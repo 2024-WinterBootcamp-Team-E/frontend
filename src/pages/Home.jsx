@@ -1,5 +1,14 @@
 import React from 'react';
 import useSampleStore from '@/store';
+import styled from 'styled-components';
+
+const TestH1 = styled.h1`
+	color: var(--primary-main);
+`;
+
+const TestP = styled.p`
+	font-size: 16px;
+`;
 
 const Home = () => {
 	const count = useSampleStore((state) => state.count);
@@ -8,8 +17,8 @@ const Home = () => {
 
 	return (
 		<div>
-			<h1>Home Page</h1>
-			<p>Count : {count}</p>
+			<TestH1>Home Page</TestH1>
+			<TestP>Count : {count}</TestP>
 			<button onClick={increment}>Increment</button>
 			<button onClick={decrement}>Decrement</button>
 		</div>
