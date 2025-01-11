@@ -18,24 +18,24 @@
   --neutral-100: #0A0A0A;
 
   --primary-main:#D9983E;
-  --primary-surface:#F6F7EE;
-  --primary-border:#976D29;
-  --primary-hover:#E6AA5A;
-  --primary-pressed:#BF8133;
-  --primary-focus:#F2D0A0;
+  --primary-surface:#F9DFBA;
+  --primary-border:#E6AA5A;
+  --primary-hover:#BF8133;
+  --primary-pressed:#976D29;
+  --primary-focus:#d9983e33;
 
   --secondary-main:#FBFCF6;
   --secondary-surface:#F6F7EE;
   --secondary-border:#EDEFE1;
   --secondary-hover:#D8DAC4;
   --secondary-pressed:#CDD0B6;
-  --secondary-focus:#F0F2E7;
+  --secondary-focus:#FBFCF633;
 
-  --sucess-border:#b8dbca;
-  --sucess-hober:#367a59;
-  --sucess-main:#43936c;
-  --sucess-pressed:#20573d;
-  --sucess-surface:#f7f7f7;
+  --success-border:#b8dbca;
+  --success-hober:#367a59;
+  --success-main:#43936c;
+  --success-pressed:#20573d;
+  --success-surface:#f7f7f7;
 
   --warning-border:#eeceb0;
   --warning-hober:#bf6919;
@@ -54,4 +54,10 @@
   --info-main:#3267e3;
   --info-pressed:#11317d;
   --info-surface:#f0f3ff;
+
+  --rounded-sm:8px;
+  --rounded-md:16px;
+  --rounded-lg:24px;
+  --rounded-xl:32px;
+  --rounded-full: 9999px;
 }
