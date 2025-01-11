@@ -43,21 +43,21 @@ export const pretendard_black = css`
 	font-style: normal;
 `;
 
-export const XL = css`
-	font-size: 2.5rem;
-	line-height: 3rem;
-`;
-export const L = css`
-	font-size: 2rem;
-	line-height: 2.5rem;
-`;
-export const M = css`
+export const TextSizeXL = css`
 	font-size: 1.5rem;
-	line-height: 2rem;
+	line-height: 1.75rem;
 `;
-export const S = css`
-	font-size: 1rem;
+export const TextSizeL = css`
+	font-size: 1.25rem;
 	line-height: 1.5rem;
+`;
+export const TextSizeM = css`
+	font-size: 1rem;
+	line-height: 1.25rem;
+`;
+export const TextSizeS = css`
+	font-size: 0.75rem;
+	line-height: 1rem;
 `;
 
 export const display1 = styled.p`
@@ -82,6 +82,63 @@ export const display3 = styled.p`
 `;
 
 const GlobalStyle = createGlobalStyle`
+  :root {
+    --neutral-10: #FFFFFF;
+    --neutral-20: #EBF0F4;
+    --neutral-30: #E4E9EC;
+    --neutral-40: #D8DCE0;
+    --neutral-50: #BABEC1;
+    --neutral-60: #989B9D;
+    --neutral-70: #717375;
+    --neutral-80: #5D5F61;
+    --neutral-90: #3D3F40;
+    --neutral-100: #0A0A0A;
+
+    --primary-main:#D9983E;
+    --primary-surface:#F9DFBA;
+    --primary-border:#E6AA5A;
+    --primary-hover:#BF8133;
+    --primary-pressed:#976D29;
+    --primary-focus:#d9983e33;
+
+    --secondary-main:#FBFCF6;
+    --secondary-surface:#F6F7EE;
+    --secondary-border:#EDEFE1;
+    --secondary-hover:#D8DAC4;
+    --secondary-pressed:#CDD0B6;
+    --secondary-focus:#FBFCF633;
+
+    --success-border:#b8dbca;
+    --success-hober:#367a59;
+    --success-main:#43936c;
+    --success-pressed:#20573d;
+    --success-surface:#f7f7f7;
+
+    --warning-border:#eeceb0;
+    --warning-hober:#bf6919;
+    --warning-main:#cd7b2e;
+    --warning-pressed:#734011;
+    --warning-surface:#fff9f2;
+
+    --danger-border:#eeb4b0;
+    --danger-hober:#bd251c;
+    --danger-main:#cb3a31;
+    --danger-pressed:#731912;
+    --danger-surface:#fff4f2;
+
+    --info-border:#b1c5f6;
+    --info-hober:#114cd6;
+    --info-main:#3267e3;
+    --info-pressed:#11317d;
+    --info-surface:#f0f3ff;
+
+    --rounded-sm:0.5rem;
+    --rounded-md:1rem;
+    --rounded-lg:1.5rem;
+    --rounded-xl:2rem;
+    --rounded-full:100rem;
+  }
+
   html, body, div, span, applet, object, iframe,
   h1, h2, h3, h4, h5, h6, p, blockquote, pre,
   a, abbr, acronym, address, big, cite, code,
@@ -174,6 +231,9 @@ const GlobalStyle = createGlobalStyle`
     letter-spacing: -1.4%;
   }
   
+
+  
+
 `;
 
 export default GlobalStyle;

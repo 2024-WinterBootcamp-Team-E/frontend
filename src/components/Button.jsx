@@ -4,7 +4,7 @@ import { pretendard_medium } from '../GlobalStyle';
 const VARIENTS = {
 	default: css`
 		background: transparent;
-		color: var(--neutral-100, #000000);
+		color: var(--neutral-100, #0a0a0a);
 		&:hover {
 			color: var(--neutral-90, #3d3f40);
 		}
@@ -16,7 +16,7 @@ const VARIENTS = {
 		}
 	`,
 	black: css`
-		background: var(--neutral-100, #000000);
+		background: var(--neutral-100, #0a0a0a);
 		color: var(--neutral-10, #ffffff);
 		&:hover {
 			background: var(--neutral-90, #3d3f40);
@@ -74,7 +74,7 @@ const BORDERS = {
 		border: none;
 	`,
 	black: css`
-		border: 2px solid var(--neutral-100, #000000);
+		border: 2px solid var(--neutral-100, #0a0a0a);
 	`,
 	primary: css`
 		border: 2px solid var(--primary-border, #976d29);
@@ -98,7 +98,7 @@ const BORDERS = {
 
 const Button = ({
 	disabled,
-	varient = 'defalt',
+	varient = 'default',
 	rounded = 'none',
 	padding = 'sm',
 	border = 'transparent',
