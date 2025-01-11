@@ -1,7 +1,7 @@
 import React from 'react';
 import useSampleStore from '@/store';
 import styled from 'styled-components';
-import Button from '../components/Button';
+import Button from '@/components/Button';
 
 const TestH1 = styled.h1`
 	color: var(--primary-main);
@@ -20,7 +20,7 @@ const Home = () => {
 		<div>
 			<TestH1>Home Page</TestH1>
 			<TestP>Count : {count}</TestP>
-			<Button onClick={increment}>Increment</Button>
+			<button onClick={increment}>Increment</button>
 			<Button onClick={decrement}>Decrement</Button>
 		</div>
 	);
