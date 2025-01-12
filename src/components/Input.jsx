@@ -3,19 +3,20 @@ import { pretendard_medium, TextSizeM, TextSizeS } from '../GlobalStyle';
 
 const STATES = {
 	default: css`
+		background-color: var(--neutral-10, #ffffff);
 		border: 0.125rem solid var(--neutral-50, #babec1);
 	`,
 	success: css`
-		border: 0.125rem solid var(--success-main, #3bb143);
 		background-color: var(--success-surface, #f7f7f7);
+		border: 0.125rem solid var(--success-main, #3bb143);
 	`,
 	warning: css`
-		border: 0.125rem solid var(--warning-main, #f5a623);
 		background-color: var(--warning-surface, #fff9f2);
+		border: 0.125rem solid var(--warning-main, #f5a623);
 	`,
 	danger: css`
-		border: 0.125rem solid var(--danger-main, #d0021b);
 		background-color: var(--danger-surface, #fff4f2);
+		border: 0.125rem solid var(--danger-main, #d0021b);
 	`,
 };
 
@@ -67,10 +68,14 @@ export default Input;
 const StyledInputWrapper = styled.div`
 	${pretendard_medium}
 
-	position: relative;
+	align-items: start;
 	display: flex;
 	flex-direction: column;
 	gap: 0.25rem;
+	height: 2rem;
+	justify-content: center;
+	margin: 0;
+	padding: 0;
 	width: 100%;
 `;
 
@@ -80,27 +85,29 @@ const StyledLabel = styled.label`
 
 const StyledInput = styled.input`
 	${(props) => props.stateStyle}
-
 	${TextSizeM}
 
+	border-radius: var(--rounded-sm, 0.5rem);
+	height: 100%;
+	margin: 0;
 	padding: 0.5rem 1rem;
 	width: 100%;
-	border-radius: var(--rounded-sm, 0.5rem);
-	&:focus {
-		outline: none;
-		border: 0.125rem solid var(--primary-main, #d9983e);
-	}
+
 	&:disabled {
-		outline: none;
 		background: var(--neutral-50, #babec1);
 		opacity: 0.5;
+		outline: none;
+	}
+
+	&:focus {
+		border: 0.125rem solid var(--primary-main, #d9983e);
+		outline: none;
 	}
 `;
 
 const StyledMessage = styled.p`
 	${(props) => props.messageStyle}
-
 	${TextSizeS}
 
-  margin: 0;
+	margin: 0;
 `;

@@ -5,27 +5,49 @@ const VARIENTS = {
 	default: css`
 		background: transparent;
 		color: var(--neutral-100, #0a0a0a);
-		&:hover {
-			color: var(--neutral-90, #3d3f40);
+
+		&:active {
+			color: var(--neutral-70, #717375);
 		}
+
 		&:focus {
 			color: var(--neutral-80, #5d5f61);
 		}
-		&:active {
-			color: var(--neutral-70, #717375);
+
+		&:hover {
+			color: var(--neutral-90, #3d3f40);
 		}
 	`,
 	black: css`
 		background: var(--neutral-100, #0a0a0a);
 		color: var(--neutral-10, #ffffff);
-		&:hover {
-			background: var(--neutral-90, #3d3f40);
+
+		&:active {
+			background: var(--neutral-70, #717375);
 		}
+
 		&:focus {
 			background: var(--neutral-80, #5d5f61);
 		}
+
+		&:hover {
+			background: var(--neutral-90, #3d3f40);
+		}
+	`,
+	white: css`
+		background-color: var(--neutral-10, #ffffff);
+		color: var(--netural-100, #0a0a0a);
+
 		&:active {
-			background: var(--neutral-70, #717375);
+			background: var(--neutral-40, #d8dce0);
+		}
+
+		&:focus {
+			background: var(--neutral-30, #e4e9ec);
+		}
+
+		&:hover {
+			background: var(--neutral-20, #ebf0f4);
 		}
 	`,
 };
@@ -55,17 +77,20 @@ const PADDINGS = {
 	none: css`
 		padding: 0;
 	`,
+	xs: css`
+		padding: 0.5rem;
+	`,
 	sm: css`
-		padding: 8px 16px;
+		padding: 0.5rem 1rem;
 	`,
 	md: css`
-		padding: 16px 16px;
+		padding: 1rem;
 	`,
 	lg: css`
-		padding: 16px 32px;
+		padding: 1rem 2rem;
 	`,
 	xl: css`
-		padding: 32px 32px;
+		padding: 2rem;
 	`,
 };
 
@@ -96,12 +121,24 @@ const BORDERS = {
 	`,
 };
 
+const SIZES = {
+	fit: css`
+		height: fit-content;
+		width: fit-content;
+	`,
+	full: css`
+		height: 100%;
+		width: 100%;
+	`,
+};
+
 const Button = ({
 	disabled,
 	varient = 'default',
 	rounded = 'none',
 	padding = 'sm',
 	border = 'transparent',
+	size = 'fit',
 	onClick,
 	children,
 }) => {
@@ -109,6 +146,7 @@ const Button = ({
 	const roundedStyle = ROUNDEDS[rounded];
 	const paddingStyle = PADDINGS[padding];
 	const borderStyle = BORDERS[border];
+	const sizeStyle = SIZES[size];
 
 	return (
 		<StyledButton
@@ -117,6 +155,7 @@ const Button = ({
 			roundedStyle={roundedStyle}
 			paddingStyle={paddingStyle}
 			borderStyle={borderStyle}
+			sizeStyle={sizeStyle}
 			onClick={onClick}
 		>
 			{children}
@@ -125,19 +164,20 @@ const Button = ({
 };
 
 const StyledButton = styled.button`
-	${(props) => props.varientStyle}
-	${(props) => props.roundedStyle}
-	${(props) => props.paddingStyle}
 	${(props) => props.borderStyle}
-
-	margin: 0;
-	cursor: pointer;
+	${(props) => props.paddingStyle}
+	${(props) => props.roundedStyle}
+	${(props) => props.sizeStyle}
+	${(props) => props.varientStyle}
 	${pretendard_medium}
 
+	cursor: pointer;
+	margin: 0;
+
 	&:disabled {
+		background: var(--neutral-50, #babec1);
 		cursor: default;
 		opacity: 0.5;
-		background: var(--neutral-50, #babec1);
 	}
 `;
 
