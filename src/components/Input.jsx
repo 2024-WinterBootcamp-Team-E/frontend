@@ -84,7 +84,6 @@ const StyledInput = styled.input`
 	${TextSizeM}
 
 	padding: 0.5rem 1rem;
-	width: 100%;
 	border-radius: var(--rounded-sm, 0.5rem);
 	&:focus {
 		outline: none;
