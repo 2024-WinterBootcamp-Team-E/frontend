@@ -96,12 +96,24 @@ const BORDERS = {
 	`,
 };
 
+const SIZES = {
+	fit: css`
+		width: fit-content;
+		height: fit-content;
+	`,
+	full: css`
+		width: 100%;
+		height: 100%;
+	`,
+};
+
 const Button = ({
 	disabled,
 	varient = 'default',
 	rounded = 'none',
 	padding = 'sm',
 	border = 'transparent',
+	size = 'fit',
 	onClick,
 	children,
 }) => {
@@ -109,6 +121,7 @@ const Button = ({
 	const roundedStyle = ROUNDEDS[rounded];
 	const paddingStyle = PADDINGS[padding];
 	const borderStyle = BORDERS[border];
+	const sizeStyle = SIZES[size];
 
 	return (
 		<StyledButton
@@ -117,6 +130,7 @@ const Button = ({
 			roundedStyle={roundedStyle}
 			paddingStyle={paddingStyle}
 			borderStyle={borderStyle}
+			sizeStyle={sizeStyle}
 			onClick={onClick}
 		>
 			{children}
@@ -129,10 +143,12 @@ const StyledButton = styled.button`
 	${(props) => props.roundedStyle}
 	${(props) => props.paddingStyle}
 	${(props) => props.borderStyle}
+  ${(props) => props.sizeStyle}
+  
+	${pretendard_medium}
 
 	margin: 0;
 	cursor: pointer;
-	${pretendard_medium}
 
 	&:disabled {
 		cursor: default;
