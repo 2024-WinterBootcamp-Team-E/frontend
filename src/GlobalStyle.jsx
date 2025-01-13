@@ -199,39 +199,49 @@ const GlobalStyle = createGlobalStyle`
     font-size: 2.625rem;
     line-height: 3.25rem;
     letter-spacing: -2.2%;
+    color:var(--neutral-100)
   }
   h2 {
     ${pretendard_medium}
     font-size: 2.25rem;
     line-height: 2.75rem;
     letter-spacing: -2.2%;
+    color:var(--neutral-100)
   }
   h3 {
     ${pretendard_medium}
     font-size: 1.75rem;
     line-height: 2.125rem;
     letter-spacing: -2.1%;
+    color:var(--neutral-100)
   }
   h4 {
     ${pretendard_medium}
     font-size: 1.5rem;
     line-height: 1.875rem;
     letter-spacing: -1.9%;
+    color:var(--neutral-100)
   }
   h5 {
     ${pretendard_medium}
     font-size: 1.25rem;
     line-height: 1.5rem;
     letter-spacing: -1.7%;
+    color:var(--neutral-100)
   }
   h6 {
     ${pretendard_medium}
     font-size: 1.125rem;
     line-height: 1.375rem;
     letter-spacing: -1.4%;
+    color:var(--neutral-100)
   }
   
-
+  p {
+    ${pretendard_medium}
+    ${TextSizeM}
+    color:var(--neutral-100)
+  }
   
 
 `;
