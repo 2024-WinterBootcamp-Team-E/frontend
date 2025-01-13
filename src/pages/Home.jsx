@@ -3,6 +3,7 @@ import useSampleStore from '@/store';
 import styled from 'styled-components';
 import Button from '@/components/Button';
 import DropDown from '@/components/DropDown';
+import ChatBubble from '@/components/ChatBubble';
 
 const Home = () => {
 	const count = useSampleStore((state) => state.count);
@@ -25,14 +26,16 @@ const Home = () => {
 				setIsDropDownOpen
 			</Button>
 			<DropDown isDropDownOpen={isDropDownOpen} />
+			<ChatBubble />
+			<ChatBubble isAI />
 		</StyledBackGround>
 	);
 };
 
 const StyledBackGround = styled.div`
-	background-color: var(--neutral-50);
-	width: 100%;
-	height: 100%;
+	background-color: var(--neutral-20);
+	width: 100vw;
+	height: 100vh;
 	padding: 4rem;
 	display: flex;
 	flex-direction: column;
