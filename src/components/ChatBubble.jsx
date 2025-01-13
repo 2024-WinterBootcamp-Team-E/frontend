@@ -1,19 +1,20 @@
 import styled from 'styled-components';
 import { TextSizeS } from '@/GlobalStyle';
+import Bubble from './Bubble';
 
-const ChatBubble = ({ isAI = false }) => {
+const ChatBubble = ({ message }) => {
+	const role = message.role;
+	console.log({ message });
 	return (
 		<ChatBubbleWrapper>
-			<ChatterName>UserName</ChatterName>
-			<Bubble isAI={isAI}>
-				<p>I go to the park and meet my friend.</p>
-			</Bubble>
+			<ChatterName role={role}>{role}</ChatterName>
+			<Bubble message={message} />
 		</ChatBubbleWrapper>
 	);
 };
 export default ChatBubble;
 
-const ChatBubbleWrapper = styled.div`
+export const ChatBubbleWrapper = styled.div`
 	align-items: end;
 	display: flex;
 	flex-direction: column;
@@ -28,20 +29,9 @@ const ChatterName = styled.p`
 
 	color: var(--neutral-80);
 	height: fit-content;
-	text-align: end;
-	width: fit-content;
+	padding: 0 0.5rem;
+	text-align: ${({ role }) => (role != 'user' ? 'start' : 'end')};
+	width: 100%;
 `;
 
-const Bubble = styled.div`
-	align-items: ${({ isAI }) => (isAI ? 'start' : 'end')};
-	background-color: var(--neutral-10);
-	border-radius: ${({ isAI }) => (isAI ? '1rem 1rem 1rem 0.1rem' : '1rem 1rem 0.1rem 1rem')};
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-	height: fit-content;
-	justify-content: center;
-	max-width: 22.5rem;
-	padding: 1rem;
-	width: fit-content;
-`;
+
