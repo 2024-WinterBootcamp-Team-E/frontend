@@ -18,7 +18,7 @@ const RecordButton = () => {
 
     return (
         <StyledButton onClick={handleClick} isRecording={isRecording}>
-            {isRecording ? <FaStop size={20} /> : <FaMicrophone size={20} />}
+            {isRecording ? <FaStop size="1.25rem" /> : <FaMicrophone size="1.25rem" />}
         </StyledButton>
     );
 };
@@ -28,13 +28,13 @@ const StyledButton = styled.button`
     color: white;
     border: none;
     border-radius: 50%; /* 원형 버튼 */
-    width: 50px;
-    height: 50px; /* 크기 조정 */
+    width: 3.125rem; /* 50px → 3.125rem */
+    height: 3.125rem; /* 50px → 3.125rem */
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 1.125rem; /* 18px → 1.125rem */
     transition: transform 0.2s ease-in-out;
 
     &:hover {
