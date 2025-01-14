@@ -5,8 +5,8 @@ import Button from '@/components/Button';
 import DropDown from '@/components/DropDown';
 import ChatBubble from '@/components/ChatBubble';
 import chatData from '@/mock/chatData';
-import RecordButton from '@/components/RecordButton'; 
-import Header from '@/components/Header'
+import Header from '@/components/Header';
+import Layout from '@/components/Layout';
 
 const Home = () => {
 	const count = useSampleStore((state) => state.count);
@@ -16,8 +16,7 @@ const Home = () => {
 	const messages = chatData.messages;
 	console.log('home', messages);
 	return (
-		<StyledBackGround>
-			<Header/>
+		<Layout>
 			<TestH1>Home Page</TestH1>
 			<TestP>Count : {count}</TestP>
 			<div>
@@ -35,7 +34,7 @@ const Home = () => {
 			{messages.map((message, index) => (
 				<ChatBubble key={index} message={message} />
 			))}
-		</StyledBackGround>
+		</Layout>
 	);
 };
 
