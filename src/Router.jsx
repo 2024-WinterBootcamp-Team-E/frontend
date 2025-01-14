@@ -7,7 +7,7 @@ import Pronunciation from '@/pages/Pronounciation';
 import PStudy from '@/pages/Pronounciation/PStudy';
 import SignIn from '@/pages/SignIn';
 import SignUp from '@/pages/SignUp';
-import RecordTest from '@/pages/RecordTest';
+// import RecordTest from '@/pages/RecordTest';
 
 const Router = () => {
 	return (
@@ -20,8 +20,8 @@ const Router = () => {
 				<Route path='/pronunciation/pstudy' element={<PStudy />} /> {/* 발음 문장 연습 */}
 				<Route path='/signin' element={<SignIn />} /> {/* 로그인 */}
 				<Route path='/signup' element={<SignUp />} /> {/* 회원가입 */}
+				{/* <Route path='/RecordTest' element={<RecordTest />} /> 버튼 */}
 				<Route path='/' element={<Home />} />
-				<Route path="/record-test" element={<RecordTest />} /> {/* 라우트 추가 */}
 			</Routes>
 		</BrowserRouter>
 	);

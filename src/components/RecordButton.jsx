@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FaMicrophone, FaStop } from 'react-icons/fa';
+import { Microphone } from '@styled-icons/fa-solid/Microphone';
+import { Stop } from '@styled-icons/fa-solid/Stop';
 
 const RecordButton = () => {
     const [isRecording, setIsRecording] = useState(false);
@@ -18,7 +19,7 @@ const RecordButton = () => {
 
     return (
         <StyledButton onClick={handleClick} isRecording={isRecording}>
-            {isRecording ? <FaStop size="1.25rem" /> : <FaMicrophone size="1.25rem" />}
+            {isRecording ? <StopIcon /> : <MicrophoneIcon />}
         </StyledButton>
     );
 };
@@ -44,6 +45,18 @@ const StyledButton = styled.button`
     &:active {
         transform: scale(0.95); /* 눌렀을 때 축소 */
     }
+`;
+
+const MicrophoneIcon = styled(Microphone)`
+    color: white;
+    width: 1.25rem;
+    height: 1.25rem;
+`;
+
+const StopIcon = styled(Stop)`
+    color: white;
+    width: 1.25rem;
+    height: 1.25rem;
 `;
 
 export default RecordButton;
