@@ -1,5 +1,5 @@
 const Intonation = ({}) => {
-	return <></>;
+	return <>Intonation</>;
 };
 
 export default Intonation;
