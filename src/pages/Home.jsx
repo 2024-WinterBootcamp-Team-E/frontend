@@ -5,6 +5,7 @@ import Button from '@/components/Button';
 import DropDown from '@/components/DropDown';
 import ChatBubble from '@/components/ChatBubble';
 import chatData from '@/mock/chatData';
+import RecordButton from '@/components/RecordButton'; 
 
 const Home = () => {
 	const count = useSampleStore((state) => state.count);
