@@ -6,6 +6,7 @@ import DropDown from '@/components/DropDown';
 import ChatBubble from '@/components/ChatBubble';
 import chatData from '@/mock/chatData';
 import RecordButton from '@/components/RecordButton'; 
+import Header from '@/components/Header'
 
 const Home = () => {
 	const count = useSampleStore((state) => state.count);
@@ -16,6 +17,7 @@ const Home = () => {
 	console.log('home', messages);
 	return (
 		<StyledBackGround>
+			<Header/>
 			<TestH1>Home Page</TestH1>
 			<TestP>Count : {count}</TestP>
 			<div>
@@ -41,7 +43,10 @@ const StyledBackGround = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
-	padding: 4rem;
+	// width: 100%;
+	width: 100vw;
+	overflow:hidden;
+	position:relative;
 `;
 
 const TestH1 = styled.h1`

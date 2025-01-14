@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Home from '@/pages/Home';
+import Header from '@/components/Header';
 import Intonation from '@/pages/Intonation';
 import IStudy from '@/pages/Intonation/IStudy';
 import Pronunciation from '@/pages/Pronounciation';
@@ -22,6 +23,7 @@ const Router = () => {
 				<Route path='/signup' element={<SignUp />} /> {/* 회원가입 */}
 				{/* <Route path='/RecordTest' element={<RecordTest />} /> 버튼 */}
 				<Route path='/' element={<Home />} />
+				<Route path='/header' element={<Header/>}/>
 			</Routes>
 		</BrowserRouter>
 	);
