@@ -7,7 +7,7 @@ import Button from '@/components/Button';
 import {AngleLeft} from '@styled-icons/fa-solid'
 import chatData from '@/mock/chatData';
 
-const IStudyPage = () => {
+const IStudy = () => {
   const messages = chatData.messages;
   return (
     <Layout>
@@ -138,4 +138,4 @@ const SoundControl = styled.div`
   }
 `;
 
-export default IStudyPage;
+export default IStudy;
