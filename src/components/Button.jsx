@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { pretendard_medium } from '../GlobalStyle';
+import { pretendard_medium } from '@/GlobalStyle';
 
 const VARIENTS = {
 	default: css`

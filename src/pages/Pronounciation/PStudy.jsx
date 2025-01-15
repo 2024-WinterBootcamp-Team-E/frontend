@@ -3,6 +3,7 @@ import Button from '@/components/Button';
 import Layout from '@/components/Layout';
 import { pretendard_bold, pretendard_medium, TextSizeM, TextSizeL } from '@/GlobalStyle';
 import RecordButton from '@/components/RecordButton';
+import PlayButton from '@/components/PlayButton';
 
 const PStudy = () => {
 	return (
@@ -15,11 +16,11 @@ const PStudy = () => {
 					</ProgressSection>
 					<ContentSection>
 						<QuestionContainer>
-							<Button aria-label='Play Question'>재생</Button>
+							<PlayButton aria-label='Play Question'>재생</PlayButton>
 							<h3>If you need any assistance with the task, feel free to let me know.</h3>
 						</QuestionContainer>
 						<AnswerContainer>
-							<Button aria-label='Play Answer'>재생</Button>
+							<PlayButton aria-label='Play Question'>재생</PlayButton>
 							<RecordButton aria-label='Record Answer' />
 							<div>Sound Wave</div>
 						</AnswerContainer>
