@@ -22,6 +22,9 @@ const LayoutWrapper = styled.div`
 
 const ContentWrapper = styled.main`
 	flex: 1; /* 남은 공간을 차지 */
+	height: 100%;
+	display: flex;
+	flex-direction: column;
 `;
 
 // 사용법
