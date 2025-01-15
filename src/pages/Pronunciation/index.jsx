@@ -77,7 +77,7 @@ const Overlay = styled.div`
   justify-content: center;
   color: white; /* 텍스트 색상 */
   font-size: 3.0rem; /* 텍스트 크기 */
-  font-weight: bold;
+  font-weight: bold; /* global style로 폰트 통일하면 좋을듯 */
   text-align: center;
   border-radius: 1rem; /* 오버레이도 둥글게 */
 `;
