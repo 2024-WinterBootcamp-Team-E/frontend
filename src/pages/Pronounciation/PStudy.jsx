@@ -6,7 +6,7 @@ import RecordButton from '@/components/RecordButton';
 import PlayButton from '@/components/PlayButton';
 import { useState } from 'react';
 import { Evaluation } from '@/mock/Evaluation';
-import WaveSurfer from 'wavesurfer.js';
+import SoundWave from '@/components/SoundWave';
 
 const PStudy = () => {
 	const [evaluation, setEvaluation] = useState('info'); // info, success, warning, danger
@@ -29,7 +29,7 @@ const PStudy = () => {
 						<AnswerContainer>
 							<PlayButton aria-label='Play Question'>재생</PlayButton>
 							<RecordButton aria-label='Record Answer' />
-							<div>Sound Wave</div>
+							<SoundWave />
 						</AnswerContainer>
 					</ContentSection>
 					<FeedbackSection evaluation={evaluation}>
