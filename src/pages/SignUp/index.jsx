@@ -11,24 +11,21 @@ const SignUpPage = () => {
     register,
     handleSubmit,
     watch,
-    formState: { errors, isValid },
+    formState: { errors },
     resetField,
   } = useForm({
-    mode: 'onChange', // onChange로 실시간 유효성 검사
+    mode: 'onChange',
     reValidateMode: 'onChange',
   });
 
   const onSubmit = (data) => {
-    console.log("Form submitted successfully:", data);
-
-    // 모든 값이 유효한 경우에만 처리
-    if (isValid) {
-      alert("Signup successful!");
-      resetField('nickname');
-      resetField('email');
-      resetField('password');
-      resetField('passwordCheck');
-    }
+    const { passwordCheck, ...filteredData } = data;
+    console.log('Form submitted successfully:', filteredData);
+    alert('Signup successful!');
+    resetField('nickname');
+    resetField('email');
+    resetField('password');
+    resetField('passwordCheck');
   };
 
   return (
@@ -41,20 +38,21 @@ const SignUpPage = () => {
           <Input
             label="Nickname"
             placeholder="Input your Nickname"
+            message={errors.nickname?.message} // errors.nickname의 메시지 전달
+            state={errors.nickname ? 'danger' : 'default'} // 상태에 따라 danger 스타일 적용
             {...register('nickname', {
               required: '닉네임을 입력해주세요.',
               validate: (value) =>
                 !/\s/.test(value) || '닉네임에 공백을 제거해주세요.',
             })}
           />
-          {errors.nickname && (
-            <ErrorMessage>{errors.nickname.message}</ErrorMessage>
-          )}
 
           {/* Email */}
           <Input
             label="Email"
             placeholder="abc123@gmail.com"
+            message={errors.email?.message}
+            state={errors.email ? 'danger' : 'default'}
             {...register('email', {
               required: '이메일을 입력해주세요.',
               pattern: {
@@ -63,13 +61,14 @@ const SignUpPage = () => {
               },
             })}
           />
-          {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
 
           {/* Password */}
           <Input
             label="Password"
             type="password"
             placeholder="Input your Password"
+            message={errors.password?.message}
+            state={errors.password ? 'danger' : 'default'}
             {...register('password', {
               required: '비밀번호를 입력해주세요.',
               minLength: {
@@ -78,36 +77,26 @@ const SignUpPage = () => {
               },
             })}
           />
-          {errors.password && (
-            <ErrorMessage>{errors.password.message}</ErrorMessage>
-          )}
 
           {/* Password Check */}
           <Input
             label="Password Check"
             type="password"
             placeholder="Check your Password"
+            message={errors.passwordCheck?.message}
+            state={errors.passwordCheck ? 'danger' : 'default'}
             {...register('passwordCheck', {
               required: '비밀번호 확인을 입력해주세요.',
               validate: (value) =>
                 value === watch('password') || '비밀번호가 일치하지 않습니다.',
             })}
           />
-          {errors.passwordCheck && (
-            <ErrorMessage>{errors.passwordCheck.message}</ErrorMessage>
-          )}
 
           <Button varient="black" rounded="sm" size="full" padding="lg" type="submit">
             <BoldLgText>
               <span>Sign Up</span>
             </BoldLgText>
           </Button>
-
-          <Divider />
-          <Text>Have an account?</Text>
-          <SignInButton varient="white" border="black" rounded="sm" size="full" padding="lg">
-            <BoldLgText>Sign In</BoldLgText>
-          </SignInButton>
         </SignUpForm>
       </SignUpContainer>
     </Layout>
