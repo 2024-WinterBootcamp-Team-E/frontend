@@ -6,11 +6,13 @@ import RecordButton from '@/components/RecordButton';
 import PlayButton from '@/components/PlayButton';
 import { useState } from 'react';
 import { Evaluation } from '@/mock/Evaluation';
+import WaveSurfer from 'wavesurfer.js';
 
 const PStudy = () => {
 	const [evaluation, setEvaluation] = useState('info'); // info, success, warning, danger
 	const totalScore = 92;
 	console.log(Evaluation.info);
+
 	return (
 		<Layout>
 			<MainContent>
