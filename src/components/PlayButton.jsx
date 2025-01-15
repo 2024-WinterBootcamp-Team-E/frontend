@@ -32,6 +32,7 @@ const StyledButton = styled.button`
 	cursor: pointer;
 	font-size: 1.125rem;
 	transition: transform 0.2s ease-in-out;
+	padding: 1rem;
 
 	&:hover {
 		transform: scale(1.05); /* 살짝 확대 */

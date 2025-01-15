@@ -25,26 +25,27 @@ const RecordButton = () => {
 };
 
 const StyledButton = styled.button`
-    background: ${(props) => (props.isRecording ? '#FF3B30' : '#34C759')}; /* 녹음 중이면 빨간색, 대기 상태면 초록색 */
-    color: white;
-    border: none;
-    border-radius: 50%; /* 원형 버튼 */
-    width: 3.125rem; /* 50px → 3.125rem */
-    height: 3.125rem; /* 50px → 3.125rem */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    font-size: 1.125rem; /* 18px → 1.125rem */
-    transition: transform 0.2s ease-in-out;
+	background: ${(props) => (props.isRecording ? '#FF3B30' : '#34C759')}; /* 녹음 중이면 빨간색, 대기 상태면 초록색 */
+	color: white;
+	border: none;
+	border-radius: 50%; /* 원형 버튼 */
+	width: 3.125rem; /* 50px → 3.125rem */
+	height: 3.125rem; /* 50px → 3.125rem */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	font-size: 1.125rem; /* 18px → 1.125rem */
+	transition: transform 0.2s ease-in-out;
+	padding: 1rem;
 
-    &:hover {
-        transform: scale(1.05); /* 살짝 확대 */
-    }
+	&:hover {
+		transform: scale(1.05); /* 살짝 확대 */
+	}
 
-    &:active {
-        transform: scale(0.95); /* 눌렀을 때 축소 */
-    }
+	&:active {
+		transform: scale(0.95); /* 눌렀을 때 축소 */
+	}
 `;
 
 const MicrophoneIcon = styled(Microphone)`
