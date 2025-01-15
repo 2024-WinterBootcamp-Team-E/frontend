@@ -24,7 +24,7 @@ const DropDown = ({ isDropDownOpen }) => {
 	return (
 		<StyledDropDownMenu isEditOpen={isEditOpen} isDropDownOpen={isDropDownOpen}>
 			<StyledProfileItem>
-				<StyledProfileImage src='UserImage.png' alt='Profile' />
+				<StyledProfileImage src='/UserImage.png' alt='Profile' />
 				<StyledProfileInfo>
 					<StyledNameWrapper>
 						<StyledName>TaciTa</StyledName>
