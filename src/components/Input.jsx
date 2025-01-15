@@ -41,7 +41,7 @@ const Input = ({
 	label = 'label',
 	placeholder = 'placeholder',
 	message = 'helper text',
-	state,
+	state = 'default',
 	disabled = false,
 	onChange,
 }) => {
@@ -72,11 +72,12 @@ const StyledInputWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 0.25rem;
-	height: 2rem;
+	height: fit-content;
 	justify-content: center;
 	margin: 0;
 	padding: 0;
 	width: 100%;
+	position:relative;
 `;
 
 const StyledLabel = styled.label`
