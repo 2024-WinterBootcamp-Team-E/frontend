@@ -4,8 +4,13 @@ import Layout from '@/components/Layout';
 import { pretendard_bold, pretendard_medium, TextSizeM, TextSizeL } from '@/GlobalStyle';
 import RecordButton from '@/components/RecordButton';
 import PlayButton from '@/components/PlayButton';
+import { useState } from 'react';
+import { Evaluation } from '@/mock/Evaluation';
 
 const PStudy = () => {
+	const [evaluation, setEvaluation] = useState('info'); // info, success, warning, danger
+	const totalScore = 92;
+	console.log(Evaluation.info);
 	return (
 		<Layout>
 			<MainContent>
@@ -25,15 +30,17 @@ const PStudy = () => {
 							<div>Sound Wave</div>
 						</AnswerContainer>
 					</ContentSection>
-					<FeedbackSection>
-						<ProgressCircle>93%</ProgressCircle>
-						<FeedbackText>
-							<p>You got it!</p>
+					<FeedbackSection evaluation={evaluation}>
+						<ProgressCircle evaluation={evaluation}>{totalScore}%</ProgressCircle>
+						<FeedbackText evaluation={evaluation}>
+							<p>{Evaluation.evaluation}</p>
 							<span>Select the underlined word(s) for additional feedback.</span>
 						</FeedbackText>
-						<Button varient='green' rounded='xl' aria-label='Continue to Next'>
-							Continue
-						</Button>
+						{evaluation === 'success' && (
+							<Button varient='green' rounded='xl' aria-label='Continue to Next'>
+								Continue
+							</Button>
+						)}
 					</FeedbackSection>
 				</StudyContainer>
 			</MainContent>
@@ -111,7 +118,19 @@ const AnswerContainer = styled.div`
 
 const FeedbackSection = styled.div`
 	align-items: center;
-	background-color: var(--success-border);
+	background-color: ${(props) => {
+		switch (props.evaluation) {
+			case 'success':
+				return 'var(--success-border)';
+			case 'warning':
+				return 'var(--warning-border)';
+			case 'danger':
+				return 'var(--danger-border)';
+			case 'info':
+			default:
+				return 'var(--info-border)';
+		}
+	}};
 	border-radius: 0 0 2rem 2rem;
 	display: flex;
 	flex-direction: row;
@@ -127,7 +146,19 @@ const ProgressCircle = styled.div`
 	align-items: center;
 	background-color: var(--neutral-10);
 	border-radius: var(--rounded-full);
-	color: var(--success-pressed);
+	color: ${(props) => {
+		switch (props.evaluation) {
+			case 'success':
+				return 'var(--success-pressed)';
+			case 'warning':
+				return 'var(--warning-pressed)';
+			case 'danger':
+				return 'var(--danger-pressed)';
+			case 'info':
+			default:
+				return 'var(--info-pressed)';
+		}
+	}};
 	display: flex;
 	height: 4.5rem;
 	justify-content: center;
@@ -141,12 +172,36 @@ const FeedbackText = styled.div`
 	flex-grow: 1;
 	justify-content: center;
 	p {
-		color: var(--success-pressed);
+		color: ${(props) => {
+			switch (props.evaluation) {
+				case 'success':
+					return 'var(--success-pressed)';
+				case 'warning':
+					return 'var(--warning-pressed)';
+				case 'danger':
+					return 'var(--danger-pressed)';
+				case 'info':
+				default:
+					return 'var(--info-pressed)';
+			}
+		}};
 		${pretendard_bold}
 		${TextSizeL}
 	}
 	span {
-		color: var(--success-pressed);
+		color: ${(props) => {
+			switch (props.evaluation) {
+				case 'success':
+					return 'var(--success-pressed)';
+				case 'warning':
+					return 'var(--warning-pressed)';
+				case 'danger':
+					return 'var(--danger-pressed)';
+				case 'info':
+				default:
+					return 'var(--info-pressed)';
+			}
+		}};
 		${pretendard_medium}
 		${TextSizeM}
 	}
