@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import DropDown from './DropDown'; // DropDown 컴포넌트 가져오기
 import { ChevronDown } from '@styled-icons/boxicons-regular';
 import { pretendard_bold, TextSizeXL } from '@/GlobalStyle';
+
 const HeaderContainer = styled.header`
   display: flex;
   align-items: center;
@@ -90,12 +91,11 @@ const Header = () => {
     const fetchProfile = async () => {
       try {
         const mockApiResponse = {
-          isLoggedIn: true,
-          profile: {
-            image: 'UserImage.png',
-            name: 'TaciTa',
-          },
-        };
+					isLoggedIn: true,
+					profile: {
+						name: 'TaciTa',
+					},
+				};
 
         if (mockApiResponse.isLoggedIn) {
           setIsLoggedIn(true);
@@ -110,31 +110,31 @@ const Header = () => {
   }, []);
 
   return (
-    <HeaderContainer>
-      <Logo>Logo</Logo>
-      <Nav>
-          <h3>Region</h3>
-          <h3>Theme</h3>
-          <h3>My Activity</h3>
-      </Nav>
-      {isLoggedIn && profile ? (
-        <ProfileContainer>
-          <ProfileImage src={profile.image} alt="Profile" />
-          <ProfileName>{profile.name}</ProfileName>
-          <DropdownButton onClick={() => setIsDropDownOpen((prev) => !prev)}>
-            <ChevronIcon />
-          </DropdownButton>
-          {isDropDownOpen && (
-            <StyledDropDownWrapper>
-              <DropDown isDropDownOpen={isDropDownOpen} />
-            </StyledDropDownWrapper>
-          )}
-        </ProfileContainer>
-      ) : (
-        <button>Sign In</button>
-      )}
-    </HeaderContainer>
-  );
+		<HeaderContainer>
+			<Logo>Logo</Logo>
+			<Nav>
+				<h3>Region</h3>
+				<h3>Theme</h3>
+				<h3>My Activity</h3>
+			</Nav>
+			{isLoggedIn && profile ? (
+				<ProfileContainer>
+					<ProfileImage src={'/UserImage.png'} alt='Profile' />
+					<ProfileName>{profile.name}</ProfileName>
+					<DropdownButton onClick={() => setIsDropDownOpen((prev) => !prev)}>
+						<ChevronIcon />
+					</DropdownButton>
+					{isDropDownOpen && (
+						<StyledDropDownWrapper>
+							<DropDown isDropDownOpen={isDropDownOpen} />
+						</StyledDropDownWrapper>
+					)}
+				</ProfileContainer>
+			) : (
+				<button>Sign In</button>
+			)}
+		</HeaderContainer>
+	);
 };
 
 export default Header;

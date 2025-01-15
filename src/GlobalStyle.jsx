@@ -82,6 +82,12 @@ export const display3 = styled.p`
 `;
 
 const GlobalStyle = createGlobalStyle`
+  /* :root의 사용자 지정 CSS 사용법
+  import 없이
+  background-color: var(--neutral-10);
+  또는
+  background-color: var(--neutral-10, #ffffff); */
+
   :root {
     --neutral-10: #FFFFFF;
     --neutral-20: #EBF0F4;
@@ -132,11 +138,11 @@ const GlobalStyle = createGlobalStyle`
     --info-pressed:#11317d;
     --info-surface:#f0f3ff;
 
-    --rounded-sm:0.5rem;
-    --rounded-md:1rem;
-    --rounded-lg:1.5rem;
-    --rounded-xl:2rem;
-    --rounded-full:100rem;
+    --rounded-sm:0.5rem; // 8px
+    --rounded-md:1rem; // 16px
+    --rounded-lg:1.5rem; // 24px
+    --rounded-xl:2rem; // 32px
+    --rounded-full:100rem; // 매우 둥글게게
   }
 
   html, body, div, span, applet, object, iframe,
