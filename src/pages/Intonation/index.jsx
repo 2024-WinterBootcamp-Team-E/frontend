@@ -1,23 +1,24 @@
 import React from 'react';
 import styled from 'styled-components';
 import Layout from '@/components/Layout'; // Layout 컴포넌트 가져오기
+import { display1 } from '@/GlobalStyle'; // GlobalStyle에서 display1 가져오기
 
-const LanguageSelection = () => {
+const Intonation = () => { // 컴포넌트 이름 수정
   return (
     <Layout> {/* Layout으로 감싸기 */}
       <PageContainer>
         <Main>
-          <Card className="left">
+          <Card className="left" borderRadius="2rem 0 0 2rem">
             <ImageWrapper>
               <img src="/SpeechImages/state.jpg" alt="American English" />
             </ImageWrapper>
-            <CenteredText className="text">American English</CenteredText>
+            <CenteredText>American English</CenteredText>
           </Card>
-          <Card className="right">
+          <Card className="right" borderRadius="0 2rem 2rem 0">
             <ImageWrapper>
               <img src="/SpeechImages/big.jpg" alt="British English" />
             </ImageWrapper>
-            <CenteredText className="text">British English</CenteredText>
+            <CenteredText>British English</CenteredText>
           </Card>
         </Main>
       </PageContainer>
@@ -25,29 +26,25 @@ const LanguageSelection = () => {
   );
 };
 
-export default LanguageSelection;
+export default Intonation;
 
 // 스타일 정의
 const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100vh; /* 화면 전체 높이 */
+  height: calc(100vh - 6.5rem); /* 화면 전체 높이 */
 `;
 
 const Main = styled.div`
-  display: flex;
+  display: flex; /* 카드 정렬을 위한 플렉스 박스 */
   flex: 1;
-  height: calc(100vh - 70px); /* 헤더 높이 제외 */
+  height:  100%;/* 헤더 높이 제외 */
   overflow: hidden;
   border: 2px solid transparent; /* 투명한 테두리 추가 */
 
-  &:hover .left:hover {
-    flex-grow: 2; /* 왼쪽 카드 커짐 */
-    transition: flex-grow 0.3s ease; /* 크기 변화 애니메이션 */
-  }
-
+  &:hover .left:hover,
   &:hover .right:hover {
-    flex-grow: 2; /* 오른쪽 카드 커짐 */
+    flex-grow: 2; /* 마우스 오버된 카드 확대 */
     transition: flex-grow 0.3s ease; /* 크기 변화 애니메이션 */
   }
 
@@ -58,26 +55,30 @@ const Main = styled.div`
   }
 `;
 
+const CenteredText = styled(display1)`
+  position: absolute;
+  top: 50%; /* 중앙 배치 */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--neutral-10);
+  text-shadow: 0px 0px 15px rgba(0, 0, 0, 0.7); /* 텍스트만 그림자 추가 */
+  transition: opacity 0.3s ease; /* 텍스트 숨김/표시 애니메이션 */
+  opacity: 1; /* 기본 상태에서 텍스트 보임 */
+`;
+
 const Card = styled.div`
   position: relative;
   flex: 1; /* 기본 상태에서 동일 크기 */
   height: 100%;
   overflow: hidden;
-  transition: flex-grow 0.3s ease; /* 부드러운 크기 변화 효과 */
+  border-radius: ${({ borderRadius }) => borderRadius}; /* 동적 border-radius */
+  transition: flex-grow 0.3s ease; /* 크기 변화 애니메이션 */
 
-  &.left {
-    border-radius: 2rem 0 0 2rem; /* 왼쪽 카드의 border-radius */
-  }
-
-  &.right {
-    border-radius: 0 2rem 2rem 0; /* 오른쪽 카드의 border-radius */
-  }
-
-  &:hover .text {
+  &:hover ${CenteredText} {
     opacity: 1; /* 마우스가 올라간 카드의 텍스트 유지 */
   }
 
-  &:not(:hover) .text {
+  &:not(:hover) ${CenteredText} {
     opacity: 0; /* 마우스가 올라가지 않은 카드의 텍스트 숨기기 */
   }
 `;
@@ -92,19 +93,4 @@ const ImageWrapper = styled.div`
     object-fit: cover; /* 이미지를 비율에 맞게 꽉 채움 */
     transition: transform 0.3s ease; /* 부드러운 확대 효과 */
   }
-`;
-
-const CenteredText = styled.div`
-  position: absolute;
-  top: 50%; /* 중앙 배치 */
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  font-size: 3.5rem; /* 텍스트 크기 */
-  font-weight: bold;
-  text-shadow: 0px 0px 15px rgba(0, 0, 0, 0.7); /* 텍스트 그림자 */
-  white-space: nowrap; /* 줄바꿈 금지 */
-  line-height: 1.2; /* 텍스트 높이 조정 */
-  transition: opacity 0.3s ease; /* 텍스트 숨김/표시 애니메이션 */
-  opacity: 1;
 `;
