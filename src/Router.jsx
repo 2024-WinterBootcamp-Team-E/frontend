@@ -1,14 +1,13 @@
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Home from '@/pages/Home';
-import Header from '@/components/Header';
 import Intonation from '@/pages/Intonation';
 import IStudy from '@/pages/Intonation/IStudy';
 import Pronunciation from '@/pages/Pronunciation';
 import PStudy from '@/pages/Pronunciation/PStudy';
 import SignIn from '@/pages/SignIn';
 import SignUp from '@/pages/SignUp';
-// import RecordTest from '@/pages/RecordTest';
+import TestPage from '@/forTest/TestPage';
 
 const Router = () => {
 	return (
@@ -21,9 +20,8 @@ const Router = () => {
 				<Route path='/pronunciation/pstudy' element={<PStudy />} /> {/* 발음 문장 연습 */}
 				<Route path='/signin' element={<SignIn />} /> {/* 로그인 */}
 				<Route path='/signup' element={<SignUp />} /> {/* 회원가입 */}
-				{/* <Route path='/RecordTest' element={<RecordTest />} /> 버튼 */}
 				<Route path='/' element={<Home />} />
-				<Route path='/header' element={<Header />} />
+				<Route path='/testpage' element={<TestPage />} />
 			</Routes>
 		</BrowserRouter>
 	);

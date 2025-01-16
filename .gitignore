@@ -26,3 +26,5 @@ dist-ssr
 *storybook.log
 src/stories
 .storybook
+
+src/forTest
