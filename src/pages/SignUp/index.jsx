@@ -1,4 +1,5 @@
 import React from 'react';
+import { useForm } from 'react-hook-form';
 import styled from 'styled-components';
 import Layout from '@/components/Layout';
 import Input from '@/components/Input';
@@ -6,19 +7,96 @@ import Button from '@/components/Button';
 import { pretendard_bold, TextSizeL } from '@/GlobalStyle';
 
 const SignUpPage = () => {
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+    resetField,
+  } = useForm({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+  });
+
+  const onSubmit = (data) => {
+    const { passwordCheck, ...filteredData } = data;
+    console.log('Form submitted successfully:', filteredData);
+    alert('Signup successful!');
+    resetField('nickname');
+    resetField('email');
+    resetField('password');
+    resetField('passwordCheck');
+  };
+
   return (
     <Layout>
       <SignUpContainer>
-        <SignUpForm>
+        <SignUpForm onSubmit={handleSubmit(onSubmit)}>
           <Title>Sign Up</Title>
-          <Input label="Nickname" placeholder="Input your Nickname" />
-          <Input label="Email" placeholder="abc123@gmail.com" />
-          <Input label="Password" type="password" placeholder="Input your Password" />
-          <Input label="Password Check" type="password" placeholder="Check your Password" />
-          <Button varient="black" rounded="sm" size="full" padding="lg"><BoldLgText><span>Sign Up</span></BoldLgText></Button>
-          <Divider />
-          <Text>Have an account?</Text>
-          <SignInButton varient="white" border="black" rounded="sm" size="full" padding="lg"><BoldLgText>Sign In</BoldLgText></SignInButton>
+
+          {/* Nickname */}
+          <Input
+            label="Nickname"
+            placeholder="Input your Nickname"
+            message={errors.nickname?.message} // errors.nickname의 메시지 전달
+            state={errors.nickname ? 'danger' : 'default'} // 상태에 따라 danger 스타일 적용
+            {...register('nickname', {
+              required: '닉네임을 입력해주세요.',
+              validate: (value) =>
+                !/\s/.test(value) || '닉네임에 공백을 제거해주세요.',
+            })}
+          />
+
+          {/* Email */}
+          <Input
+            label="Email"
+            placeholder="abc123@gmail.com"
+            message={errors.email?.message}
+            state={errors.email ? 'danger' : 'default'}
+            {...register('email', {
+              required: '이메일을 입력해주세요.',
+              pattern: {
+                value: /^[^@\s]+@[^@\s]+\.[^@\s]+$/,
+                message: '유효한 이메일 주소를 입력해주세요.',
+              },
+            })}
+          />
+
+          {/* Password */}
+          <Input
+            label="Password"
+            type="password"
+            placeholder="Input your Password"
+            message={errors.password?.message}
+            state={errors.password ? 'danger' : 'default'}
+            {...register('password', {
+              required: '비밀번호를 입력해주세요.',
+              minLength: {
+                value: 6,
+                message: '비밀번호는 최소 6자리 이상이어야 합니다.',
+              },
+            })}
+          />
+
+          {/* Password Check */}
+          <Input
+            label="Password Check"
+            type="password"
+            placeholder="Check your Password"
+            message={errors.passwordCheck?.message}
+            state={errors.passwordCheck ? 'danger' : 'default'}
+            {...register('passwordCheck', {
+              required: '비밀번호 확인을 입력해주세요.',
+              validate: (value) =>
+                value === watch('password') || '비밀번호가 일치하지 않습니다.',
+            })}
+          />
+
+          <Button varient="black" rounded="sm" size="full" padding="lg" type="submit">
+            <BoldLgText>
+              <span>Sign Up</span>
+            </BoldLgText>
+          </Button>
         </SignUpForm>
       </SignUpContainer>
     </Layout>
@@ -27,6 +105,7 @@ const SignUpPage = () => {
 
 export default SignUpPage;
 
+// Styled Components
 const SignUpContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -36,51 +115,50 @@ const SignUpContainer = styled.div`
   ${pretendard_bold}
 `;
 
-const SignUpForm = styled.div`
+const SignUpForm = styled.form`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2.5rem; /* 40px */
-  width: 25rem; /* 400px */
-  gap: 0.75rem; // <- 간격!
+  padding: 2.5rem;
+  width: 25rem;
+  gap: 0.75rem;
 `;
 
 const SignInButton = styled(Button)`
   border: 1px solid var(--neutral-100);
-`
+`;
+
 const BoldLgText = styled.p`
   ${pretendard_bold}
   ${TextSizeL}
   span {
     color: var(--neutral-10);
   }
-`
+`;
 
 const Divider = styled.hr`
   width: 100%;
   background-color: var(--neutral-50, #0a0a0a);
-  margin: 0.4rem; /* 6.4px */
+  margin: 0.4rem;
 `;
 
 const Title = styled.h2`
-  font-size: 2.3rem; /* 28px */
+  font-size: 2.3rem;
   color: var(--neutral-100, #0a0a0a);
-  margin-bottom: 1rem; /* 16px */
-`;
-
-const Footer = styled.div`
-  display: flex;
-  flex-direction: column; /* 세로 정렬 */
-  align-items: center; /* 가운데 정렬 */
-  width: 100%;
-  margin-top: 0rem; /* Sign Up 버튼과 간격 추가 */
+  margin-bottom: 1rem;
 `;
 
 const Text = styled.span`
-  font-size: 0.875rem; /* 14px */
+  font-size: 0.875rem;
   color: var(--neutral-100, #0a0a0a);
-  text-align: center; /* 텍스트 가운데 정렬 */
+  text-align: center;
   ${pretendard_bold}
   ${TextSizeL}
 `;
 
+const ErrorMessage = styled.p`
+  color: red;
+  font-size: 0.875rem;
+  margin-top: -0.5rem;
+  margin-bottom: 0.5rem;
+`;

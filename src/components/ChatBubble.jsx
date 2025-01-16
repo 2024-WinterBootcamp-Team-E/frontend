@@ -6,7 +6,7 @@ const ChatBubble = ({ message }) => {
 	const role = message.role;
 	console.log({ message });
 	return (
-		<ChatBubbleWrapper>
+		<ChatBubbleWrapper role={role}>
 			<ChatterName role={role}>{role}</ChatterName>
 			<Bubble message={message} />
 		</ChatBubbleWrapper>
@@ -15,13 +15,13 @@ const ChatBubble = ({ message }) => {
 export default ChatBubble;
 
 export const ChatBubbleWrapper = styled.div`
-	align-items: end;
+	align-items: ${({ role }) => (role != 'user' ? 'start' : 'end')};
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
 	height: fit-content;
 	justify-content: center;
-	width: fit-content;
+	width: 100%;
 `;
 
 const ChatterName = styled.p`

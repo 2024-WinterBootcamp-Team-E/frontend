@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components';
 import { pretendard_medium, TextSizeM, TextSizeS } from '../GlobalStyle';
+import React, { forwardRef } from 'react';
 
 const STATES = {
 	default: css`
@@ -35,34 +36,43 @@ const MESSAGES = {
 	`,
 };
 
-const Input = ({
-	type = 'text',
-	isLabel = true,
-	label = 'label',
-	placeholder = 'placeholder',
-	message = 'helper text',
-	state = 'default',
-	disabled = false,
-	onChange,
-}) => {
-	const stateStyle = STATES[state];
-	const messageStyle = MESSAGES[state];
-
-	return (
+const Input = forwardRef(
+	(
+	  {
+		type = 'text',
+		isLabel = true,
+		label = 'label',
+		placeholder = 'placeholder',
+		message = '', // 메시지 기본값 빈 문자열
+		state = 'default',
+		disabled = false,
+		onChange,
+		...rest
+	  },
+	  ref
+	) => {
+	  const stateStyle = STATES[state];
+	  const messageStyle = MESSAGES[state];
+  
+	  return (
 		<StyledInputWrapper>
-			{isLabel && <StyledLabel htmlFor={label}>{label}</StyledLabel>}
-			<StyledInput
-				id={label}
-				type={type}
-				placeholder={placeholder}
-				stateStyle={stateStyle}
-				disabled={disabled}
-				onChange={onChange}
-			/>
-			{state !== 'default' && <StyledMessage messageStyle={messageStyle}>{message}</StyledMessage>}
+		  {isLabel && <StyledLabel htmlFor={label}>{label}</StyledLabel>}
+		  <StyledInput
+			id={label}
+			type={type}
+			placeholder={placeholder}
+			stateStyle={stateStyle}
+			disabled={disabled}
+			onChange={onChange}
+			ref={ref}
+			{...rest}
+		  />
+		  {message && <StyledMessage messageStyle={messageStyle}>{message}</StyledMessage>}
 		</StyledInputWrapper>
-	);
-};
+	  );
+	}
+  );
+  
 export default Input;
 
 const StyledInputWrapper = styled.div`
