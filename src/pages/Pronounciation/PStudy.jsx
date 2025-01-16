@@ -1,17 +1,16 @@
+import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
 import Button from '@/components/Button';
 import Layout from '@/components/Layout';
-import { pretendard_bold, pretendard_medium, TextSizeM, TextSizeL } from '@/GlobalStyle';
-import RecordButton from '@/components/RecordButton';
 import PlayButton from '@/components/PlayButton';
-import { useState } from 'react';
-import { Evaluation } from '@/mock/Evaluation';
 import SoundWave from '@/components/SoundWave';
+import { Evaluation } from '@/mock/Evaluation';
+import { pretendard_medium, pretendard_bold, TextSizeM, TextSizeL } from '@/GlobalStyle';
 
 const PStudy = () => {
 	const [evaluation, setEvaluation] = useState('info'); // info, success, warning, danger
+
 	const totalScore = 92;
-	console.log(Evaluation.info);
 
 	return (
 		<Layout>
@@ -27,8 +26,6 @@ const PStudy = () => {
 							<h3>If you need any assistance with the task, feel free to let me know.</h3>
 						</QuestionContainer>
 						<AnswerContainer>
-							<PlayButton aria-label='Play Question'>재생</PlayButton>
-							<RecordButton aria-label='Record Answer' />
 							<SoundWave />
 						</AnswerContainer>
 					</ContentSection>

@@ -1,29 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { Play, Pause } from '@styled-icons/fa-solid';
 
-const PlayButton = () => {
-	const [isPlaying, setIsPlaying] = useState(false);
-
-	const handleClick = () => {
-		setIsPlaying((prev) => !prev); // 상태 토글
-		console.log(isPlaying ? '재생 중지!' : '재생 시작!');
-		// 추가적인 재생 로직을 여기서 처리
-	};
-
+const PlayButton = ({ isPlaying, onClick }) => {
 	return (
-		<StyledButton onClick={handleClick} isRecording={isPlaying}>
+		<StyledButton onClick={onClick} isPlaying={isPlaying}>
 			{isPlaying ? <PauseIcon size='1.25rem' /> : <PlayIcon size='1.25rem' />}
 		</StyledButton>
 	);
 };
 
 const StyledButton = styled.button`
-	background: ${(props) =>
-		props.isRecording ? '#FF3B30' : '#34C759'}; /* 재생생 중이면 빨간색, 일시 정지지 상태면 초록색 */
+	background: ${(props) => (props.isPlaying ? '#FF3B30' : '#34C759')};
 	color: white;
 	border: none;
-	border-radius: 50%; /* 원형 버튼 */
+	border-radius: 50%;
 	width: 3.125rem;
 	height: 3.125rem;
 	display: flex;
@@ -35,11 +26,11 @@ const StyledButton = styled.button`
 	padding: 1rem;
 
 	&:hover {
-		transform: scale(1.05); /* 살짝 확대 */
+		transform: scale(1.05);
 	}
 
 	&:active {
-		transform: scale(0.95); /* 눌렀을 때 축소 */
+		transform: scale(0.95);
 	}
 `;
 
