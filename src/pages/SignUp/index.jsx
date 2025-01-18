@@ -6,6 +6,7 @@ import Layout from '@/components/Layout';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
 import { pretendard_bold, TextSizeL } from '@/GlobalStyle';
+import { post } from '@/api';
 
 const SignUpPage = () => {
 	const navigate = useNavigate(); // navigate 함수 선언
@@ -26,23 +27,8 @@ const SignUpPage = () => {
 		const { passwordCheck, ...filteredData } = data;
 
 		try {
-			const response = await fetch('http://localhost:8000/api/v1/user/signup', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(filteredData), // 요청 바디에 필터링된 데이터 전송
-			});
-
-			if (!response.ok) {
-				// 응답이 실패한 경우 에러 처리
-				const errorData = await response.json();
-				console.error('Signup error:', errorData);
-				alert('회원가입 실패: ' + (errorData.message || '알 수 없는 오류'));
-				return;
-			}
-
-			const result = await response.json();
+			// 공통 post 함수를 사용해 회원가입 요청 보내기
+			const result = await post('/user/signup', filteredData);
 			console.log('Signup successful:', result);
 			alert('회원가입 성공!');
 
