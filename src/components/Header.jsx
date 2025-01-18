@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronDown } from '@styled-icons/boxicons-regular';
 import { pretendard_bold, TextSizeXL } from '@/GlobalStyle';
 import Button from '@/components/Button';
-
+import DropDown from '@/components/DropDown';
 
 // Styled Components
 const HeaderContainer = styled.header`
@@ -91,18 +91,12 @@ const ChevronIcon = styled(ChevronDown)`
   color: black;
 `;
 
-const DropDownContainer = styled.div`
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 0.5rem;
-  background: white;
-  border: 1px solid var(--neutral-100);
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 1rem;
-  min-width: 200px;
-  z-index: 1001;
+const StyledDropDownWrapper = styled.div`
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    z-index: 1001;
 `;
 
 const Header = () => {
