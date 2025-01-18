@@ -100,11 +100,12 @@ const IStudy = () => {
               <TitleLarge>{selectedChat?.subject || 'Subject1'}</TitleLarge>
                   <TitleSmall>
                     {selectedChat
-                      ? `${selectedChat.create_at} - ${selectedChat.updated_at}`
+                      ? `${selectedChat.create_at} ~ ${selectedChat.updated_at}`
                       : 'yyyy.mm.dd ~ yyyy.mm.dd'}
                   </TitleSmall>
             </ChatTitle>
           </ChatHeader>
+          <StyledHr/>
           <ChatContent ref={chatContentRef}>
           {messages.map((message, index) => (
             <ChatBubble
@@ -116,7 +117,7 @@ const IStudy = () => {
           ))}
         </ChatContent>
           <RecordSection>
-            <RecordButton />
+            <RecordButton where='istudy' />
           </RecordSection>
         </ChatSection>
       </MainContainer>
@@ -129,7 +130,6 @@ const MainContainer = styled.div`
   display: grid;
   grid-template-columns: ${(props) => (props.expanded ? '20% 80%' : '5% 95%')};
   grid-gap: 1rem;
-  height: 100vh;
   background-color: var(--neutral-10);
   transition: grid-template-columns 0.3s ease;
 `;
@@ -140,7 +140,6 @@ const Sidebar = styled.aside`
   border-radius: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
   overflow: hidden;
   height: 100%;
   transition: width 0.3s ease, padding 0.3s ease;
@@ -152,7 +151,10 @@ const SidebarHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  height:fit-content;
+  height: 4rem;
+  margin: 0;
+  padding: 0;
+
   h5 {
   padding-left:0.5rem;
   }
@@ -168,15 +170,15 @@ const ToggleWrapper = styled.div`
 `;
 
 const StyledToggleOn = styled(ToggleOn)`
-  color: #000000;
+  color: var(--neutral-100);
   width: 2rem;
   height: 2rem;
-  margin-top:1rem;
+  margin-top:2.4rem;
   margin-left:0.5rem;
 `;
 
 const StyledToggleOff = styled(ToggleOff)`
-  color: #000000;
+  color: var(--neutral-100);
   width: 2rem;
   height: 2rem;
 `;
@@ -190,6 +192,7 @@ const SubjectList = styled.ul`
   list-style: none;
   padding: 0;
   margin: 0;
+  padding-top:1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -200,7 +203,7 @@ const SubjectItem = styled.li`
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem;
-  background-color: #fff;
+  background-color: var(--neutral-10);
   border-radius: 0.5rem;
   cursor: pointer;
 `;
@@ -238,6 +241,7 @@ const ChatHeader = styled.header`
   gap: 0.5rem; /* 아이콘과 제목 사이 간격 추가 */
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--neutral-30);
+  height:4rem;
 `;
 
 const DateRange = styled.span`
