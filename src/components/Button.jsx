@@ -72,31 +72,19 @@ const ROUNDEDS = {
 	none: css`
 		border-radius: 0;
 	`,
-		border-radius: 0;
-	`,
 	sm: css`
-		border-radius: var(--rounded-sm, 8px);
-	`,
 		border-radius: var(--rounded-sm, 8px);
 	`,
 	md: css`
 		border-radius: var(--rounded-md, 16px);
 	`,
-		border-radius: var(--rounded-md, 16px);
-	`,
 	lg: css`
-		border-radius: var(--rounded-lg, 24px);
-	`,
 		border-radius: var(--rounded-lg, 24px);
 	`,
 	xl: css`
 		border-radius: var(--rounded-xl, 32px);
 	`,
-		border-radius: var(--rounded-xl, 32px);
-	`,
 	full: css`
-		border-radius: var(--rounded-full, 9999px);
-	`,
 		border-radius: var(--rounded-full, 9999px);
 	`,
 };
@@ -105,26 +93,16 @@ const PADDINGS = {
 	none: css`
 		padding: 0;
 	`,
-		padding: 0;
-	`,
 	xs: css`
-		padding: 0.5rem;
-	`,
 		padding: 0.5rem;
 	`,
 	sm: css`
 		padding: 0.5rem 1rem;
 	`,
-		padding: 0.5rem 1rem;
-	`,
 	md: css`
 		padding: 1rem;
 	`,
-		padding: 1rem;
-	`,
 	lg: css`
-		padding: 1rem 2rem;
-	`,
 		padding: 1rem 2rem;
 	`,
 	xl: css`
@@ -139,36 +117,22 @@ const BORDERS = {
 	transparent: css`
 		border: none;
 	`,
-		border: none;
-	`,
 	black: css`
-		border: 2px solid var(--neutral-100, #0a0a0a);
-	`,
 		border: 2px solid var(--neutral-100, #0a0a0a);
 	`,
 	primary: css`
 		border: 2px solid var(--primary-border, #976d29);
 	`,
-		border: 2px solid var(--primary-border, #976d29);
-	`,
 	secondary: css`
-		border: 2px solid var(--secondary-border, #edefe1);
-	`,
 		border: 2px solid var(--secondary-border, #edefe1);
 	`,
 	info: css`
 		border: 2px solid var(--info-border, #b1c5f6);
 	`,
-		border: 2px solid var(--info-border, #b1c5f6);
-	`,
 	success: css`
 		border: 2px solid var(--success-border, #b8dbca);
 	`,
-		border: 2px solid var(--success-border, #b8dbca);
-	`,
 	warning: css`
-		border: 2px solid var(--warning-border, #eeceb0);
-	`,
 		border: 2px solid var(--warning-border, #eeceb0);
 	`,
 	danger: css`
@@ -184,13 +148,7 @@ const SIZES = {
 		height: fit-content;
 		width: fit-content;
 	`,
-		height: fit-content;
-		width: fit-content;
-	`,
 	full: css`
-		height: 100%;
-		width: 100%;
-	`,
 		height: 100%;
 		width: 100%;
 	`,
