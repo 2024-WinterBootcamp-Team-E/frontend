@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import useSampleStore from '@/store';
+import { useSampleStore } from '@/store';
 import styled from 'styled-components';
 import Button from '@/components/Button';
 import DropDown from '@/components/DropDown';
