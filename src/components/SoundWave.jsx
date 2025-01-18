@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import WaveSurfer from 'wavesurfer.js';
+import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js';
 import styled from 'styled-components';
 import PlayButton from '@/components/PlayButton';
 import RecordButton from '@/components/RecordButton';

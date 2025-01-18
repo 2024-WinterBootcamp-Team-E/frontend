@@ -60,6 +60,7 @@ const ProfileImage = styled.img`
 	border-radius: 50%;
 	border: 2px solid white;
 	object-fit: cover;
+	object-position: center;
 `;
 
 const ProfileName = styled.span`
@@ -104,7 +105,7 @@ const Header = () => {
 				const mockApiResponse = {
 					isLoggedIn: true,
 					profile: {
-						image: 'UserImage.png',
+						image: '/UserImage.png',
 						name: 'TaciTa',
 					},
 				};
