@@ -19,20 +19,6 @@ const PlayButton = ({ onClick }) => {
 };
 
 const StyledButton = styled.button`
-	background: ${(props) => (props.$isPlaying ? 'var(--info-pressed)' : 'var(--neutral-10)')};
-	border: 2px solid;
-	border-color: ${(props) => (props.$isPlaying ? 'transparent' : 'var(--info-pressed)')};
-	border-radius: 50%;
-	width: 3.125rem;
-	height: 3.125rem;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	cursor: pointer;
-	font-size: 1.125rem;
-	transition: transform 0.2s ease-in-out;
-	padding: 1rem;
-
 	&:hover {
 		transform: scale(1.05);
 	}
@@ -40,6 +26,19 @@ const StyledButton = styled.button`
 	&:active {
 		transform: scale(0.95);
 	}
+	align-items: center;
+	background: ${(props) => (props.$isPlaying ? 'var(--info-pressed)' : 'var(--neutral-10)')};
+	border: 2px solid;
+	border-color: ${(props) => (props.$isPlaying ? 'transparent' : 'var(--info-pressed)')};
+	border-radius: 50%;
+	cursor: pointer;
+	display: flex;
+	font-size: 1.125rem;
+	height: 3.125rem;
+	justify-content: center;
+	padding: 1rem;
+	transition: transform 0.2s ease-in-out;
+	width: 3.125rem;
 `;
 
 const PlayIcon = styled(Play)`

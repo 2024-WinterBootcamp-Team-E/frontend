@@ -135,15 +135,17 @@ const MainContainer = styled.div`
 `;
 
 const Sidebar = styled.aside`
-  background-color: #d4d5c8;
-  padding: ${(props) => (props.expanded ? '1rem' : '0.5rem')};
-  border-radius: 1rem;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  height: 100%;
-  transition: width 0.3s ease, padding 0.3s ease;
-  position: relative;
+	background-color: #d4d5c8;
+	padding: ${(props) => (props.expanded ? '1rem' : '0.5rem')};
+	border-radius: 1rem;
+	display: flex;
+	flex-direction: column;
+	overflow: auto;
+	height: 100%;
+	transition:
+		width 0.3s ease,
+		padding 0.3s ease;
+	position: relative;
 `;
 
 const SidebarHeader = styled.div`
@@ -224,15 +226,14 @@ const DateDisplay = styled.span`
 `;
 
 const ChatSection = styled.section`
-  display: flex;
-  flex-direction: column;
-  background-color: #e0e0d5;
-  padding: 1rem;
-  border-radius: 1rem;
-  overflow: auto;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	background-color: #e0e0d5;
+	padding: 1rem;
+	border-radius: 1rem;
+	overflow: auto;
+	width: 100%;
+	height: 100%;
 `;
 
 const ChatHeader = styled.header`
