@@ -1,59 +1,65 @@
-import React, { useState } from 'react';
-import useSampleStore from '@/store';
+import React from 'react';
 import styled from 'styled-components';
-import Button from '@/components/Button';
-import DropDown from '@/components/DropDown';
-import ChatBubble from '@/components/ChatBubble';
-import chatData from '@/mock/chatData';
-import Header from '@/components/Header';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
+import Button from '@/components/Button';
+import { pretendard_bold, pretendard_light, TextSizeXL, TextSizeL } from '@/GlobalStyle';
 
-const Home = () => {
-	const count = useSampleStore((state) => state.count);
-	const increment = useSampleStore((state) => state.increment);
-	const decrement = useSampleStore((state) => state.decrement);
-	const [isDropDownOpen, setIsDropDownOpen] = useState(false);
-	const messages = chatData.messages;
-	console.log('home', messages);
+const HomePage = () => {
+	const navigate = useNavigate(); // navigate 함수 초기화
+
 	return (
-		<Layout>
-			<TestH1>Home Page</TestH1>
-			<TestP>Count : {count}</TestP>
-			<div>
-				<Button onClick={increment} varient='white'>
-					Increment
+		<Layout isLanding='landing'>
+			<Container>
+				<Title>Online English Speaking Practice Platform</Title>
+				<Subtitle>
+					It is a free speaking practice platform where you can start your practicing via AI trainer anywhere anytime.
+				</Subtitle>
+				<Button varient='black' rounded='full' padding='getstarted' onClick={() => navigate('/signin')}>
+					<BoldLgText>
+						<span>Get Started</span>
+					</BoldLgText>
 				</Button>
-				<Button onClick={decrement} varient='white'>
-					Decrement
-				</Button>
-			</div>
-			<Button onClick={() => setIsDropDownOpen(!isDropDownOpen)} varient='white'>
-				setIsDropDownOpen
-			</Button>
-			<DropDown isDropDownOpen={isDropDownOpen} />
-			{messages.map((message, index) => (
-				<ChatBubble key={index} message={message} />
-			))}
+			</Container>
 		</Layout>
 	);
 };
 
-const StyledBackGround = styled.div`
+export default HomePage;
+
+// Styled Components
+const Container = styled.div`
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
-	// width: 100%;
-	width: 100vw;
-	overflow:hidden;
-	position:relative;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+	padding: 2rem;
+	background-color: var(--secondary-main);
+	text-align: center;
 `;
 
-const TestH1 = styled.h1`
-	color: var(--primary-main);
+const Title = styled.h1`
+	font-size: 5rem;
+	color: var(--neutral-100);
+	${pretendard_bold}
+	margin-bottom: 1rem;
+	line-height: 1.5;
 `;
 
-const TestP = styled.p`
-	font-size: 1rem;
+const Subtitle = styled.p`
+	${pretendard_light}
+	${TextSizeXL}
+color: var(--neutral-100);
+	max-width: 39.5rem;
+	margin-bottom: 1.5rem;
+	line-height: 1.5;
 `;
 
-export default Home;
+const BoldLgText = styled.span`
+	${pretendard_bold}
+	${TextSizeL}
+  span {
+		color: var(--neutral-10);
+	}
+`;

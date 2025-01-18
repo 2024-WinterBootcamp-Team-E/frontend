@@ -1,9 +1,19 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import Header from '@/components/Header';
+const ISLANDING = {
+	default: `
+	  background-color: var(--secondary-main);
+	`,
+	landing: `
+	  background-image: url('/LandingBackground.jpg');
+	  background-size: cover;
+	`,
+};
 
-const Layout = ({ children }) => {
+const Layout = ({ isLanding = 'default', children }) => {
+	const landingstyle = ISLANDING[isLanding];
 	return (
-		<LayoutWrapper>
+		<LayoutWrapper $landingstyle={landingstyle}>
 			<Header />
 			<ContentWrapper>{children}</ContentWrapper>
 		</LayoutWrapper>
@@ -13,6 +23,7 @@ const Layout = ({ children }) => {
 export default Layout;
 
 const LayoutWrapper = styled.div`
+	${(props) => props.$landingstyle}
 	width: 100%;
 	min-height: 100vh;
 	display: flex;

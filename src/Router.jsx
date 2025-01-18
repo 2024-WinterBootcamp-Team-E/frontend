@@ -7,7 +7,7 @@ import Pronunciation from '@/pages/Pronunciation';
 import PStudy from '@/pages/Pronunciation/PStudy';
 import SignIn from '@/pages/SignIn';
 import SignUp from '@/pages/SignUp';
-import TestPage from '@/forTest/TestPage';
+//import TestPage from '@/forTest/TestPage';
 
 const Router = () => {
 	return (
@@ -21,7 +21,7 @@ const Router = () => {
 				<Route path='/signin' element={<SignIn />} /> {/* 로그인 */}
 				<Route path='/signup' element={<SignUp />} /> {/* 회원가입 */}
 				<Route path='/' element={<Home />} />
-				<Route path='/testpage' element={<TestPage />} />
+				{/* <Route path='/testpage' element={<TestPage />} /> */}
 			</Routes>
 		</BrowserRouter>
 	);
