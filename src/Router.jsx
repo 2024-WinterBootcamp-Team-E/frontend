@@ -21,7 +21,7 @@ const Router = () => {
 				<Route path='/signup' element={<SignUp />} /> {/* 회원가입 */}
 			</Routes>
 		</BrowserRouter>
-	);
+	);s
 };
 
 export default Router;

@@ -3,18 +3,24 @@ import styled from 'styled-components';
 import { Microphone } from '@styled-icons/fa-solid/Microphone';
 import { Stop } from '@styled-icons/fa-solid/Stop';
 
-const RecordButton = ({ onClick }) => {
+const varients = {
+	0: 'var(--info-pressed)',
+	1: '#7B7D63', // You can add more colors as needed
+};
+
+const RecordButton = ({ onClick, where = 0 }) => {
 	const [isRecording, setIsRecording] = useState(false);
 
 	const handleClick = () => {
-		setIsRecording((prev) => !prev); // isRecording 상태 토글
+		setIsRecording((prev) => !prev); // Toggle the isRecording state
 		if (onClick) {
-			onClick(); // 부모 컴포넌트로 전달된 onClick 호출
+			onClick(); // Call the onClick prop passed from the parent
 		}
 	};
+
 	return (
-		<StyledButton $isRecording={isRecording} onClick={handleClick}>
-			{isRecording ? <StopIcon /> : <MicrophoneIcon />}
+		<StyledButton $isRecording={isRecording} $where={where} onClick={handleClick}>
+			{isRecording ? <StopIcon $where={where} /> : <MicrophoneIcon $where={where} />}
 		</StyledButton>
 	);
 };
@@ -22,9 +28,10 @@ const RecordButton = ({ onClick }) => {
 export default RecordButton;
 
 const StyledButton = styled.button`
-	background: ${(props) => (props.$isRecording ? 'var(--info-pressed)' : 'var(--neutral-10)')};
+	background: ${(props) =>
+		props.$isRecording ? varients[props.$where] : 'var(--neutral-10)'}; // Use colors based on $isRecording
 	border: 2px solid;
-	border-color: ${(props) => (props.$isRecording ? 'transparent' : 'var(--info-pressed)')};
+	border-color: ${(props) => (props.$isRecording ? 'transparent' : varients[props.$where])};
 	border-radius: 50%;
 	width: 3.125rem;
 	height: 3.125rem;
@@ -46,7 +53,7 @@ const StyledButton = styled.button`
 `;
 
 const MicrophoneIcon = styled(Microphone)`
-	color: var(--info-pressed);
+	color: ${(props) => (props.$where == 0? 'var(--info-pressed)':'#7B7D63')};
 	width: 1.25rem;
 	height: 1.25rem;
 `;
