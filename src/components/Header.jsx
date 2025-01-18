@@ -1,57 +1,58 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom'; // useNavigate 훅 가져오기
-import DropDown from './DropDown';
+import { useNavigate } from 'react-router-dom';
 import { ChevronDown } from '@styled-icons/boxicons-regular';
 import { pretendard_bold, TextSizeXL } from '@/GlobalStyle';
 import Button from '@/components/Button';
 
+
+// Styled Components
 const HeaderContainer = styled.header`
-	display: flex;
-	align-items: center;
-	padding: 1rem 2rem;
-	background-color: transparent;
-	border-bottom: 2px solid transparent;
-	width: 100%;
-	z-index: 1000;
+  display: flex;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: transparent;
+  border-bottom: 2px solid transparent;
+  width: 100%;
+  z-index: 1000;
 `;
 
 const LeftSide = styled.div`
-	flex: 1;
-	display: flex;
-	align-items: center;
+  flex: 1;
+  display: flex;
+  align-items: center;
 `;
 
 const Center = styled.nav`
-	display: flex;
-	gap: 2rem;
-	list-style: none;
-	justify-content: center;
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+  justify-content: center;
 
-	h3 {
-		cursor: pointer;
-		color: var(--neutral-100);
-	}
+  h3 {
+    cursor: pointer;
+    color: var(--neutral-100);
+  }
 `;
 
 const RightSide = styled.div`
-	flex: 1;
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
-	position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
 `;
 
 const Logo = styled.h1`
-	color: var(--neutral-100, #0a0a0a);
-	cursor: pointer;
-	padding-top: 1rem;
+  color: var(--neutral-100, #0a0a0a);
+  cursor: pointer;
+  padding-top: 1rem;
 `;
 
 const ProfileContainer = styled.div`
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 `;
 
 const ProfileImage = styled.img`
@@ -61,35 +62,47 @@ const ProfileImage = styled.img`
 	border: 2px solid white;
 	object-fit: cover;
 	object-position: center;
+  width: 2.5em;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 2px solid white;
+  object-fit: cover;
+  object-position: center;
 `;
 
 const ProfileName = styled.span`
-	${TextSizeXL}
-	${pretendard_bold}
+  ${TextSizeXL}
+  ${pretendard_bold}
   color: var(--neutral-100);
 `;
 
 const DropdownButton = styled.button`
-	background: none;
-	border: none;
-	cursor: pointer;
-	padding: 0;
-	display: flex;
-	align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
 `;
 
 const ChevronIcon = styled(ChevronDown)`
-	width: 1.5rem;
-	height: 1.5rem;
-	color: black;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: black;
 `;
 
-const StyledDropDownWrapper = styled.div`
-	position: absolute;
-	top: 100%;
-	right: 0;
-	margin-top: 0.5rem;
-	z-index: 1001;
+const DropDownContainer = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: white;
+  border: 1px solid var(--neutral-100);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  min-width: 200px;
+  z-index: 1001;
 `;
 
 const Header = () => {
@@ -167,3 +180,19 @@ const Header = () => {
 };
 
 export default Header;
+const ProfileInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+
+  span {
+    color: var(--neutral-50);
+    font-size: 0.875rem;
+  }
+
+  strong {
+    font-size: 1rem;
+    color: var(--neutral-100);
+    font-weight: bold;
+  }
+`;
