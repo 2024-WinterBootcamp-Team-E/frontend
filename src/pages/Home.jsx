@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useSampleStore } from '@/store';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';

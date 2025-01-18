@@ -9,8 +9,14 @@ import { pretendard_medium, pretendard_bold, TextSizeM, TextSizeL } from '@/Glob
 
 const PStudy = () => {
 	const [evaluation, setEvaluation] = useState('info'); // info, success, warning, danger
-
+	const audioRef = useRef(null); // audio 엘리먼트를 위한 ref
 	const totalScore = 92;
+
+	const handlePlayAudio = () => {
+		if (audioRef.current) {
+			audioRef.current.play();
+		}
+	};
 
 	return (
 		<Layout>
@@ -18,16 +24,20 @@ const PStudy = () => {
 				<StudyContainer>
 					<ProgressSection>
 						<p>1 of 3</p>
-						<a href='/pronounciation'>Quit</a>
+						<a href='/pronunciation'>Quit</a>
 					</ProgressSection>
 					<ContentSection>
 						<QuestionContainer>
-							<PlayButton aria-label='Play Question'>재생</PlayButton>
+							<PlayButton aria-label='Play Question' onClick={handlePlayAudio}>
+								재생
+							</PlayButton>
 							<h3>If you need any assistance with the task, feel free to let me know.</h3>
 						</QuestionContainer>
 						<AnswerContainer>
 							<SoundWave />
 						</AnswerContainer>
+						{/* Audio 엘리먼트 추가 */}
+						<audio ref={audioRef} src='/SampleAudio.wav' />
 					</ContentSection>
 					<FeedbackSection evaluation={evaluation}>
 						<ProgressCircle evaluation={evaluation}>{totalScore}%</ProgressCircle>
@@ -65,7 +75,6 @@ const StudyContainer = styled.section`
 	flex-direction: column;
 	flex-grow: 1;
 	gap: 2rem;
-	/* height: 100%; */
 	width: 100%;
 `;
 

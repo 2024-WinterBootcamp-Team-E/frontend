@@ -173,11 +173,11 @@ const Button = ({
 	return (
 		<StyledButton
 			disabled={disabled}
-			varientStyle={varientStyle}
-			roundedStyle={roundedStyle}
-			paddingStyle={paddingStyle}
-			borderStyle={borderStyle}
-			sizeStyle={sizeStyle}
+			$varientStyle={varientStyle}
+			$roundedStyle={roundedStyle}
+			$paddingStyle={paddingStyle}
+			$borderStyle={borderStyle}
+			$sizeStyle={sizeStyle}
 			onClick={onClick}
 		>
 			{children}
@@ -186,11 +186,11 @@ const Button = ({
 };
 
 const StyledButton = styled.button`
-	${(props) => props.borderStyle}
-	${(props) => props.paddingStyle}
-	${(props) => props.roundedStyle}
-	${(props) => props.sizeStyle}
-	${(props) => props.varientStyle}
+	${(props) => props.$borderStyle}
+	${(props) => props.$paddingStyle}
+	${(props) => props.$roundedStyle}
+	${(props) => props.$sizeStyle}
+	${(props) => props.$varientStyle}
 	${pretendard_medium}
 
 	cursor: pointer;
