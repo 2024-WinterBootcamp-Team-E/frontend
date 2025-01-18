@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
 import { pretendard_bold, TextSizeL } from '@/GlobalStyle';
+import { post } from '@/api';
 
 const SignInPage = () => {
   const [email, setEmail] = useState('');
@@ -12,38 +13,33 @@ const SignInPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // 세션 스토리지에 사용자 정보가 있으면 메인 페이지로 리디렉션
+    const userId = sessionStorage.getItem('userId');
+    if (userId) {
+      navigate('/'); // 메인 페이지로 이동
+    }
+  }, [navigate]);
+
   const handleSignIn = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/v1/user/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const data = await post('/user/login', { email, password });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        setErrorMessage(errorData.detail || '로그인 실패');
-        return;
-      }
-
-      const data = await response.json();
       console.log('로그인 성공:', data);
 
-      // 세션 스토리지에 사용자 정보 저장
-      sessionStorage.setItem('userProfile', JSON.stringify(data.data));
+      // 세션 스토리지에 사용자 ID 저장
+      sessionStorage.setItem('userId', data.data);
 
-      alert('로그인 성공! 유저 ID: ' + data.data.nickname);
+      alert('로그인 성공! 유저 ID: ' + data.data);
       navigate('/'); // 메인 페이지로 이동
     } catch (error) {
-      console.error('Error during login:', error);
-      setErrorMessage('로그인 중 오류가 발생했습니다.');
+      console.error('로그인 실패:', error);
+      setErrorMessage(error.message || '로그인 중 오류가 발생했습니다.');
     }
   };
 
   const handleSignUp = () => {
-    navigate('/signup'); 
+    navigate('/signup');
   };
 
   return (
@@ -82,7 +78,7 @@ const SignInPage = () => {
             rounded="sm"
             size="full"
             padding="lg"
-            onClick={handleSignUp} 
+            onClick={handleSignUp}
           >
             <BoldLgText>Sign Up</BoldLgText>
           </SignUpButton>
