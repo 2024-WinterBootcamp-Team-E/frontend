@@ -45,6 +45,7 @@ const RightSide = styled.div`
 const Logo = styled.h1`
 	color: var(--neutral-100, #0a0a0a);
 	cursor: pointer;
+	padding-top: 1rem;
 `;
 
 const ProfileContainer = styled.div`
@@ -123,7 +124,9 @@ const Header = () => {
 	return (
 		<HeaderContainer>
 			<LeftSide>
-				<Logo onClick={() => navigate('/')}>Logo</Logo>
+				<Logo onClick={() => navigate('/')}>
+					<img src='/logo2.png' alt='EASTUDY' style={{ width: '13rem', height: '4rem' }} />
+				</Logo>
 			</LeftSide>
 
 			<Center>
