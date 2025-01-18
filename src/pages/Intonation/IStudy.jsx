@@ -1,141 +1,288 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import ChatBubble from '@/components/ChatBubble';
 import Layout from '@/components/Layout';
 import RecordButton from '@/components/RecordButton';
-import Button from '@/components/Button';
-import {AngleLeft} from '@styled-icons/fa-solid'
+import { AngleLeft } from '@styled-icons/fa-solid';
+import { ToggleOff, ToggleOn } from '@styled-icons/fa-solid';
 import chatData from '@/mock/chatData';
 
 const IStudy = () => {
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true); // 사이드바 상태
+  const [selectedChat, setSelectedChat] = useState(null); // 초기 상태 추가
   const messages = chatData.messages;
+  const chatContentRef = useRef(null); // 채팅창 참조
+  const [feedbackVisibility, setFeedbackVisibility] = useState({});
+
+  const chat_history = [
+    {
+      subject: '호텔직원과 대화하는상황',
+      create_at: '2025.01.11',
+      updated_at: '2025.01.18',
+    },
+    {
+      subject: '길을 물어보는 상황',
+      create_at: '2025.01.12',
+      updated_at: '2025.01.18',
+    },
+    {
+      subject: '음식을 주문하는 상황',
+      create_at: '2025.01.18',
+      updated_at: '2025.01.18',
+    },
+  ];
+  
+  const toggleSidebar = () => {
+    setIsSidebarExpanded(!isSidebarExpanded);
+  };
+
+  const toggleFeedback = (index) => {
+    setFeedbackVisibility((prevState) => ({
+      ...prevState,
+      [index]: !prevState[index], // 특정 메시지의 피드백 토글
+    }));
+  };
+
+  useEffect(() => {
+    // 초기 상태 설정: 첫 번째 항목을 기본 선택
+    if (!selectedChat && chat_history.length > 0) {
+      setSelectedChat(chat_history[0]);
+    }
+
+    // 새로운 메시지가 추가될 때마다 스크롤이 아래로 이동
+    chatContentRef.current?.scrollTo({
+      top: chatContentRef.current.scrollHeight,
+      behavior: 'smooth',
+    });
+  }, [messages, selectedChat, chat_history]);
+
   return (
     <Layout>
-      <HeaderSection>
-        <Button><BackIcon /></Button>
-        <h5>Richard</h5>
-        <h6>(with British English)</h6>
-      </HeaderSection>
-      <ChatRoomSection>
-        <AIProfile src = "/AIImage.jpg" alt="AI Profile"/>
-        <ChattingSection>
+      <MainContainer expanded={isSidebarExpanded}>
+        {/* 왼쪽 사이드바 */}
+        <Sidebar expanded={isSidebarExpanded}>
+          {isSidebarExpanded ? (
+            <>
+              <SidebarHeader>
+                <h5>Chat List</h5>
+                <ToggleWrapper onClick={toggleSidebar}>
+                  <StyledToggleOff />
+                </ToggleWrapper>
+              </SidebarHeader>
+              <StyledHr/>
+              <SubjectList>
+                {chat_history.map((history, index) => (
+                  <SubjectItem
+                    key={index}
+                    onClick={() => setSelectedChat(history)} // 클릭 시 선택된 채팅 데이터 업데이트
+                  >
+                    <span role="img" aria-label="flag">
+                      🇺🇸
+                    </span>
+                    <SubjectText>{history.subject}</SubjectText>
+                    <DateDisplay>{history.updated_at}</DateDisplay>
+                  </SubjectItem>
+                ))}
+              </SubjectList>
+            </>
+          ) : (
+            <ToggleWrapper onClick={toggleSidebar}>
+              <StyledToggleOn />
+            </ToggleWrapper>
+          )}
+        </Sidebar>
+
+        {/* 채팅 영역 */}
+        <ChatSection>
+          <ChatHeader>
+            <AngleLeftIcon />
+            <ChatTitle>
+              <TitleLarge>{selectedChat?.subject || 'Subject1'}</TitleLarge>
+                  <TitleSmall>
+                    {selectedChat
+                      ? `${selectedChat.create_at} - ${selectedChat.updated_at}`
+                      : 'yyyy.mm.dd ~ yyyy.mm.dd'}
+                  </TitleSmall>
+            </ChatTitle>
+          </ChatHeader>
+          <ChatContent ref={chatContentRef}>
           {messages.map((message, index) => (
-            <ChatBubble key={index} message={message} />
+            <ChatBubble
+              key={index}
+              message={message}
+              isFeedbackVisible={feedbackVisibility[index] || false}
+              toggleFeedback={() => toggleFeedback(index)}
+            />
           ))}
-        </ChattingSection>
-        <UserProfile src="/UserImage.png" alt="User Profile"/>
-        <SoundControl>
-            <input type="range" id="progress-bar" min="0" max="100" defaultValue="50" />
-            <Button>🔊</Button>
-        </SoundControl>
-      </ChatRoomSection>
-      <ControllerSection>
-        <ControllerBox>
-            <RecordButton>Record</RecordButton>
-        </ControllerBox>
-      </ControllerSection>
+        </ChatContent>
+          <RecordSection>
+            <RecordButton />
+          </RecordSection>
+        </ChatSection>
+      </MainContainer>
     </Layout>
   );
 };
 
-// Additional Components and Styles for IStudy.jsx
-
-const HeaderSection = styled.header`
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  height : fit-content;
-  width : 100%;
-  border-bottom: 1px solid var(--neutral-30);
-  background-color : var(--secondary-surface);
-  border-radius: 2rem;
-  gap: 0.5rem;
-  margin : 0 1rem;
-`;
-
-const BackIcon = styled(AngleLeft)`
-  color : var(--neutral-100);
-  width : 1.25rem;
-  height : 1.25rem;
-`;
-
-const ChatRoomSection = styled.main`
+// Styled Components
+const MainContainer = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1.5fr 1fr;
-  grid-template-rows: 1fr;
-  height: 100%; /* 고정 높이 */
-  width: 100%; /* 고정 너비 */
-  padding: 0; /* 내부 여백 없음 */
-  overflow-y: auto; /* 내용 스크롤 활성화 */
-  background-color: var(--neutral-10); /* 흰색 배경 */
-  margin: 1rem;
+  grid-template-columns: ${(props) => (props.expanded ? '20% 80%' : '5% 95%')};
+  grid-gap: 1rem;
+  height: 100vh;
+  background-color: var(--neutral-10);
+  transition: grid-template-columns 0.3s ease;
 `;
 
-const AIProfile = styled.img`
-  width: 100%;
-  height: 100%;
-  border-radius: 2rem 0 0 2rem;
-  margin : 0;
-  padding: 0;
-  object-fit: cover;
-  object-position: center;
-`;
-
-const ChattingSection = styled.section`
+const Sidebar = styled.aside`
+  background-color: #d4d5c8;
+  padding: ${(props) => (props.expanded ? '1rem' : '0.5rem')};
+  border-radius: 1rem;
   display: flex;
   flex-direction: column;
-  align-items: start;
-  justify-content: center;
-  position : relative;
-  gap: 0.5rem;
-  flex-grow: 1;
-  margin: 0 ;
-  width: 100%;
-  height: 100%;
-  overflow-y: auto; /* 스크롤 활성화 */
-  background-color : #A8A999
-`;
-
-const UserProfile = styled.img`
-  width: 100%;
-  height: 100%;
-  border-radius: 0 2rem 2rem 0;
-  margin : 0;
-  padding: 0;
-  object-fit: cover;
-  object-position: center;
-`;
-
-const ControllerSection = styled.footer`
-  padding: 1rem;
-  border-top: 1px solid var(--neutral-30);
-  background-color : #F6F7EE;
-  border-radius: 1.9rem;
-  width : 100%;
-  max-width : 90rem;
-  height : 6.8rem;
-  margin : 0 auto;
-`;
-
-const ControllerBox = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
   gap: 1rem;
+  overflow: hidden;
+  height: 100%;
+  transition: width 0.3s ease, padding 0.3s ease;
+  position: relative;
 `;
 
-// SoundControl을 position: absolute를 적용 시킨 후, ChatRoomSection 안으로 컴포넌트를 옮긴 후, Bottom이랑 Left로 위치를 조정할 것! 열심히 계산 해보기. + calc() 사용도 가능할 것임. 
-// 참고로 ChatRoomSection에는 position : relative가 선언되어 있어야 함.
-const SoundControl = styled.div`
+const SidebarHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height:fit-content;
+  h5 {
+  padding-left:0.5rem;
+  }
+`;
+
+const ToggleWrapper = styled.div`
   display: flex;
   align-items: center;
-  position : absolute;
-  bottom: -10rem; /* ChatRoomSection의 하단에 배치 */
-  left: 8rem; /* 왼쪽 여백 설정 */
-  input[type='range'] {
-    margin-right: 0.5rem;
-  }
+  justify-content: center;
+  cursor: pointer;
+  width: 2.5rem;
+  height: 2.5rem;
+`;
+
+const StyledToggleOn = styled(ToggleOn)`
+  color: #000000;
+  width: 2rem;
+  height: 2rem;
+  margin-top:1rem;
+  margin-left:0.5rem;
+`;
+
+const StyledToggleOff = styled(ToggleOff)`
+  color: #000000;
+  width: 2rem;
+  height: 2rem;
+`;
+
+const StyledHr = styled.hr`
+  margin:0;
+  padding:0;
+`
+
+const SubjectList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const SubjectItem = styled.li`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  cursor: pointer;
+`;
+
+const SubjectText = styled.span`
+  flex-grow: 1;
+  margin: 0 0.5rem; /* 텍스트의 좌우 간격 */
+  font-size: 1rem;
+  color: #333; /* 기본 텍스트 색상 */
+  overflow: hidden; /* 내용이 길어질 경우 숨김 처리 */
+  text-overflow: ellipsis; /* 생략 기호 추가 */
+  white-space: nowrap; /* 한 줄로 표시 */
+`;
+
+const DateDisplay = styled.span`
+  font-size: 0.875rem;
+  color: #6c757d;
+`;
+
+const ChatSection = styled.section`
+  display: flex;
+  flex-direction: column;
+  background-color: #e0e0d5;
+  padding: 1rem;
+  border-radius: 1rem;
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+`;
+
+const ChatHeader = styled.header`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* 아이콘과 제목 사이 간격 추가 */
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--neutral-30);
+`;
+
+const DateRange = styled.span`
+  font-size: 0.875rem;
+  color: var(--neutral-70);
+`;
+
+const AngleLeftIcon = styled(AngleLeft)`
+  color: var(--neutral-100);
+  width: 1.25rem;
+  height: 1.25rem;
+`;
+
+const ChatTitle = styled.h4`
+  margin: 0;
+  font-size: 1.25rem; /* 적절한 크기로 설정 */
+  color: var(--neutral-100); /* 텍스트 색상 */
+  display: flex;
+  white-space: nowrap; /* 텍스트가 한 줄로 유지되도록 설정 */
+  overflow: hidden; /* 텍스트가 길면 숨김 처리 */
+  gap: 0.5rem;
+`;
+
+const TitleLarge = styled.span`
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--neutral-100);
+`;
+
+const TitleSmall = styled.span`
+  font-size: 0.875rem;
+  color: var(--neutral-70);
+`;
+
+const ChatContent = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  margin-top: 1rem;
+`;
+
+const RecordSection = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
 `;
 
 export default IStudy;
