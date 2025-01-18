@@ -139,10 +139,10 @@ const Header = () => {
 
 			<Center>
 				<Button onClick={() => navigate('/intonation')}>
-					<h3>Region</h3>
+					<h3>Conversation</h3>
 				</Button>
 				<Button onClick={() => navigate('/pronunciation')}>
-					<h3>Theme</h3>
+					<h3>Sentences</h3>
 				</Button>
 				<Button>
 					<h3>My Activity</h3>
