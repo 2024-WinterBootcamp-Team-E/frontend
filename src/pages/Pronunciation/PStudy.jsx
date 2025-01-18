@@ -18,7 +18,7 @@ const PStudy = () => {
 				<StudyContainer>
 					<ProgressSection>
 						<p>1 of 3</p>
-						<a href='/pronounciation'>Quit</a>
+						<a href='/pronunciation'>Quit</a>
 					</ProgressSection>
 					<ContentSection>
 						<QuestionContainer>
