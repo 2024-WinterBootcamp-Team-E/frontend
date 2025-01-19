@@ -66,22 +66,6 @@ const VARIENTS = {
 			background-color: var(--success-pressed);
 		}
 	`,
-	green: css`
-		background-color: var(--success-hober);
-		color: var(--netural-10, #ffffff);
-
-		&:active {
-			background-color: var(--success-main);
-		}
-
-		&:focus {
-			background-color: var(--success-hober);
-		}
-
-		&:hover {
-			background-color: var(--success-pressed);
-		}
-	`,
 	plus: css`
 		background-color: #0a0a0a80;
 		color: var(--netural-10, #ffffff);
