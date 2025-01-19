@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import Layout from '@/components/Layout';
 import { pretendard_bold } from '@/GlobalStyle';
+import { useNavigate } from 'react-router-dom';
 import Button from '@/components/Button';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,21 +12,27 @@ const PronunciationPage = () => {
 		{ name: 'Travel', image: '/PronunImages/travel3.jpg' },
 		{ name: 'Movie', image: '/PronunImages/movie2.jpg' },
 		{ name: 'Business', image: '/PronunImages/business2.jpg' },
-		{ name: 'Practical', image: '/PronunImages/practical2.jpg' },
+		{ name: 'Daily', image: '/PronunImages/practical2.jpg' },
 	];
 
+	// 클릭 핸들러
+	const handleCategoryClick = (categoryRoute) => {
+		// 원하는 경로로 이동
+		navigate(`/pronunciation/pstudy`, { state: { category: categoryRoute } });
+	};
+	
 	return (
 		<Layout>
 			<PageContainer>
 				<CardGrid>
 					{categories.map((category) => (
-						<Card key={category.name}>
-							<Button padding='none' rounded='xl' onClick={() => navigate('/pronunciation/pstudy')}>
-								<StyledImage src={category.image} alt={category.name} />
-								<Overlay>
-									<CategoryName>{category.name}</CategoryName>
-								</Overlay>
-							</Button>
+						<Card key={category.name}
+							onClick={() => handleCategoryClick(category.name)} // 클릭 이벤트 추가
+						>
+							<img src={category.image} alt={category.name} />
+							<Overlay>
+								<CategoryName>{category.name}</CategoryName>
+							</Overlay>
 						</Card>
 					))}
 				</CardGrid>
