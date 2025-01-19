@@ -66,6 +66,38 @@ const VARIENTS = {
 			background-color: var(--success-pressed);
 		}
 	`,
+	green: css`
+		background-color: var(--success-hober);
+		color: var(--netural-10, #ffffff);
+
+		&:active {
+			background-color: var(--success-main);
+		}
+
+		&:focus {
+			background-color: var(--success-hober);
+		}
+
+		&:hover {
+			background-color: var(--success-pressed);
+		}
+	`,
+	plus: css`
+		background-color: #0a0a0a80;
+		color: var(--netural-10, #ffffff);
+
+		&:active {
+			background-color: #0a0a0a50;
+		}
+
+		&:focus {
+			background-color: #0a0a0a80;
+		}
+
+		&:hover {
+			background-color: #0a0a0a50;
+		}
+	`,
 };
 
 const ROUNDEDS = {
@@ -111,6 +143,9 @@ const PADDINGS = {
 	getstarted: css`
 		padding: 1.5rem 3.5rem;
 	`,
+	plus: css`
+		padding-top: 0.5rem;
+	`,
 };
 
 const BORDERS = {
@@ -118,7 +153,7 @@ const BORDERS = {
 		border: none;
 	`,
 	black: css`
-		border: 2px solid var(--neutral-100, #0a0a0a);
+		border: 1px solid var(--neutral-100, #0a0a0a);
 	`,
 	primary: css`
 		border: 2px solid var(--primary-border, #976d29);
@@ -150,6 +185,10 @@ const SIZES = {
 	`,
 	full: css`
 		height: 100%;
+		width: 100%;
+	`,
+	wide: css`
+		height: 1.7rem;
 		width: 100%;
 	`,
 };

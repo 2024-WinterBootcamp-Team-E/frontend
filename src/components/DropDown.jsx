@@ -1,5 +1,5 @@
 import styled, { keyframes } from 'styled-components';
-import Button from './Button';
+import Button from '@/components/Button';
 import Input from './Input';
 import { Edit } from '@styled-icons/boxicons-solid';
 import { SignOut } from '@styled-icons/octicons';
