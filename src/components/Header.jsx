@@ -7,6 +7,7 @@ import Button from '@/components/Button';
 import DropDown from '@/components/DropDown';
 import useAuthStore from '@/store/authStore'; // Zustand 스토어 임포트
 import { get } from '@/api';
+
 // Styled Components
 const HeaderContainer = styled.header`
 	display: flex;
@@ -154,7 +155,7 @@ const Header = () => {
 			<RightSide>
 				{isLoggedIn && profile ? (
 					<ProfileContainer>
-						<ProfileImage src={profile.image} alt='Profile' />
+						<ProfileImage src={profile.image || '/UserImage.png'} />
 						<ProfileName>{profile.name}</ProfileName>
 						<DropdownButton onClick={() => setIsDropDownOpen((prev) => !prev)}>
 							<ChevronIcon />
