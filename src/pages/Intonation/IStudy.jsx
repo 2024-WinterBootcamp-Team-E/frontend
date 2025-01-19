@@ -135,18 +135,12 @@ const IStudy = () => {
 
 					<h2>Create New Chat</h2>
 					<ImageSelector>
-						<img
-							src='/public/usa.png'
-							alt='USA'
-							onClick={() => setSelectedImage('USA')}
-							className={selectedImage === 'USA' ? 'selected' : ''}
-						/>
-						<img
-							src='/public/uk.png'
-							alt='UK'
-							onClick={() => setSelectedImage('UK')}
-							className={selectedImage === 'UK' ? 'selected' : ''}
-						/>
+						<Button padding='none' rounded='full' onClick={() => setSelectedImage('USA')}>
+							<img src='/public/usa.png' alt='USA' className={selectedImage === 'USA' ? 'selected' : ''} />
+						</Button>
+						<Button padding='none' rounded='full' onClick={() => setSelectedImage('UK')}>
+							<img src='/public/uk.png' alt='UK' className={selectedImage === 'UK' ? 'selected' : ''} />
+						</Button>
 					</ImageSelector>
 					<InputBox placeholder='Enter your topic' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
 					<ButtonWrapper>
