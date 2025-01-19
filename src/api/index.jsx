@@ -11,6 +11,9 @@ const defaultHeaders = {
  * @param {string} endpoint - API 엔드포인트 (BASE_URL 이후의 경로)
  * @returns {Promise<any>} - API 응답 데이터
  */
+// 사용법
+// const userData = await get(`/user/5`);
+// console.log(userData);
 export const get = async (endpoint) => {
 	try {
 		const response = await fetch(`${BASE_URL}${endpoint}`, {
