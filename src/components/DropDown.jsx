@@ -6,7 +6,9 @@ import { SignOut } from '@styled-icons/octicons';
 import { pretendard_medium, TextSizeL, TextSizeS } from '@/GlobalStyle';
 import { pretendard_regular } from '../GlobalStyle';
 import { useState } from 'react';
-
+import useAuthStore from '@/store/authStore'; // Zustand 스토어 임포트
+import { useNavigate } from 'react-router-dom';
+import { patch } from '@/api';
 const EditIcon = styled(Edit)`
 	color: gray;
 
@@ -21,28 +23,86 @@ const SignOutIcon = styled(SignOut)`
 
 const DropDown = ({ isDropDownOpen }) => {
 	const [isEditOpen, setIsEditOpen] = useState(false);
+	const [newNickname, setNewNickname] = useState('');
+	const { profile, setAuth, logout } = useAuthStore(); // logout 액션 추가
+	const navigate = useNavigate(); // useNavigate 훅 사용
+
+	const updateNickname = async () => {
+		try {
+			const userId = sessionStorage.getItem('userId'); // 또는 'user_id' 키 사용
+			if (!userId) {
+				console.error('사용자 ID를 찾을 수 없습니다.');
+				return;
+			}
+
+			// 공통 patch 함수를 사용하여 PATCH 요청 전송
+			const result = await patch(`/user/${userId}`, { nickname: newNickname });
+
+			// 응답 코드가 200이면 상태 업데이트
+			if (result.code === 200) {
+				// data가 null이어도 newNickname을 사용해 업데이트
+				setAuth(true, { ...profile, name: newNickname });
+
+				// 수정 모드를 닫고 입력값 초기화
+				setIsEditOpen(false);
+				setNewNickname('');
+			} else {
+				console.error('닉네임 업데이트 실패:', result.message);
+			}
+		} catch (error) {
+			console.error('닉네임 업데이트 중 오류 발생:', error);
+		}
+	};
+
+	// 로그아웃 핸들러 추가
+	const handleSignOut = () => {
+		// 세션 스토리지에서 user_id 제거
+		sessionStorage.removeItem('userId');
+		// Zustand 스토어 상태 초기화
+		logout();
+		// 필요 시 다른 페이지로 이동 (예: 로그인 페이지)
+		navigate('/');
+		alert('로그아웃 되었습니다.');
+	};
+
 	return (
 		<StyledDropDownMenu isEditOpen={isEditOpen} isDropDownOpen={isDropDownOpen}>
 			<StyledProfileItem>
-				<StyledProfileImage src='/UserImage.png' alt='Profile' />
+				<StyledProfileImage src={profile?.image || '/UserImage.png'} alt='Profile' />
 				<StyledProfileInfo>
 					<StyledNameWrapper>
-						<StyledName>TaciTa</StyledName>
+						<StyledName>{profile?.name || '닉네임'}</StyledName>
 						<Button padding='none' onClick={() => setIsEditOpen(!isEditOpen)}>
 							<EditIcon size='20' title='Edit' />
 						</Button>
 					</StyledNameWrapper>
-					<StyledEmail>TaciTa@gmail.com</StyledEmail>
+					<StyledEmail>{profile?.email || '이메일'}</StyledEmail>
 				</StyledProfileInfo>
 			</StyledProfileItem>
-			<StyledEditItem isEditOpen={isEditOpen}>
-				<Input isLabel={false} state='default' placeholder='4~12 Num&Letter' />
-				<Button varient='white' rounded='full' padding='xs'>
-					<Edit size='20' title='Edit' />
-				</Button>
-			</StyledEditItem>
+
+			{/* 닉네임 수정 입력창 */}
+			{isEditOpen && (
+				<StyledEditItem isEditOpen={isEditOpen}>
+					<Input
+						isLabel={false}
+						state='default'
+						placeholder='4~12 Num&Letter'
+						value={newNickname}
+						onChange={(e) => setNewNickname(e.target.value)}
+					/>
+					<Button variant='white' rounded='full' padding='xs' onClick={updateNickname}>
+						<Edit size='20' title='Edit' />
+					</Button>
+				</StyledEditItem>
+			)}
+
 			<StyledSignOutItem>
-				<Button size='full' rounded='xl' padding='md'>
+				<Button
+					size='full'
+					rounded='xl'
+					padding='md'
+					onClick={handleSignOut} // Sign Out 버튼에 클릭 핸들러 연결
+				>
 					<StyledSignOutTextWrapper>
 						<SignOutIcon size='24' title='SignOut' />
 						<StyledSignOutText>Sign Out</StyledSignOutText>

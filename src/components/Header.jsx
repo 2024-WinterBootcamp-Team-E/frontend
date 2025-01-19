@@ -6,7 +6,7 @@ import { pretendard_bold, TextSizeXL } from '@/GlobalStyle';
 import Button from '@/components/Button';
 import DropDown from '@/components/DropDown';
 import useAuthStore from '@/store/authStore'; // Zustand 스토어 임포트
-
+import { get } from '@/api';
 // Styled Components
 const HeaderContainer = styled.header`
 	display: flex;
@@ -104,32 +104,21 @@ const Header = () => {
 		const fetchProfile = async () => {
 			try {
 				// sessionStorage에서 저장된 user_id 가져오기
-				const storedUserId = sessionStorage.getItem('user_id');
+				const storedUserId = sessionStorage.getItem('userId');
 				if (!storedUserId) {
 					// user_id가 없으면 로그인되지 않은 상태
 					return;
 				}
 
-				// FastAPI에 GET 요청 보내기
-				const response = await fetch(`http://localhost:8000/api/v1/user/${storedUserId}`, {
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				});
-
-				if (!response.ok) {
-					console.error('프로필 정보를 가져오는데 실패했습니다.');
-					return;
-				}
-
-				const result = await response.json();
+				// 공통 get 함수를 사용해 FastAPI에 GET 요청 보내기
+				const result = await get(`/user/${storedUserId}`);
 
 				// FastAPI 응답 구조에 맞춰 상태 업데이트
 				if (result.code === 200 && result.data) {
 					setAuth(true, {
 						image: result.data.user_image,
 						name: result.data.nickname,
+						email: result.data.email,
 					});
 				} else {
 					console.error('프로필 조회 실패:', result.message);
