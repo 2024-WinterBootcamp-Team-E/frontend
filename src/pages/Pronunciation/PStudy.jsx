@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useLocation } from 'react-router-dom'; // useParams 훅 추가
 import styled from 'styled-components';
 import Button from '@/components/Button';
 import Layout from '@/components/Layout';
@@ -8,6 +9,9 @@ import { Evaluation } from '@/mock/Evaluation';
 import { pretendard_medium, pretendard_bold, TextSizeM, TextSizeL } from '@/GlobalStyle';
 
 const PStudy = () => {
+	const location = useLocation();
+  	const searchParams = new URLSearchParams(location.search);
+  	const category = searchParams.get('category'); // 쿼리 파라미터에서 category 추출
 	const [evaluation, setEvaluation] = useState('info'); // info, success, warning, danger
 	const audioRef = useRef(null); // audio 엘리먼트를 위한 ref
 	const totalScore = 92;
@@ -94,7 +98,6 @@ const ProgressSection = styled.div`
 		${pretendard_medium}
 		${TextSizeM}
     :link, :visited {
-			color: initial;
 		}
 		:hover {
 			color: var(--neutral-50);
