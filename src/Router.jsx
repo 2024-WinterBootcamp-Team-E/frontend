@@ -18,7 +18,7 @@ const Router = () => {
 				<Route path='/intonation' element={<Intonation />} /> {/* 억양 선택 */}
 				<Route path='/intonation/istudy' element={<IStudy />} /> {/* 억양 연습(채팅방) */}
 				<Route path='/pronunciation' element={<Pronunciation />} /> {/* 발음 토픽 선택 */}
-				<Route path='/pronunciation/pstudy' element={<PStudy />} /> {/* 발음 문장 연습 */}
+				<Route path='/pronunciation/pstudy' element={<PStudy />} />
 				<Route path='/signin' element={<SignIn />} /> {/* 로그인 */}
 				<Route path='/signup' element={<SignUp />} /> {/* 회원가입 */}
 				<Route path='/' element={<Home />} />
