@@ -7,7 +7,7 @@ import Pronunciation from '@/pages/Pronunciation';
 import PStudy from '@/pages/Pronunciation/PStudy';
 import SignIn from '@/pages/SignIn';
 import SignUp from '@/pages/SignUp';
-//import TestPage from '@/forTest/TestPage';
+// import TestPage from '@/forTest';
 import Dashboard from '@/pages/Dashboard';
 
 const Router = () => {

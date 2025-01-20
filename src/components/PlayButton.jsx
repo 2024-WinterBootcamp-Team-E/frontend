@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Play, Pause } from '@styled-icons/fa-solid';
 
-const PlayButton = ({ onClick }) => {
-	const [isPlaying, setIsPlaying] = useState(false);
+const PlayButton = ({ onClick, isPlaying }) => {
+	// const [isPlaying, setIsPlaying] = useState(false);
 
 	const handleClick = () => {
-		setIsPlaying((prev) => !prev); // isRecording 상태 토글
+		// setIsPlaying((prev) => !prev); // isRecording 상태 토글
 		if (onClick) {
 			onClick(); // 부모 컴포넌트로 전달된 onClick 호출
 		}

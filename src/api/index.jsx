@@ -11,6 +11,13 @@ const defaultHeaders = {
  * @param {string} endpoint - API 엔드포인트 (BASE_URL 이후의 경로)
  * @returns {Promise<any>} - API 응답 데이터
  */
+// 사용법
+// 1) 유저 정보 가져오기
+// const userData = await get(`/user/19`);
+// console.log(userData);
+// 2) 상황 문장 목록 조회
+// const data = await get(`/speech/situationType/all?situation=여행`);
+// console.log(data);
 export const get = async (endpoint) => {
 	try {
 		const response = await fetch(`${BASE_URL}${endpoint}`, {
@@ -33,16 +40,29 @@ export const get = async (endpoint) => {
 /**
  * 공통 POST 요청 함수
  * @param {string} endpoint - API 엔드포인트
- * @param {object} data - 전송할 데이터
+ * @param {object | FormData} data - 전송할 데이터 (JSON 객체 또는 FormData 객체)
+ * @param {boolean} isFormData - 데이터가 FormData인지 여부 (기본값: false)
  * @returns {Promise<any>} - API 응답 데이터
  */
-export const post = async (endpoint, data) => {
+// 사용법
+// 1) applicaion/json 타입
+// const data = await post(`chat/${user_id}/chat`, { character_name: { characterName }, subject: { subject } });
+// console.log(data);
+// 2) multipart/form-data 타입
+// const formData = new FormData();
+// formData.append('file', selectedFile);
+// const data = await post(`chat/${user_id}/${chat_id}`, formData, true);
+// console.log(data);
+export const post = async (endpoint, data, isFormData = false) => {
 	try {
+		// FormData의 경우 Content-Type 헤더를 제거
+		const headers = isFormData ? {} : defaultHeaders;
+
 		const response = await fetch(`${BASE_URL}${endpoint}`, {
 			method: 'POST',
-			headers: defaultHeaders,
-			credentials: 'include',
-			body: JSON.stringify(data),
+			headers,
+			credentials: 'include', // 필요 시 쿠키 전송
+			body: isFormData ? data : JSON.stringify(data),
 		});
 
 		if (!response.ok) {
@@ -56,12 +76,16 @@ export const post = async (endpoint, data) => {
 	}
 };
 
+
 /**
  * 공통 PUT 요청 함수
  * @param {string} endpoint - API 엔드포인트
  * @param {object} data - 전송할 데이터
  * @returns {Promise<any>} - API 응답 데이터
  */
+// 사용법
+// const data = await put(`/user/soft/${user_id}`);
+// console.log(data);
 export const put = async (endpoint, data) => {
 	try {
 		const response = await fetch(`${BASE_URL}${endpoint}`, {
@@ -88,6 +112,9 @@ export const put = async (endpoint, data) => {
  * @param {object} data - 전송할 데이터
  * @returns {Promise<any>} - API 응답 데이터
  */
+// 사용법
+// const data = await patch(`/users/${user_id}`, { nickname: {nickname} });
+// console.log(data);
 export const patch = async (endpoint, data) => {
 	try {
 		const response = await fetch(`${BASE_URL}${endpoint}`, {
@@ -113,6 +140,9 @@ export const patch = async (endpoint, data) => {
  * @param {string} endpoint - API 엔드포인트
  * @returns {Promise<any>} - API 응답 데이터
  */
+// 사용법법
+// const data = await remove(`/users/${user_id}`);
+// console.log(data);
 export const remove = async (endpoint) => {
 	try {
 		const response = await fetch(`${BASE_URL}${endpoint}`, {
