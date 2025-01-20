@@ -17,16 +17,16 @@ const PronunciationPage = () => {
 
 	// 클릭 핸들러
 	const handleCategoryClick = (categoryRoute) => {
-		// 원하는 경로로 이동
-		navigate(`/pronunciation/pstudy`, { state: { category: categoryRoute } });
-	};
+		navigate(`/pronunciation/pstudy?category=${categoryRoute}`);
+	  };
 	
 	return (
 		<Layout>
 			<PageContainer>
 				<CardGrid>
 					{categories.map((category) => (
-						<Card key={category.name}
+						<Card 
+							key={category.name}
 							onClick={() => handleCategoryClick(category.name)} // 클릭 이벤트 추가
 						>
 							<img src={category.image} alt={category.name} />

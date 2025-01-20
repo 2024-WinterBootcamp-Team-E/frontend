@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
+import { useLocation } from 'react-router-dom'; // useParams 훅 추가
 import styled from 'styled-components';
 import Button from '@/components/Button';
 import Layout from '@/components/Layout';
@@ -6,42 +7,14 @@ import PlayButton from '@/components/PlayButton';
 import SoundWave from '@/components/SoundWave';
 import { Evaluation } from '@/mock/Evaluation';
 import { pretendard_medium, pretendard_bold, TextSizeM, TextSizeL } from '@/GlobalStyle';
-import axios from 'axios';
-import { useLocation } from 'react-router-dom';
-
-axios.defaults.baseURL = 'http://localhost:8000'; // 백엔드 기본 URL 설정
 
 const PStudy = () => {
 	const location = useLocation();
-	const { category } = location.state || {};
-	const [sentences, setSentences] = useState([]); // 문장 데이터 상태
-	const [currentIndex, setCurrentIndex] = useState(0); // 현재 문장 인덱스
+  	const searchParams = new URLSearchParams(location.search);
+  	const category = searchParams.get('category'); // 쿼리 파라미터에서 category 추출
 	const [evaluation, setEvaluation] = useState('info'); // info, success, warning, danger
-	const [loading, setLoading] = useState(false); // 로딩 상태 추가
 	const audioRef = useRef(null); // audio 엘리먼트를 위한 ref
 	const totalScore = 92;
-
-	// 상황에 따라 문장 가져오기
-	useEffect(() => {
-		if (category) {
-			console.log('Fetching sentences for category:', category); // 카테고리 확인
-			fetchSentences(category.toUpperCase());
-		} else {
-			console.error('No category provided');
-		}
-	}, [category]);
-
-	const fetchSentences = async (situation) => {
-		try {
-		  const response = await axios.get('/api/v1/speech/situationType/all', {
-			params: { situation },
-		  });
-		  console.log('API Response:', response.data);
-		  setSentences(response.data.data || []);
-		} catch (error) {
-		  console.error('Error fetching sentences:', error);
-		}
-	  };
 
 	const handlePlayAudio = () => {
 		if (audioRef.current) {
@@ -49,77 +22,44 @@ const PStudy = () => {
 		}
 	};
 
-	const handleNext = () => {
-		setCurrentIndex((prevIndex) => (prevIndex + 1) % sentences.length);
-	};
-	
-	const handlePrevious = () => {
-		setCurrentIndex((prevIndex) => (prevIndex - 1 + sentences.length) % sentences.length);
-	};
-	
-	  return (
+	return (
 		<Layout>
-		  <MainContent>
-			<StudyContainer>
-			  <ProgressSection>
-				<p>
-				  {sentences.length > 0
-					? `${currentIndex + 1} of ${sentences.length}`
-					: 'No Sentences'}
-				</p>
-				<a href='/pronunciation'>Quit</a>
-			  </ProgressSection>
-			  <ContentSection>
-				{loading ? (
-				  <p>Loading sentences...</p>
-				) : sentences.length > 0 ? (
-				  <>
-					<QuestionContainer>
-					  <PlayButton aria-label='Play Question' onClick={handlePlayAudio}>
-						재생
-					  </PlayButton>
-					  <h3>{sentences[currentIndex]}</h3> {/* 현재 문장 표시 */}
-					</QuestionContainer>
-					<AnswerContainer>
-					  <SoundWave />
-					</AnswerContainer>
-					{/* Audio 엘리먼트 추가 */}
-					<audio 
-						ref={audioRef} 
-						src={sentences[currentIndex]?.voice_url || ''} 
-						controls 
-						onError={() => console.error('Failed to load audio')}
-					/>
-					<NavigationButtons>
-					  <Button onClick={handlePrevious} disabled={sentences.length === 1}>
-						Previous
-					  </Button>
-					  <Button onClick={handleNext} disabled={sentences.length === 1}>
-						Next
-					  </Button>
-					</NavigationButtons>
-				  </>
-				) : (
-				  <p>No sentences available for this category.</p>
-				)}
-			  </ContentSection>
-			  <FeedbackSection evaluation={evaluation}>
-				<ProgressCircle evaluation={evaluation}>{totalScore}%</ProgressCircle>
-				<FeedbackText evaluation={evaluation}>
-				  <p>{Evaluation.evaluation}</p>
-				  <span>Select the underlined word(s) for additional feedback.</span>
-				</FeedbackText>
-				{evaluation === 'success' && (
-				  <Button varient='green' rounded='xl' aria-label='Continue to Next'>
-					Continue
-				  </Button>
-				)}
-			  </FeedbackSection>
-			</StudyContainer>
-		  </MainContent>
+			<MainContent>
+				<StudyContainer>
+					<ProgressSection>
+						<p>1 of 3</p>
+						<a href='/pronunciation'>Quit</a>
+					</ProgressSection>
+					<ContentSection>
+						<QuestionContainer>
+							<PlayButton aria-label='Play Question' onClick={handlePlayAudio}>
+								재생
+							</PlayButton>
+							<h3>If you need any assistance with the task, feel free to let me know.</h3>
+						</QuestionContainer>
+						<AnswerContainer>
+							<SoundWave />
+						</AnswerContainer>
+						{/* Audio 엘리먼트 추가 */}
+						<audio ref={audioRef} src='/SampleAudio.wav' />
+					</ContentSection>
+					<FeedbackSection evaluation={evaluation}>
+						<ProgressCircle evaluation={evaluation}>{totalScore}%</ProgressCircle>
+						<FeedbackText evaluation={evaluation}>
+							<p>{Evaluation.evaluation}</p>
+							<span>Select the underlined word(s) for additional feedback.</span>
+						</FeedbackText>
+						{evaluation === 'success' && (
+							<Button varient='green' rounded='xl' aria-label='Continue to Next'>
+								Continue
+							</Button>
+						)}
+					</FeedbackSection>
+				</StudyContainer>
+			</MainContent>
 		</Layout>
-	  );
-	};
+	);
+};
 
 export default PStudy;
 
@@ -158,7 +98,6 @@ const ProgressSection = styled.div`
 		${pretendard_medium}
 		${TextSizeM}
     :link, :visited {
-			color: initial;
 		}
 		:hover {
 			color: var(--neutral-50);
@@ -278,26 +217,4 @@ const FeedbackText = styled.div`
 		${TextSizeM}
 	}
 	text-align: start;
-`;
-
-const NavigationButtons = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1rem;
-
-  button {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    border-radius: 0.5rem;
-    border: none;
-    background-color: var(--primary-color);
-    color: #000000;
-    cursor: pointer;
-
-    &:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-  }
 `;

@@ -249,6 +249,11 @@ const GlobalStyle = createGlobalStyle`
     color:var(--neutral-100)
   }
   
+  a {
+    ${pretendard_medium}
+    ${TextSizeM}
+    color:var(--neutral-100)
+}
 
 `;
 
