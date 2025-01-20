@@ -1,20 +1,43 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
+import ScaleLoader from 'react-spinners/ScaleLoader';
 import Button from '@/components/Button';
 import Layout from '@/components/Layout';
 import PlayButton from '@/components/PlayButton';
 import SoundWave from '@/components/SoundWave';
 import { Evaluation } from '@/mock/Evaluation';
 import { pretendard_medium, pretendard_bold, TextSizeM, TextSizeL } from '@/GlobalStyle';
+import { get } from '@/api';
 
 const PStudy = () => {
 	const [evaluation, setEvaluation] = useState('info'); // info, success, warning, danger
+	const [sentenceData, setSentenceData] = useState(null); // 데이터 상태 추가
+	const [totalScore, setTotalScore] = useState(92);
+	const [isLoading, setIsLoading] = useState(false);
 	const audioRef = useRef(null); // audio 엘리먼트를 위한 ref
-	const totalScore = 92;
+	const userId = sessionStorage.getItem('userId'); // 유저id 가져오는 함수
+	const sentenceId = 2;
+
+	useEffect(() => {
+		const fetchSentenceData = async () => {
+			setIsLoading(true);
+			try {
+				const response = await get(`/speech/${sentenceId}`);
+				setSentenceData(response.data); // 데이터 상태 저장
+				console.log('Fetched Sentence Data:', response);
+			} catch (error) {
+				console.error('Error fetching sentence data:', error);
+			} finally {
+				// setIsLoading(false);
+			}
+		};
+		fetchSentenceData();
+	}, [userId]);
 
 	const handlePlayAudio = () => {
-		if (audioRef.current) {
-			audioRef.current.play();
+		if (audioRef.current && sentenceData && sentenceData.voice_url) {
+			audioRef.current.src = sentenceData.voice_url; // 오디오 URL 설정
+			audioRef.current.play(); // 재생
 		}
 	};
 
@@ -27,23 +50,34 @@ const PStudy = () => {
 						<a href='/pronunciation'>Quit</a>
 					</ProgressSection>
 					<ContentSection>
-						<QuestionContainer>
-							<PlayButton aria-label='Play Question' onClick={handlePlayAudio}>
-								재생
-							</PlayButton>
-							<h3>If you need any assistance with the task, feel free to let me know.</h3>
-						</QuestionContainer>
-						<AnswerContainer>
-							<SoundWave />
-						</AnswerContainer>
-						{/* Audio 엘리먼트 추가 */}
-						<audio ref={audioRef} src='/SampleAudio.wav' />
+						{sentenceData ? (
+							<>
+								<QuestionContainer>
+									<PlayButton aria-label='Play Question' onClick={handlePlayAudio}>
+										재생
+									</PlayButton>
+									<h3>{sentenceData.content}</h3>
+								</QuestionContainer>
+								<AnswerContainer>
+									<SoundWave />
+								</AnswerContainer>
+								<audio ref={audioRef} src='/SampleAudio.wav' />
+							</>
+						) : (
+							<ScaleLoader
+								color={'#0a0a0a'}
+								loading={isLoading}
+								speedMultiplier={1.5}
+								aria-label='Loading Spinner'
+								data-testid='loader'
+							/>
+						)}
 					</ContentSection>
-					<FeedbackSection evaluation={evaluation}>
-						<ProgressCircle evaluation={evaluation}>{totalScore}%</ProgressCircle>
-						<FeedbackText evaluation={evaluation}>
-							<p>{Evaluation.evaluation}</p>
-							<span>Select the underlined word(s) for additional feedback.</span>
+					<FeedbackSection $evaluation={evaluation}>
+						<ProgressCircle $evaluation={evaluation}>{totalScore}%</ProgressCircle>
+						<FeedbackText $evaluation={evaluation}>
+							<p>{Evaluation[evaluation].shortComment}</p>
+							<span>{Evaluation[evaluation].longComment}</span>
 						</FeedbackText>
 						{evaluation === 'success' && (
 							<Button varient='green' rounded='xl' aria-label='Continue to Next'>
@@ -115,7 +149,11 @@ const ContentSection = styled.div`
 const QuestionContainer = styled.div`
 	align-items: center;
 	display: flex;
-	gap: 1rem;
+	gap: 2rem;
+	padding: 0 3rem;
+	h3 {
+		max-width: 50rem;
+	}
 `;
 
 const AnswerContainer = styled.div`
@@ -127,7 +165,7 @@ const AnswerContainer = styled.div`
 const FeedbackSection = styled.div`
 	align-items: center;
 	background-color: ${(props) => {
-		switch (props.evaluation) {
+		switch (props.$evaluation) {
 			case 'success':
 				return 'var(--success-border)';
 			case 'warning':
