@@ -103,6 +103,7 @@ const StyledInput = styled.input`
 	margin: 0;
 	padding: 0.5rem 1rem;
 	width: 100%;
+	color: var(--neutral-100);
 
 	&:disabled {
 		background: var(--neutral-50, #babec1);

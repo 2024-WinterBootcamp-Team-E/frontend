@@ -147,7 +147,7 @@ const Header = () => {
 				<Button onClick={() => navigate('/pronunciation')}>
 					<h3>Sentences</h3>
 				</Button>
-				<Button>
+				<Button onClick={() => navigate('/dashboard')}>
 					<h3>My Activity</h3>
 				</Button>
 			</Center>
