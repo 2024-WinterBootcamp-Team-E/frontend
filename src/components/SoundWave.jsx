@@ -89,6 +89,7 @@ const SoundWave = () => {
 					formData.append('audio_file', audioBlob); // Blob과 파일 이름 설정
 					const response = await post(`/feedback/${userId}/${sentenceId}`, formData, true);
 					console.log('서버 응답:', response);
+					// 현재는 api 오류로 동작하지 않지만, 오류 해결 후 response에 score 추가되면 zustand로 reponse를 저장해서 PStudy 페이지에서 점수를 받아 evaluation 값을 set 할 수 있도록 수정할 것.
 				} catch (error) {
 					console.error('Error posting feedback:', error);
 				}
