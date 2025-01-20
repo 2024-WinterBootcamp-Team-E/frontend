@@ -1,17 +1,66 @@
-import React from 'react';
 import styled from 'styled-components';
 import Layout from '@/components/Layout';
 import { pretendard_bold } from '@/GlobalStyle';
+import React, { useState, useEffect } from 'react';
+import useAuthStore from '@/store/authStore'; // Zustand 스토어 임포트  
+import { get } from '@/api';
+import { useNavigate } from 'react-router-dom';
 
 const DashboardPage = () => {
+  const { isLoggedIn, profile, setAuth } = useAuthStore(); // 인증 상태와 사용자 프로필
+  const [userData, setUserData] = useState({ nickname: '', email: '', user_image: '' });
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const storedUserId = sessionStorage.getItem('userId');
+        if (!storedUserId) {
+          navigate('/signin');
+          return; // 로그인되지 않은 상태
+        }
+
+        const result = await get(`/user/${storedUserId}`); // 사용자 프로필 요청
+        if (result.code === 200 && result.data) {
+          const { nickname, email, user_image } = result.data;
+
+          // Zustand 스토어 업데이트
+          setAuth(true, {
+            name: nickname,
+            email,
+            image: user_image,
+          });
+
+          // 컴포넌트 내부 상태 업데이트
+          setUserData({
+            nickname,
+            email,
+            user_image,
+          });
+        } else {
+          console.error('사용자 정보를 가져오는 데 실패했습니다:', result.message);
+        }
+      } catch (error) {
+        console.error('사용자 정보를 가져오는 중 오류 발생:', error);
+      }
+    };
+
+    if (!isLoggedIn) {
+      navigate('/signin'); // 로그인이 되어 있지 않으면 로그인 페이지로 리다이렉트
+    } else {
+      fetchUserData();
+    }
+  }, [isLoggedIn, navigate, setAuth]);
+	
+
   return (
     <Layout>
       <PageContainer>
         <CardGrid> {/* CardGrid로 수정 */}
           <Card>
-            <ProfileImage src="/UserImage.png" alt="Profile" />
-            Nickname
-            <p>Nick@gmail.com</p>
+            <ProfileImage src={userData.user_image || '/default-profile.png'} alt="Profile" />
+            <Nickname>{userData.nickname || 'Guest'}</Nickname>
+            <p>{userData.email || 'guest@example.com'}</p>
           </Card>
           <FeedbackCard>
             <CardTitle>My Feedbacks</CardTitle>
@@ -101,6 +150,12 @@ const ProfileImage = styled.img`
   border-radius: 50%; /* 동그라미 모양 */
   object-fit: cover; /* 이미지를 박스에 맞게 조정 */
   margin-bottom: 1rem; /* 닉네임과의 간격 */
+`;
+
+const Nickname = styled.h3`
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
 `;
 
 const Overlay = styled.div`
