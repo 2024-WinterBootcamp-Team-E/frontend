@@ -2,7 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import Layout from '@/components/Layout';
 import { pretendard_bold } from '@/GlobalStyle';
-import Button from '@/components/Button';
 import { useNavigate } from 'react-router-dom';
 
 const PronunciationPage = () => {
@@ -11,21 +10,26 @@ const PronunciationPage = () => {
 		{ name: 'Travel', image: '/PronunImages/travel3.jpg' },
 		{ name: 'Movie', image: '/PronunImages/movie2.jpg' },
 		{ name: 'Business', image: '/PronunImages/business2.jpg' },
-		{ name: 'Practical', image: '/PronunImages/practical2.jpg' },
+		{ name: 'Daily', image: '/PronunImages/practical2.jpg' },
 	];
+
+	const handleCategoryClick = (categoryRoute) => {
+        navigate(`/pronunciation/pstudy?category=${categoryRoute}`);
+      };
 
 	return (
 		<Layout>
 			<PageContainer>
 				<CardGrid>
 					{categories.map((category) => (
-						<Card key={category.name}>
-							<Button padding='none' rounded='xl' onClick={() => navigate('/pronunciation/pstudy')}>
-								<StyledImage src={category.image} alt={category.name} />
-								<Overlay>
-									<CategoryName>{category.name}</CategoryName>
-								</Overlay>
-							</Button>
+						<Card 
+							key={category.name}
+							onClick={() => handleCategoryClick(category.name)}
+							>
+							<img src={category.image} alt={category.name} />
+							<Overlay>
+								<CategoryName>{category.name}</CategoryName>
+							</Overlay>
 						</Card>
 					))}
 				</CardGrid>
@@ -41,8 +45,8 @@ const PageContainer = styled.div`
 	flex-direction: column;
 	align-items: center;
 	width: 100%;
-	height: 100%;
-	padding: 0 1rem;
+	height: calc(100vh - 5rem);
+	padding: 1rem;
 	margin: 0;
 	${pretendard_bold}
 `;
@@ -54,25 +58,21 @@ const CardGrid = styled.div`
 	width: 100%; /* 화면 너비 꽉 채우기 */
 	height: 100%; /* 화면 높이 꽉 채우기 */
 	gap: 1rem; /* 카드 간 간격 제거 */
-	border-radius: 2rem; /* 모서리 둥글게 */
 `;
 
 const Card = styled.div`
-	height: fit-content;
-	width: fit-content;
-	max-height: 20rem;
 	position: relative;
 	overflow: hidden;
-	border-radius: 2rem; /* 모서리 둥글게 */
-	background-color: #f8f9fa; /* 배경색 추가 (로딩 중 대비) */
-`;
-
-const StyledImage = styled.img`
+	border-radius: 1rem; /* 모서리 둥글게 */
 	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 카드 그림자 추가 */
-	width: 100%;
-	height: 100%;
-	object-fit: cover; /* 이미지를 박스에 맞게 조정 */
-	border-radius: 2rem; /* 이미지도 모서리 둥글게 */
+	background-color: #f8f9fa; /* 배경색 추가 (로딩 중 대비) */
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover; /* 이미지를 박스에 맞게 조정 */
+		border-radius: 1rem; /* 이미지도 모서리 둥글게 */
+	}
 `;
 
 const Overlay = styled.div`
@@ -84,22 +84,13 @@ const Overlay = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	&:hover {
-		transform: scale(1.05);
-	}
-
-	&:active {
-		transform: scale(0.95);
-	}
-	transition: transform 0.2s ease-in-out;
-
-	border-radius: 2rem; /* 오버레이도 둥글게 */
-`;
-
-const CategoryName = styled.p`
 	color: white; /* 텍스트 색상 */
 	font-size: 3rem; /* 텍스트 크기 */
 	font-weight: bold; /* global style로 폰트 통일하면 좋을듯 */
 	text-align: center;
+	border-radius: 1rem; /* 오버레이도 둥글게 */
+`;
+
+const CategoryName = styled.div`
 	z-index: 10;
 `;
