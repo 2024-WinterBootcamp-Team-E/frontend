@@ -132,6 +132,30 @@ const Header = () => {
 		fetchProfile();
 	}, [setAuth]);
 
+	const handleConversationClick = () => {
+		if (!isLoggedIn) {
+			navigate('/signin');
+		} else {
+			navigate('/intonation');
+		}
+	};
+
+	const handleSentenceClick = () => {
+		if (!isLoggedIn) {
+			navigate('/signin');
+		} else {
+			navigate('/pronunciation');
+		}
+	}
+
+	const handelDashboardClick = () => {
+		if (!isLoggedIn) {
+			navigate('/signin');
+		} else {
+			navigate('/dashboard');
+		}
+	}
+
 	return (
 		<HeaderContainer>
 			<LeftSide>
@@ -141,13 +165,13 @@ const Header = () => {
 			</LeftSide>
 
 			<Center>
-				<Button onClick={() => navigate('/intonation')}>
+				<Button onClick={handleConversationClick}>
 					<h3>Conversation</h3>
 				</Button>
-				<Button onClick={() => navigate('/pronunciation')}>
+				<Button onClick={handleSentenceClick}>
 					<h3>Sentences</h3>
 				</Button>
-				<Button onClick={() => navigate('/dashboard')}>
+				<Button onClick={handelDashboardClick}>
 					<h3>My Activity</h3>
 				</Button>
 			</Center>

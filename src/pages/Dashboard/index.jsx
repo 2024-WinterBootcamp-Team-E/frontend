@@ -44,12 +44,6 @@ const DashboardPage = () => {
         console.error('사용자 정보를 가져오는 중 오류 발생:', error);
       }
     };
-
-    if (!isLoggedIn) {
-      navigate('/signin'); // 로그인이 되어 있지 않으면 로그인 페이지로 리다이렉트
-    } else {
-      fetchUserData();
-    }
   }, [isLoggedIn, navigate, setAuth]);
 	
 
