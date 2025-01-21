@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import PlayButton from '@/components/PlayButton';
 import RecordButton from '@/components/RecordButton';
 import { useRecordStore } from '@/store'; // zustand 스토어 import
-import { postWithEventSource } from '@/api';
+import { postWithReadableStream } from '@/api';
 
 const SoundWave = () => {
 	const [isPlaying, setIsPlaying] = useState(false); // 재생 상태를 관리
@@ -107,31 +107,15 @@ const SoundWave = () => {
 
 		// FormData 객체 생성
 		const formData = new FormData();
-		formData.append('audio_file', recordedAudio); // Blob과 파일 이름 추가
+		formData.append('audio_file', recordedAudio);
 
 		try {
-			// `postWithEventSource` 함수 호출
-			const eventSource = await postWithEventSource(`/feedback/${userId}/${sentenceId}`, formData, true);
-
-			// SSE 메시지 처리
-			eventSource.onmessage = (event) => {
-				const data = JSON.parse(event.data);
-				console.log('SSE 메시지 수신:', data);
-
-				// 필요한 데이터 처리 (예: 상태 업데이트)
-				if (data.status === 'completed') {
-					console.log('처리가 완료되었습니다:', data);
-					eventSource.close(); // SSE 연결 종료
-				}
-			};
-
-			// SSE 에러 처리
-			eventSource.onerror = (error) => {
-				console.error('SSE 연결 오류:', error);
-				eventSource.close();
-			};
+			// 스트림을 처리하기 위해 postWithReadableStream 함수 호출
+			const result = await postWithReadableStream(`/feedback/${userId}/${sentenceId}`, formData, true);
+			console.log('스트림 처리 결과:', result);
+			// 추가로 스트림 결과에 따른 로직이 필요하다면 여기서 처리
 		} catch (error) {
-			console.error('오디오 업로드 또는 SSE 처리 오류:', error);
+			console.error('오디오 업로드 또는 스트림 처리 오류:', error);
 		}
 	};
 

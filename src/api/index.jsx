@@ -76,7 +76,6 @@ export const post = async (endpoint, data, isFormData = false) => {
 	}
 };
 
-
 /**
  * 공통 PUT 요청 함수
  * @param {string} endpoint - API 엔드포인트
@@ -162,7 +161,7 @@ export const remove = async (endpoint) => {
 	}
 };
 
-export const postWithEventSource = async (endpoint, data, isFormData = false) => {
+export const postWithReadableStream = async (endpoint, data, isFormData = false) => {
 	try {
 		// 1. FormData를 POST 요청으로 서버에 전송
 		const headers = isFormData ? {} : { 'Content-Type': 'application/json' };
@@ -174,29 +173,35 @@ export const postWithEventSource = async (endpoint, data, isFormData = false) =>
 			credentials: 'include', // 필요 시 쿠키 전송
 			body,
 		});
+
 		console.log('발음분석 리스폰스 : ', response); // 결과가 궁금함
 
 		if (!response.ok) {
 			throw new Error(`POST 요청 실패: ${response.status}`);
 		}
 
-		// 2. SSE를 위한 EventSource 생성
-		const sseEndpoint = `${BASE_URL}${endpoint}`; // SSE 연결을 위한 별도의 엔드포인트
-		const eventSource = new EventSource(sseEndpoint);
+		// 2. 서버로부터 스트림 데이터를 읽기 시작
+		const reader = response.body.getReader();
+		const decoder = new TextDecoder('utf-8');
 
-		// SSE 이벤트 처리
-		eventSource.onmessage = (event) => {
-			console.log('SSE 메시지 수신:', event.data);
-		};
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) {
+				console.log('스트림 읽기 완료');
+				break;
+			}
 
-		eventSource.onerror = (error) => {
-			console.error('SSE 연결 오류:', error);
-			eventSource.close();
-		};
+			// 스트림 데이터 처리 (디코딩하여 사용)
+			const chunk = decoder.decode(value, { stream: true });
+			console.log('수신된 데이터:', chunk);
 
-		return eventSource; // EventSource 객체 반환
+			// 필요 시 추가적인 처리 로직
+			// e.g., 데이터를 누적하거나 UI 업데이트
+		}
+
+		return '스트림 읽기 완료';
 	} catch (error) {
-		console.error('POST 요청 또는 SSE 처리 오류:', error);
+		console.error('POST 요청 또는 스트림 처리 오류:', error);
 		throw error;
 	}
 };
