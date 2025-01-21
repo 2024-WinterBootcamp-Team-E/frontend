@@ -1,15 +1,15 @@
 import React, { useRef, useState, useEffect } from 'react';
 import WaveSurfer from 'wavesurfer.js';
-import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js';
 import styled from 'styled-components';
 import PlayButton from '@/components/PlayButton';
 import RecordButton from '@/components/RecordButton';
 import { useRecordStore } from '@/store'; // zustand 스토어 import
-import { post } from '@/api';
+import { postWithReadableStream } from '@/api';
 
 const SoundWave = () => {
 	const [isPlaying, setIsPlaying] = useState(false); // 재생 상태를 관리
 	const [isRecording, setIsRecording] = useState(false); // 녹음 상태를 관리
+	const [serverResponse, setServerResponse] = useState(null); // SSE로 받은 서버 응답
 	const mediaRecorderRef = useRef(null); // MediaRecorder 인스턴스
 	const audioChunksRef = useRef([]);
 	const containerRef = useRef(null); // WaveSurfer가 렌더링될 DOM 참조
@@ -71,31 +71,22 @@ const SoundWave = () => {
 			// 녹음 데이터 초기화
 			audioChunksRef.current = [];
 
-			// 녹음 데이터 수집
 			mediaRecorder.ondataavailable = (event) => {
 				if (event.data.size > 0) {
 					audioChunksRef.current.push(event.data);
 				}
 			};
 
-			mediaRecorder.onstop = async () => {
-				// 녹음 데이터로 Blob 생성
+			mediaRecorder.onstop = () => {
 				const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-
-				// zustand 스토어에 저장
 				setRecordedAudio(audioBlob);
-				try {
-					const formData = new FormData();
-					formData.append('audio_file', audioBlob); // Blob과 파일 이름 설정
-					const response = await post(`/feedback/${userId}/${sentenceId}`, formData, true);
-					console.log('서버 응답:', response);
-					// 현재는 api 오류로 동작하지 않지만, 오류 해결 후 response에 score 추가되면 zustand로 reponse를 저장해서 PStudy 페이지에서 점수를 받아 evaluation 값을 set 할 수 있도록 수정할 것.
-				} catch (error) {
-					console.error('Error posting feedback:', error);
-				}
+				setTimeout(() => {
+					console.log('1초 지연.');
+
+					handlePostFeedback(); // 녹음이 끝나면 서버에 전송
+				}, 1000);
 			};
 
-			// 녹음 시작
 			mediaRecorder.start();
 			setIsRecording(true);
 		} catch (error) {
@@ -116,14 +107,15 @@ const SoundWave = () => {
 
 		// FormData 객체 생성
 		const formData = new FormData();
-		formData.append('audio_file', recordedAudio, 'recordedAudio.wav'); // Blob과 파일 이름 추가
+		formData.append('audio_file', recordedAudio);
 
 		try {
-			// POST 요청 보내기
-			const response = await post(`/feedback/${userId}/${sentenceId}`, formData, true);
-			console.log('서버 응답:', response);
+			// 스트림을 처리하기 위해 postWithReadableStream 함수 호출
+			const result = await postWithReadableStream(`/feedback/${userId}/${sentenceId}`, formData, true);
+			console.log('스트림 처리 결과:', result);
+			// 추가로 스트림 결과에 따른 로직이 필요하다면 여기서 처리
 		} catch (error) {
-			console.error('Error posting feedback:', error);
+			console.error('오디오 업로드 또는 스트림 처리 오류:', error);
 		}
 	};
 
