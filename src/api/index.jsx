@@ -161,3 +161,42 @@ export const remove = async (endpoint) => {
 		throw error;
 	}
 };
+
+export const postWithEventSource = async (endpoint, data, isFormData = false) => {
+	try {
+		// 1. FormData를 POST 요청으로 서버에 전송
+		const headers = isFormData ? {} : { 'Content-Type': 'application/json' };
+		const body = isFormData ? data : JSON.stringify(data);
+
+		const response = await fetch(`${BASE_URL}${endpoint}`, {
+			method: 'POST',
+			headers,
+			credentials: 'include', // 필요 시 쿠키 전송
+			body,
+		});
+		console.log('발음분석 리스폰스 : ', response); // 결과가 궁금함
+
+		if (!response.ok) {
+			throw new Error(`POST 요청 실패: ${response.status}`);
+		}
+
+		// 2. SSE를 위한 EventSource 생성
+		const sseEndpoint = `${BASE_URL}${endpoint}`; // SSE 연결을 위한 별도의 엔드포인트
+		const eventSource = new EventSource(sseEndpoint);
+
+		// SSE 이벤트 처리
+		eventSource.onmessage = (event) => {
+			console.log('SSE 메시지 수신:', event.data);
+		};
+
+		eventSource.onerror = (error) => {
+			console.error('SSE 연결 오류:', error);
+			eventSource.close();
+		};
+
+		return eventSource; // EventSource 객체 반환
+	} catch (error) {
+		console.error('POST 요청 또는 SSE 처리 오류:', error);
+		throw error;
+	}
+};
