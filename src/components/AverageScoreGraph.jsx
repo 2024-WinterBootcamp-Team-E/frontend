@@ -21,7 +21,7 @@ const AverageScoreLineGraph = () => {
 	const [averageScores, setAverageScores] = useState([]); // 평균 점수 초기 상태 빈 배열
 	const [weakPoints, setWeakPoints] = useState([]); // 약점 초기 상태 빈 배열
 	// const userId = sessionStorage.getItem('userId');
-	const userId = 1;
+	const userId = 19;
 
 	useEffect(() => {
 		// 평균 점수 Get
@@ -42,13 +42,17 @@ const AverageScoreLineGraph = () => {
 		// 약점 Get
 		const fetchWeakPoints = async () => {
 			try {
-				const response = await get(`/feedback/${userId}/weak_prounciations`);
+				const response = await get(`/feedback/${userId}/weak_pronunciations`);
+				const weakPronunciations = response.data?.top_weak_pronunciations || []; // null이면 빈 배열로 대체
+				setWeakPoints(weakPronunciations);
+				console.log(weakPronunciations);
 			} catch (error) {
 				console.error(' 약점 API 호출 중 오류 발생:', error);
 			}
 		};
 
 		fetchAverageScores(); // 비동기 함수 호출
+		fetchWeakPoints();
 	}, [userId]);
 
 	if (!averageScores.length) {
