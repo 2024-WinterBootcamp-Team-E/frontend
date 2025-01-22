@@ -5,6 +5,7 @@ import {
 	LinearScale,
 	PointElement,
 	LineElement,
+	ArcElement,
 	Title,
 	Tooltip,
 	Filler,
@@ -14,14 +15,16 @@ import { Line } from 'react-chartjs-2';
 import { get } from '@/api';
 import styled from 'styled-components';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Filler, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Filler, Tooltip, Legend);
 
 const AverageScoreLineGraph = () => {
-	const [averageScores, setAverageScores] = useState([]); // 초기 상태 빈 배열
+	const [averageScores, setAverageScores] = useState([]); // 평균 점수 초기 상태 빈 배열
+	const [weakPoints, setWeakPoints] = useState([]); // 약점 초기 상태 빈 배열
 	// const userId = sessionStorage.getItem('userId');
-	const userId = 19;
+	const userId = 1;
 
 	useEffect(() => {
+		// 평균 점수 Get
 		const fetchAverageScores = async () => {
 			try {
 				const response = await get(`/feedback/${userId}/123/score`);
@@ -33,7 +36,15 @@ const AverageScoreLineGraph = () => {
 					console.error('데이터를 가져오는 데 실패했습니다:', response.message || 'Unknown error');
 				}
 			} catch (error) {
-				console.error('API 호출 중 오류 발생:', error);
+				console.error('평균 점수 API 호출 중 오류 발생:', error);
+			}
+		};
+		// 약점 Get
+		const fetchWeakPoints = async () => {
+			try {
+				const response = await get(`/feedback/${userId}/weak_prounciations`);
+			} catch (error) {
+				console.error(' 약점 API 호출 중 오류 발생:', error);
 			}
 		};
 
@@ -54,14 +65,14 @@ const AverageScoreLineGraph = () => {
 		return `${year}/${month}/${day}`;
 	};
 
-	// 날짜와 점수를 각각 추출
-	const labels = averageScores.map((item) => formatDate(item.date));
+	// 평균 점수 라벨 <= 날짜와 점수를 각각 추출
+	const averageLabels = averageScores.map((item) => formatDate(item.date));
 	const accuracyScores = averageScores.map((item) => item.average_accuracy_score);
 	const fluencyScores = averageScores.map((item) => item.average_fluency_score);
 	const completenessScores = averageScores.map((item) => item.average_completeness_score);
 	const pronScores = averageScores.map((item) => item.average_pron_score);
-
-	const options = {
+	// 평균 점수 그래프 옵션
+	const averageOptions = {
 		responsive: true,
 		plugins: {
 			legend: {
@@ -89,9 +100,9 @@ const AverageScoreLineGraph = () => {
 			},
 		},
 	};
-
-	const data = {
-		labels,
+	// 평균 점수 그래프 데이터
+	const averageData = {
+		labels: averageLabels,
 		datasets: [
 			{
 				label: 'Accuracy',
@@ -128,9 +139,11 @@ const AverageScoreLineGraph = () => {
 		],
 	};
 
+	// 약점 라벨 정리리
+
 	return (
 		<GraphWrapper>
-			<Line options={options} data={data} />
+			<Line options={averageOptions} data={averageData} />
 		</GraphWrapper>
 	);
 };
