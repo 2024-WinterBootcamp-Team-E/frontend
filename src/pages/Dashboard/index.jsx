@@ -143,7 +143,6 @@ const CardTitle = styled.h2`
 	/* 왼쪽 정렬 */
 	width: 100%;
 	font-weight: bold;
-	margin: 0 0 1rem 0;
 	text-align: left;
 `;
 

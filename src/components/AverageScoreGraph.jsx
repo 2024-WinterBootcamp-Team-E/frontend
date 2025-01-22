@@ -11,7 +11,7 @@ import {
 	Filler,
 	Legend,
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { Line, Pie } from 'react-chartjs-2';
 import { get } from '@/api';
 import styled from 'styled-components';
 
@@ -45,7 +45,6 @@ const AverageScoreLineGraph = () => {
 				const response = await get(`/feedback/${userId}/weak_pronunciations`);
 				const weakPronunciations = response.data?.top_weak_pronunciations || []; // null이면 빈 배열로 대체
 				setWeakPoints(weakPronunciations);
-				console.log(weakPronunciations);
 			} catch (error) {
 				console.error(' 약점 API 호출 중 오류 발생:', error);
 			}
@@ -115,6 +114,7 @@ const AverageScoreLineGraph = () => {
 				backgroundColor: 'rgba(255, 99, 132, 0.3)',
 				tension: 0.4,
 				fill: true,
+				tension: 0.1,
 			},
 			{
 				label: 'Fluency',
@@ -123,6 +123,7 @@ const AverageScoreLineGraph = () => {
 				backgroundColor: 'rgba(54, 162, 235, 0.3)',
 				tension: 0.4,
 				fill: true,
+				tension: 0.1,
 			},
 			{
 				label: 'Completeness',
@@ -131,6 +132,7 @@ const AverageScoreLineGraph = () => {
 				backgroundColor: 'rgba(255, 206, 86, 0.3)',
 				tension: 0.4,
 				fill: true,
+				tension: 0.1,
 			},
 			{
 				label: 'Pronunciation',
@@ -139,15 +141,48 @@ const AverageScoreLineGraph = () => {
 				backgroundColor: 'rgba(75, 192, 192, 0.3)',
 				tension: 0.4,
 				fill: true,
+				tension: 0.1,
 			},
 		],
 	};
 
-	// 약점 라벨 정리리
+	const weakOptions = {
+		layout: {
+			padding: 20,
+		},
+	};
+
+	// 약점 데이터
+	const weakData = {
+		labels: weakPoints.map((item) => item.syllable),
+		datasets: [
+			{
+				label: 'count ',
+				data: weakPoints.map((item) => item.count),
+				backgroundColor: [
+					'rgba(255, 99, 132, 0.2)',
+					'rgba(54, 162, 235, 0.2)',
+					'rgba(255, 206, 86, 0.2)',
+					'rgba(75, 192, 192, 0.2)',
+					'rgba(153, 102, 255, 0.2)',
+				],
+				borderColor: [
+					'rgba(255, 99, 132, 1)',
+					'rgba(54, 162, 235, 1)',
+					'rgba(255, 206, 86, 1)',
+					'rgba(75, 192, 192, 1)',
+					'rgba(153, 102, 255, 1)',
+				],
+				borderWidth: 1,
+				hoverOffset: 4,
+			},
+		],
+	};
 
 	return (
 		<GraphWrapper>
 			<Line options={averageOptions} data={averageData} />
+			<Pie options={weakOptions} data={weakData} />
 		</GraphWrapper>
 	);
 };
@@ -155,6 +190,9 @@ const AverageScoreLineGraph = () => {
 export default AverageScoreLineGraph;
 
 const GraphWrapper = styled.div`
+	display: flex;
+	flex-direction: row;
+	gap: 1rem;
 	width: 100%;
 	height: 100%;
 	padding-bottom: 1rem;
