@@ -1,89 +1,95 @@
+// DashboardPage.jsx
 import styled from 'styled-components';
 import Layout from '@/components/Layout';
 import { pretendard_bold } from '@/GlobalStyle';
-import React, { useState, useEffect } from 'react';
-import useAuthStore from '@/store/authStore'; // Zustand 스토어 임포트
+import React, { useState, useEffect, useMemo } from 'react';
+import useAuthStore from '@/store/authStore';
 import { get } from '@/api';
 import { useNavigate } from 'react-router-dom';
+import Attendance from '@/components/Attendance';
 import DashboardGraphs from '@/components/DashboardGraphs';
 
 const DashboardPage = () => {
-	const { isLoggedIn, profile, setAuth } = useAuthStore(); // 인증 상태와 사용자 프로필
-	const [userData, setUserData] = useState({ nickname: '', email: '', user_image: '' });
-	const navigate = useNavigate();
+  const { isLoggedIn, profile, setAuth } = useAuthStore();
+  const [userData, setUserData] = useState({ nickname: '', email: '', user_image: '' });
+  const navigate = useNavigate();
+  const [contributions, setContributions] = useState({});
+  const storedUserId = sessionStorage.getItem('userId');
 
-	useEffect(() => {
-		const fetchUserData = async () => {
-			try {
-				const storedUserId = sessionStorage.getItem('userId');
-				if (!storedUserId) {
-					navigate('/signin');
-					return; // 로그인되지 않은 상태
-				}
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (!storedUserId) {
+          navigate('/signin');
+          return; // 로그인되지 않은 상태
+        }
+        // 사용자 프로필 요청
+        const profileResult = await get(`/user/${storedUserId}`);
+        if (profileResult.data) {
+          const { nickname, email, user_image } = profileResult.data;
+          setUserData({ nickname, email, user_image });
+        } else {
+          console.error('사용자 정보를 가져오는 데 실패했습니다:', profileResult.message);
+        }
+        
+        const contributionsResult = await get(`/user/attendance/${storedUserId}`);
+        const attendanceStatus = contributionsResult?.attendance_status || [];
+        const today = new Date();
 
-				const result = await get(`/user/${storedUserId}`); // 사용자 프로필 요청
-				if (result.code === 200 && result.data) {
-					const { nickname, email, user_image } = result.data;
+        const contributionData = attendanceStatus.reduce((acc, status, index) => {
+          const date = new Date(today);
+          date.setDate(today.getDate() - index);
+          const dateString = date.toISOString().split('T')[0];
+          acc[dateString] = status;
+          return acc;
+        }, {});
+        setContributions(contributionData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
+  }, [isLoggedIn, navigate]);
 
-					// Zustand 스토어 업데이트
-					setAuth(true, {
-						name: nickname,
-						email,
-						image: user_image,
-					});
+  return (
+    <Layout>
+      <PageContainer>
+        <CardGrid>
+          <Card>
+            <ProfileImage src={userData.user_image || '/UserImage.png'} alt='Profile' />
+            <div>
+              <Nickname>{userData.nickname || 'Guest'}</Nickname>
+              <p>{userData.email || 'guest@example.com'}</p>
+            </div>
+          </Card>
+          <HistoryCard>
+            <CardTitle>My History</CardTitle>
 
-					// 컴포넌트 내부 상태 업데이트
-					setUserData({
-						nickname,
-						email,
-						user_image,
-					});
-				} else {
-					console.error('사용자 정보를 가져오는 데 실패했습니다:', result.message);
-				}
-			} catch (error) {
-				console.error('사용자 정보를 가져오는 중 오류 발생:', error);
-			}
-		};
-	}, [isLoggedIn, navigate, setAuth]);
-
-	return (
-		<Layout>
-			<PageContainer>
-				<CardGrid>
-					{' '}
-					{/* CardGrid로 수정 */}
-					<Card>
-						<ProfileImage src={userData.user_image || '/default-profile.png'} alt='Profile' />
-						<Nickname>{userData.nickname || 'Guest'}</Nickname>
-						<p>{userData.email || 'guest@example.com'}</p>
-					</Card>
-					<FeedbackCard>
-						<CardTitle>My Feedbacks</CardTitle>
-						<ContentBox bgColor='#f28b82' /> {/* 색깔 박스 */}
-					</FeedbackCard>
-					<HistoryCard>
-						<CardTitle>My History</CardTitle>
-						<DashboardGraphs />
-					</HistoryCard>
-				</CardGrid>
-			</PageContainer>
-		</Layout>
-	);
+            {/** Attendance 컴포넌트로 출석 달력 표시 */}
+            <Attendance contributions={contributions} />
+          </HistoryCard>
+          <FeedbackCard>
+            <CardTitle>My Feedbacks</CardTitle>
+            <ContentBox bgColor='#d3d3d3' />
+          </FeedbackCard>
+        </CardGrid>
+      </PageContainer>
+    </Layout>
+  );
 };
 
 export default DashboardPage;
 
+// 이하 스타일 정의
 const PageContainer = styled.div`
-	/* 상단 여백 계산 */
-	padding: 1rem;
-	${pretendard_bold}/* 글로벌 스타일 존재 확인 */;
-	align-items: center;
-	display: flex;
-	flex-direction: column;
-	height: calc(100vh - 5rem);
-	margin: 0;
-	width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: calc(100vh - 5rem); 
+  padding: 1rem;
+  margin: 0;
+  ${pretendard_bold}
 `;
 
 const CardGrid = styled.div`
@@ -105,90 +111,59 @@ const CardGrid = styled.div`
 `;
 
 const Card = styled.div`
-	/* 모서리 둥글게 */
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-	/* 배경색 */
-	padding: 1rem;
-	/* 카드 그림자 */
-	background-color: #f8f9fa;
-	/* 특정 카드의 영역을 지정 */
-	&:nth-child(1) {
-		grid-area: card1;
-	}
-	align-items: center;
-	border-radius: 1rem;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	overflow: hidden;
-	position: relative;
-`;
-
-const FeedbackCard = styled(Card)`
-	display: flex;
-	flex-direction: column;
-	grid-area: card2;
-	align-items: flex-start; /* 텍스트 왼쪽 정렬 */
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: var(--neutral-10);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  &:nth-child(1) {
+    grid-area: card1;
+  }
 `;
 
 const HistoryCard = styled(Card)`
-	grid-area: card3;
-	align-items: flex-start;
-	padding: 1rem;
+  grid-area: card2;
+  justify-content: start;
+  align-items: flex-start;
+`;
+
+const FeedbackCard = styled(Card)`
+  grid-area: card3;
+  align-items: flex-start;
 `;
 
 const CardTitle = styled.h2`
-	/* 아래 여백 추가 */
-	font-size: 1.5rem;
-	/* 왼쪽 정렬 */
-	width: 100%;
-	font-weight: bold;
-	text-align: left;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: left;
+  width: 100%;
+  text-align: start;
 `;
 
 const ContentBox = styled.div`
-	background-color: ${(props) => props.bgColor || '#ffffff'};
-	border-radius: 0.5rem;
-	height: calc(100% - 4rem);
-	width: 100%;
+  width: 100%;
+  height: calc(100% - 4rem);
+  background-color: ${(props) => props.bgColor || '#ffffff'};
+  border-radius: 0.5rem;
 `;
 
 const ProfileImage = styled.img`
-	/* 닉네임과의 간격 */
-	/* 동그라미 모양 */
-	object-fit: cover;
-	/* 이미지를 박스에 맞게 조정 */
-	margin-bottom: 1rem;
-	/* 프로필 사진의 크기 */
-	height: 200px;
-	border-radius: 50%;
-	width: 200px;
+  width: 13rem;
+  height: 13rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: var(--neutral-20);
+  box-shadow: 0rem 0rem 1rem var(--neutral-20);
 `;
 
 const Nickname = styled.h3`
-	font-size: 1.5rem;
-	font-weight: bold;
-	margin: 0.5rem 0;
-`;
-
-const Overlay = styled.div`
-	/* 오버레이 둥글게 */
-	/* 텍스트 크기 */
-	font-weight: bold;
-	align-items: center;
-	border-radius: 1rem;
-	color: white;
-	display: flex;
-	font-size: 3rem;
-	height: 100%;
-	justify-content: center;
-	left: 0;
-	position: absolute;
-	text-align: center;
-	top: 0;
-	width: 100%;
-`;
-
-const CategoryName = styled.div`
-	z-index: 1;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
 `;
