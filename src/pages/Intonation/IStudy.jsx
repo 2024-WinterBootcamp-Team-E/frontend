@@ -172,6 +172,7 @@ const MainContainer = styled.div`
 	grid-gap: 1rem;
 	background-color: var(--neutral-10);
 	transition: grid-template-columns 0.3s ease;
+	height: 100%;
 `;
 
 const Sidebar = styled.aside`

@@ -14,6 +14,7 @@ import {
 import { Line, Pie } from 'react-chartjs-2';
 import { get } from '@/api';
 import styled from 'styled-components';
+import { weakPointsSample } from '@/mock/weakPoints';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Filler, Tooltip, Legend);
 
@@ -21,7 +22,7 @@ const DashboardGraphs = () => {
 	const [averageScores, setAverageScores] = useState([]); // 평균 점수 초기 상태 빈 배열
 	const [weakPoints, setWeakPoints] = useState([]); // 약점 초기 상태 빈 배열
 	// const userId = sessionStorage.getItem('userId');
-	const userId = 19;
+	const userId = 1;
 
 	useEffect(() => {
 		// 평균 점수 Get
@@ -52,6 +53,8 @@ const DashboardGraphs = () => {
 
 		fetchAverageScores(); // 비동기 함수 호출
 		fetchWeakPoints();
+
+		console.log(weakPoints);
 	}, [userId]);
 
 	if (!averageScores.length) {
@@ -80,6 +83,7 @@ const DashboardGraphs = () => {
 		plugins: {
 			legend: {
 				position: 'top',
+				fullSize: true,
 			},
 			title: {
 				display: false,
@@ -101,6 +105,9 @@ const DashboardGraphs = () => {
 				min: 0,
 				max: 100,
 			},
+		},
+		layout: {
+			width: 10,
 		},
 	};
 	// 평균 점수 그래프 데이터
@@ -154,11 +161,11 @@ const DashboardGraphs = () => {
 
 	// 약점 데이터
 	const weakData = {
-		labels: weakPoints.map((item) => item.syllable),
+		labels: weakPointsSample.map((item) => item.syllable),
 		datasets: [
 			{
 				label: 'count ',
-				data: weakPoints.map((item) => item.count),
+				data: weakPointsSample.map((item) => item.count),
 				backgroundColor: [
 					'rgba(255, 99, 132, 0.2)',
 					'rgba(54, 162, 235, 0.2)',
@@ -194,6 +201,5 @@ const GraphWrapper = styled.div`
 	flex-direction: row;
 	gap: 1rem;
 	width: 100%;
-	height: 100%;
-	padding-bottom: 1rem;
+	height: 14.5rem;
 `;

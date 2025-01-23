@@ -45,7 +45,7 @@ const PageContainer = styled.div`
 	flex-direction: column;
 	align-items: center;
 	width: 100%;
-	height: calc(100vh - 5rem);
+	height: 100%;
 	padding: 1rem;
 	margin: 0;
 	${pretendard_bold}
@@ -57,6 +57,7 @@ const CardGrid = styled.div`
 	grid-template-rows: repeat(2, 1fr); /* 2행 레이아웃 */
 	width: 100%; /* 화면 너비 꽉 채우기 */
 	height: 100%; /* 화면 높이 꽉 채우기 */
+	max-height: 40rem;
 	gap: 1rem; /* 카드 간 간격 제거 */
 `;
 
