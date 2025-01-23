@@ -218,6 +218,8 @@ const StyledButton = styled.button`
 
 	cursor: pointer;
 	margin: 0;
+	text-wrap: nowrap;
+	text-align: center;
 
 	&:disabled {
 		background: var(--neutral-50, #babec1);
