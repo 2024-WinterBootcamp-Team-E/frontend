@@ -2,10 +2,10 @@ import styled from 'styled-components';
 import Layout from '@/components/Layout';
 import { pretendard_bold } from '@/GlobalStyle';
 import React, { useState, useEffect } from 'react';
-import useAuthStore from '@/store/authStore'; // Zustand 스토어 임포트  
+import useAuthStore from '@/store/authStore'; // Zustand 스토어 임포트
 import { get } from '@/api';
 import { useNavigate } from 'react-router-dom';
-import AverageScoreGraph from '@/components/AverageScoreGraph';
+import DashboardGraphs from '@/components/DashboardGraphs';
 
 const DashboardPage = () => {
 	const { isLoggedIn, profile, setAuth } = useAuthStore(); // 인증 상태와 사용자 프로필
@@ -64,7 +64,7 @@ const DashboardPage = () => {
 					</FeedbackCard>
 					<HistoryCard>
 						<CardTitle>My History</CardTitle>
-						<AverageScoreGraph />
+						<DashboardGraphs />
 					</HistoryCard>
 				</CardGrid>
 			</PageContainer>
@@ -166,9 +166,9 @@ const ProfileImage = styled.img`
 `;
 
 const Nickname = styled.h3`
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 0.5rem 0;
+	font-size: 1.5rem;
+	font-weight: bold;
+	margin: 0.5rem 0;
 `;
 
 const Overlay = styled.div`
@@ -190,5 +190,5 @@ const Overlay = styled.div`
 `;
 
 const CategoryName = styled.div`
-  z-index: 1;
+	z-index: 1;
 `;
