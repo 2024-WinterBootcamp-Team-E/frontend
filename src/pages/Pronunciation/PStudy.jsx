@@ -165,7 +165,19 @@ const PStudy = () => {
 
 	// sentenceId를 selectedSentence에서 동적으로 가져옴
 	const dynamicSentenceId = selectedSentence ? selectedSentence.sentence_id : null;
+	useEffect(() => {
+		// 상태 초기화를 Promise.resolve()를 사용하여 마이크로태스크 큐에 넣기
+		Promise.resolve().then(() => {
+			resetRecordedAudio();
+			setEvaluation('info');
+			setPronScore(0);
+		});
 
+		// cleanup 함수에서도 초기화
+		return () => {
+			resetRecordedAudio();
+		};
+	}, [selectedSentence?.sentence_id]);
 	return (
 		<Layout>
 			<MainContainer expanded={isSidebarExpanded}>
