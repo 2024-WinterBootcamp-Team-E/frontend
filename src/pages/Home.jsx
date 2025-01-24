@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useSampleStore } from '@/store';
+import React from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -34,9 +33,9 @@ const Container = styled.div`
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	height: 100vh;
+	height: 100%;
 	padding: 2rem;
-	background-color: var(--secondary-main);
+	background-color: transparent;
 	text-align: center;
 `;
 
@@ -44,6 +43,7 @@ const Title = styled.h1`
 	font-size: 5rem;
 	color: var(--neutral-100);
 	${pretendard_bold}
+	margin-top: 2.5rem;
 	margin-bottom: 1rem;
 	line-height: 1.5;
 `;

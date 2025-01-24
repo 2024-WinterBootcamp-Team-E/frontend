@@ -83,7 +83,7 @@ const SignInContainer = styled.div`
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	height: calc(100vh - 5rem);
+	height: 100%;
 	background-color: var(--secondary-main);
 	${pretendard_bold}
 `;

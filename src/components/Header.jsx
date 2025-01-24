@@ -23,6 +23,7 @@ const LeftSide = styled.div`
 	flex: 1;
 	display: flex;
 	align-items: center;
+	justify-content: start;
 `;
 
 const Center = styled.nav`
@@ -47,8 +48,8 @@ const RightSide = styled.div`
 
 const Logo = styled.h1`
 	color: var(--neutral-100, #0a0a0a);
+	padding-top: 0.5rem;
 	cursor: pointer;
-	padding-top: 1rem;
 `;
 
 const ProfileContainer = styled.div`
@@ -146,7 +147,7 @@ const Header = () => {
 		} else {
 			navigate('/pronunciation');
 		}
-	}
+	};
 
 	const handelDashboardClick = () => {
 		if (!isLoggedIn) {
@@ -154,13 +155,13 @@ const Header = () => {
 		} else {
 			navigate('/dashboard');
 		}
-	}
+	};
 
 	return (
 		<HeaderContainer>
 			<LeftSide>
 				<Logo onClick={() => navigate('/')}>
-					<img src='/logo2.png' alt='EASTUDY' style={{ width: '13rem', height: '4rem' }} />
+					<img src='/logo2.png' alt='EASTUDY' style={{ width: '10rem', height: '2.5rem' }} loading='lazy' />
 				</Logo>
 			</LeftSide>
 
@@ -179,7 +180,7 @@ const Header = () => {
 			<RightSide>
 				{isLoggedIn && profile ? (
 					<ProfileContainer>
-						<ProfileImage src={profile.image || '/UserImage.png'} />
+						<ProfileImage src={profile.image || '/UserImage.png'} alt={profile.name} />
 						<ProfileName>{profile.name}</ProfileName>
 						<DropdownButton onClick={() => setIsDropDownOpen((prev) => !prev)}>
 							<ChevronIcon />
