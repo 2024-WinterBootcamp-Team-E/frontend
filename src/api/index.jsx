@@ -1,6 +1,6 @@
 // /src/api/index.jsx
 const BASE_URL = 'http://localhost:8000/api/v1';
-
+// const BASE_URL = 'http://api.myenglishstudy.com:8080/api/v1';
 const defaultHeaders = {
 	'Content-Type': 'application/json',
 	Accept: 'application/json',
