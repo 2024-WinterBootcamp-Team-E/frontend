@@ -64,13 +64,13 @@ const DashboardPage = () => {
 						</div>
 					</Card>
 					<HistoryCard>
-						<CardTitle>My History</CardTitle>
+						<CardTitle>My Attendance</CardTitle>
 
 						{/** Attendance 컴포넌트로 출석 달력 표시 */}
 						<Attendance contributions={contributions} />
 					</HistoryCard>
 					<FeedbackCard>
-						<CardTitle>My Feedbacks</CardTitle>
+						<CardTitle>My Histories</CardTitle>
 						<DashboardGraphs />
 					</FeedbackCard>
 				</CardGrid>
