@@ -161,7 +161,7 @@ export const remove = async (endpoint) => {
 	}
 };
 
-export const postWithReadableStream = async (endpoint, data, onChunk, isFormData = false) => {
+export const postWithReadableStream = async (endpoint, data, isFormData, onChunk) => {
 	try {
 		// 1. FormData를 POST 요청으로 서버에 전송
 		const headers = isFormData ? {} : { 'Content-Type': 'application/json' };

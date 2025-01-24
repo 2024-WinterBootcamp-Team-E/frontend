@@ -17,7 +17,7 @@ const PStudy = () => {
 	const category = searchParams.get('category'); // 쿼리 파라미터에서 category 추출
 	const [evaluation, setEvaluation] = useState('info'); // info, success, warning, danger
 	const [sentenceData, setSentenceData] = useState(null); // 데이터 상태 추가
-	const [pronscore, setPronScore] = useState(0);
+	const [score, setScore] = useState(0);
 	const [feedbackText, setFeedbackText] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [isPlaying, setIsPlaying] = useState(false);
@@ -137,7 +137,7 @@ const PStudy = () => {
 	};
 
 	const handleScoreUpdate = (scoreValue) => {
-		setPronScore(scoreValue);
+		setScore(scoreValue);
 		if (scoreValue <= 30) setEvaluation('danger');
 		else if (scoreValue <= 60) setEvaluation('warning');
 		else setEvaluation('success');
@@ -172,7 +172,7 @@ const PStudy = () => {
 		Promise.resolve().then(() => {
 			resetRecordedAudio();
 			setEvaluation('info');
-			setPronScore(0);
+			setScore(0);
 		});
 
 		// cleanup 함수에서도 초기화
@@ -255,7 +255,7 @@ const PStudy = () => {
 							)}
 						</ContentSection>
 						<FeedbackSection $evaluation={evaluation}>
-							<ProgressCircle $evaluation={evaluation}>{pronscore}%</ProgressCircle>
+							<ProgressCircle $evaluation={evaluation}>{score}%</ProgressCircle>
 							<FeedbackText $evaluation={evaluation}>
 								<p>{feedbackText}</p>
 							</FeedbackText>

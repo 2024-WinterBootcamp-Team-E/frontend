@@ -67,11 +67,9 @@ const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) 
 	}, [recordedAudio]);
 
 	const handlePlay = () => {
-		if (waveSurferRef.current && recordedAudio) {
+		if (waveSurferRef.current) {
 			waveSurferRef.current.playPause(); // 재생/일시정지 상태를 토글
 			setIsPlaying((prev) => !prev); // 재생 상태 업데이트
-		} else {
-			alert('녹음된 오디오가 없습니다. 먼저 녹음을 해주세요.');
 		}
 	};
 
@@ -130,7 +128,7 @@ const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) 
 		formData.append('audio_file', audioBlob);
 
 		try {
-			await postWithReadableStream(`/feedback/${userId}/${sentenceId}`, formData, (chunk) => {
+			await postWithReadableStream(`/feedback/${userId}/${sentenceId}`, formData, true, (chunk) => {
 				// pronscore와 SSE 데이터 구분 처리
 				chunk.split('\n\n').forEach((part) => {
 					if (!part) return;
@@ -142,7 +140,7 @@ const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) 
 						const dataStr = part.replace('data:', '').trim();
 						if (onSSEUpdate) onSSEUpdate(dataStr);
 					}
-				}, true);
+				});
 			});
 			console.log('스트림 처리 완료');
 		} catch (error) {
