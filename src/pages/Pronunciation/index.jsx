@@ -14,18 +14,15 @@ const PronunciationPage = () => {
 	];
 
 	const handleCategoryClick = (categoryRoute) => {
-        navigate(`/pronunciation/pstudy?category=${categoryRoute}`);
-      };
+		navigate(`/pronunciation/pstudy?category=${categoryRoute}`);
+	};
 
 	return (
 		<Layout>
 			<PageContainer>
 				<CardGrid>
 					{categories.map((category) => (
-						<Card 
-							key={category.name}
-							onClick={() => handleCategoryClick(category.name)}
-							>
+						<Card key={category.name} onClick={() => handleCategoryClick(category.name)}>
 							<img src={category.image} alt={category.name} />
 							<Overlay>
 								<CategoryName>{category.name}</CategoryName>

@@ -6,16 +6,14 @@ import RecordButton from '@/components/RecordButton';
 import { useRecordStore } from '@/store'; // zustand 스토어 import
 import { postWithReadableStream } from '@/api';
 
-const SoundWave = () => {
+const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) => {
 	const [isPlaying, setIsPlaying] = useState(false); // 재생 상태를 관리
 	const [isRecording, setIsRecording] = useState(false); // 녹음 상태를 관리
-	const [serverResponse, setServerResponse] = useState(null); // SSE로 받은 서버 응답
 	const mediaRecorderRef = useRef(null); // MediaRecorder 인스턴스
 	const audioChunksRef = useRef([]);
 	const containerRef = useRef(null); // WaveSurfer가 렌더링될 DOM 참조
 	const waveSurferRef = useRef(null); // WaveSurfer 인스턴스를 저장
 	const userId = sessionStorage.getItem('userId'); // 유저id 가져오는 함수
-	const sentenceId = 2;
 
 	// 스토어에서 오디오 파일 상태와 메서드 가져오기
 	const { recordedAudio, setRecordedAudio } = useRecordStore();
@@ -48,12 +46,24 @@ const SoundWave = () => {
 	}, []);
 
 	useEffect(() => {
-		// 스토어의 recordedAudio 변경 시 WaveSurfer에 로드
+		let audioURL;
 		if (recordedAudio && waveSurferRef.current) {
-			const audioURL = URL.createObjectURL(recordedAudio);
+			audioURL = URL.createObjectURL(recordedAudio);
 			waveSurferRef.current.load(audioURL);
+		} else {
+			// 녹음된 오디오가 없을 경우 WaveSurfer 초기화
+			if (waveSurferRef.current) {
+				waveSurferRef.current.empty();
+			}
 		}
-	}, [recordedAudio]);
+
+		// URL 객체 해제하여 메모리 누수 방지
+		return () => {
+			if (audioURL) {
+				URL.revokeObjectURL(audioURL);
+			}
+		};
+	}, [recordedAudio, sentenceId]);
 
 	const handlePlay = () => {
 		if (waveSurferRef.current) {
@@ -64,6 +74,9 @@ const SoundWave = () => {
 
 	const handleStartRecording = async () => {
 		try {
+			// 새로운 녹음에 앞서 부모 컴포넌트에서 피드백 텍스트 초기화
+			if (onResetFeedback) onResetFeedback();
+
 			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 			const mediaRecorder = new MediaRecorder(stream);
 			mediaRecorderRef.current = mediaRecorder;
@@ -80,11 +93,10 @@ const SoundWave = () => {
 			mediaRecorder.onstop = () => {
 				const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
 				setRecordedAudio(audioBlob);
-				setTimeout(() => {
-					console.log('1초 지연.');
+				console.log('녹음이 완료되었습니다.');
 
-					handlePostFeedback(); // 녹음이 끝나면 서버에 전송
-				}, 1000);
+				// setTimeout을 제거하고 즉시 handlePostFeedback 호출
+				handlePostFeedback(audioBlob);
 			};
 
 			mediaRecorder.start();
@@ -99,21 +111,37 @@ const SoundWave = () => {
 		setIsRecording(false);
 	};
 
-	const handlePostFeedback = async () => {
-		if (!recordedAudio) {
+	const handlePostFeedback = async (audioBlob) => {
+		if (!audioBlob) {
 			console.error('녹음된 오디오가 없습니다.');
+			return;
+		}
+
+		if (!sentenceId) {
+			console.error('유효한 sentenceId가 제공되지 않았습니다.');
 			return;
 		}
 
 		// FormData 객체 생성
 		const formData = new FormData();
-		formData.append('audio_file', recordedAudio);
+		formData.append('audio_file', audioBlob);
 
 		try {
-			// 스트림을 처리하기 위해 postWithReadableStream 함수 호출
-			const result = await postWithReadableStream(`/feedback/${userId}/${sentenceId}`, formData, true);
-			console.log('스트림 처리 결과:', result);
-			// 추가로 스트림 결과에 따른 로직이 필요하다면 여기서 처리
+			await postWithReadableStream(`/feedback/${userId}/${sentenceId}`, formData, true, (chunk) => {
+				// pronscore와 SSE 데이터 구분 처리
+				chunk.split('\n\n').forEach((part) => {
+					if (!part) return;
+					if (part.startsWith('pronscore:')) {
+						const scoreStr = part.replace('pronscore:', '').trim();
+						const scoreValue = Number(scoreStr);
+						if (onScoreUpdate) onScoreUpdate(scoreValue);
+					} else if (part.startsWith('data:')) {
+						const dataStr = part.replace('data:', '').trim();
+						if (onSSEUpdate) onSSEUpdate(dataStr);
+					}
+				});
+			});
+			console.log('스트림 처리 완료');
 		} catch (error) {
 			console.error('오디오 업로드 또는 스트림 처리 오류:', error);
 		}
