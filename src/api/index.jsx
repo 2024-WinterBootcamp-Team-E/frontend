@@ -161,7 +161,7 @@ export const remove = async (endpoint) => {
 	}
 };
 
-export const postWithReadableStream = async (endpoint, data, isFormData = false) => {
+export const postWithReadableStream = async (endpoint, data, isFormData, onChunk) => {
 	try {
 		// 1. FormData를 POST 요청으로 서버에 전송
 		const headers = isFormData ? {} : { 'Content-Type': 'application/json' };
@@ -194,7 +194,9 @@ export const postWithReadableStream = async (endpoint, data, isFormData = false)
 			// 스트림 데이터 처리 (디코딩하여 사용)
 			const chunk = decoder.decode(value, { stream: true });
 			console.log('수신된 데이터:', chunk);
-
+			if (onChunk) {
+				onChunk(chunk);
+			}
 			// 필요 시 추가적인 처리 로직
 			// e.g., 데이터를 누적하거나 UI 업데이트
 		}

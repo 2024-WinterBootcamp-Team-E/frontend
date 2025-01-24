@@ -8,7 +8,8 @@ export const useSampleStore = create((set) => ({
 }));
 
 export const useRecordStore = create((set) => ({
-	recordedAudio: null, // 초기 상태: null
-	setRecordedAudio: (audio) => set({ recordedAudio: audio }), // 오디오 설정
-	clearRecordedAudio: () => set({ recordedAudio: null }), // 오디오 초기화
+	recordedAudio: null,
+	setRecordedAudio: (audio) => set({ recordedAudio: audio }),
+	resetRecordedAudio: () => set({ recordedAudio: null }), // 초기화 메서드
+	// 다른 상태와 메서드들...
 }));
