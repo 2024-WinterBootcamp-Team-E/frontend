@@ -22,7 +22,6 @@ const PStudy = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [isPlaying, setIsPlaying] = useState(false);
 	const audioRef = useRef(null); // audio 엘리먼트를 위한 ref
-	const userId = sessionStorage.getItem('userId'); // 유저id 가져오는 함수
 	// 사이드바 관련 상태 및 함수
 	const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
 	const [selectedSentence, setSelectedSentence] = useState(null);
