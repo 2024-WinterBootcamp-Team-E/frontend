@@ -28,8 +28,10 @@ const PStudy = () => {
 	const [selectedSentence, setSelectedSentence] = useState(null);
 	const [sentences, setSentences] = useState([]); // API로부터 받아온 문장 데이터 저장
 
-	const { resetRecordedAudio } = useRecordStore(); // reset 메서드 가져오기
-
+	const { recordedAudio, resetRecordedAudio } = useRecordStore(); // reset 메서드 가져오기
+	useEffect(() => {
+		console.log('recordedAudio changed', recordedAudio);
+	}, [recordedAudio]);
 	const toggleSidebar = () => {
 		setIsSidebarExpanded(!isSidebarExpanded);
 	};
@@ -157,6 +159,7 @@ const PStudy = () => {
 
 		// 다음 문장이 존재하면 선택된 문장을 업데이트
 		if (nextIndex < sentences.length) {
+			resetRecordedAudio();
 			setSelectedSentence(sentences[nextIndex]);
 		} else {
 			alert('마지막 문장입니다!');
@@ -178,6 +181,12 @@ const PStudy = () => {
 			resetRecordedAudio();
 		};
 	}, [selectedSentence?.sentence_id]);
+	const handleSelectSentence = (sentenceItem) => {
+		// 1) 오디오 먼저 reset
+		resetRecordedAudio();
+		// 2) 그리고 나서 문장 변경
+		setSelectedSentence(sentenceItem);
+	};
 	return (
 		<Layout>
 			<MainContainer expanded={isSidebarExpanded}>
@@ -197,7 +206,7 @@ const PStudy = () => {
 									<SubjectItem
 										key={sentenceItem.sentence_id} // key를 고유한 ID로 변경
 										active={dynamicSentenceId === sentenceItem.sentence_id}
-										onClick={() => setSelectedSentence(sentenceItem)}
+										onClick={() => handleSelectSentence(sentenceItem)}
 									>
 										<SubjectText>{sentenceItem.content}</SubjectText>
 									</SubjectItem>
@@ -226,8 +235,8 @@ const PStudy = () => {
 										<h3>{sentenceData.content}</h3>
 									</QuestionContainer>
 									<AnswerContainer>
-										{/* key 속성 제거 */}
 										<SoundWave
+											key={dynamicSentenceId}
 											sentenceId={dynamicSentenceId}
 											onScoreUpdate={handleScoreUpdate}
 											onSSEUpdate={handleSSEUpdate}

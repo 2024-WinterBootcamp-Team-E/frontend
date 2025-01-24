@@ -19,31 +19,32 @@ const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) 
 	const { recordedAudio, setRecordedAudio } = useRecordStore();
 
 	useEffect(() => {
-		// WaveSurfer 인스턴스를 초기화
-		if (containerRef.current) {
-			waveSurferRef.current = WaveSurfer.create({
-				container: containerRef.current,
-				waveColor: '#11317d',
-				progressColor: '#b1c5f6',
-				cursorColor: '#3267e3',
-				height: 80,
-				responsive: true,
-				barWidth: 4,
-				barGap: 2,
-				barRadius: 4,
-			});
-
-			// 재생이 끝났을 때 isPlaying을 false로 설정
-			waveSurferRef.current.on('finish', () => {
-				setIsPlaying(false);
-			});
-
-			// 컴포넌트 언마운트 시 WaveSurfer 정리
-			return () => {
-				waveSurferRef.current.destroy();
-			};
+		if (waveSurferRef.current) {
+			waveSurferRef.current.destroy();
 		}
-	}, []);
+
+		waveSurferRef.current = WaveSurfer.create({
+			container: containerRef.current,
+			waveColor: '#11317d',
+			progressColor: '#b1c5f6',
+			cursorColor: '#3267e3',
+			height: 80,
+			responsive: true,
+			barWidth: 4,
+			barGap: 2,
+			barRadius: 4,
+		});
+
+		// 재생이 끝났을 때 isPlaying을 false로 설정
+		waveSurferRef.current.on('finish', () => {
+			setIsPlaying(false);
+		});
+
+		// 컴포넌트 언마운트 시 WaveSurfer 정리
+		return () => {
+			waveSurferRef.current?.destroy();
+		};
+	}, [sentenceId]);
 
 	useEffect(() => {
 		let audioURL;
@@ -63,7 +64,7 @@ const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) 
 				URL.revokeObjectURL(audioURL);
 			}
 		};
-	}, [recordedAudio, sentenceId]);
+	}, [recordedAudio]);
 
 	const handlePlay = () => {
 		if (waveSurferRef.current) {
