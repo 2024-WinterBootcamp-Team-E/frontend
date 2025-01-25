@@ -43,10 +43,12 @@ const IStudy = () => {
 			const response = await get(`/chat/${userId}/${chatId}`);
 			console.log(response);
 			setSelectedChat({
+				chatroomId: response.data.chat_info.chat_id,
 				title: response.data.chat_info.title,
 				create_at: response.data.chat_info.created_at,
 				updated_at: response.data.chat_info.updated_at,
 			});
+			setCurrentChatroom(response.data.chat_info);
 			setMessages(response.data.chat_history); // 메시지 히스토리 업데이트
 		} catch (error) {
 			console.error(`${chatId}번 채팅방 조회 실패:`, error.message);
@@ -178,9 +180,11 @@ const IStudy = () => {
 					<ChatHeader>
 						<AngleLeftIcon />
 						<ChatTitle>
-							<TitleLarge>{selectedChat?.title || 'Subject1'}</TitleLarge>
+							<TitleLarge>{currentChatroom?.title || 'Subject1'}</TitleLarge>
 							<TitleSmall>
-								{selectedChat ? `${selectedChat.create_at} ~ ${selectedChat.updated_at}` : 'yyyy.mm.dd ~ yyyy.mm.dd'}
+								{currentChatroom
+									? `${formatDate(currentChatroom.created_at)} ~ ${formatDate(currentChatroom.updated_at)}`
+									: 'yyyy.mm.dd ~ yyyy.mm.dd'}
 							</TitleSmall>
 						</ChatTitle>
 					</ChatHeader>
