@@ -18,7 +18,7 @@ export const useChatroomStore = create((set) => ({
 	setChatroomList: (chatroomListData) => set({ chatroomList: chatroomListData }),
 }));
 
-export const useChatroomDataStore = create((set) => ({
+export const useChatroomDataStore = create((set, get) => ({
 	// 데이터 형식 :
 	// {
   //     "chat_id": 0,
@@ -48,19 +48,22 @@ export const useChatroomDataStore = create((set) => ({
     })),
   // 특정 chat_id를 가진 요소 찾기
   findChatroomById: (chatId) => {
-		const state = useChatroomDataStore.getState();
+		const state = get(); // get()으로 현재 store 상태 가져오기
 		// 찾으면 채팅방 data, 못찾으면 undefined 반환
     return state.openedChatroomList.find((chatroom) => chatroom.chat_id === chatId); 
 	},
 	// 현재 선택된 채팅방 갱신
   setCurrentChatroom: (data) => {
-    const chatroomData = findChatroomById(data.chat_id); // 해당 chatId로 채팅방 찾기
+    const state = get();
+    // findChatroomById를 get()으로 호출
+    const chatroomData = state.findChatroomById(data.chat_id);
+
     if (chatroomData) {
-      set({ currentChatroom: chatroom }); // 찾은 채팅방을 currentChatroom에 설정
+      set({ currentChatroom: chatroomData });
     } else {
       console.warn(`Chatroom with chat_id: ${data.chat_id} not found`);
-      set({ currentChatroom: data }); // 찾지 못하면 data로 설정
-			setOpenedChatroomList(data) // openedChatroomList에 저장
+      set({ currentChatroom: data });
+      state.setOpenedChatroomList(data); 
     }
   },
 }));
