@@ -19,8 +19,8 @@ const IStudy = () => {
 	const [inputValue, setInputValue] = useState(''); // 입력 값
 	// const messages = chatData.messages;
 	const [messages, setMessages] = useState([]);
-	const chatContentRef = useRef(null); // 채팅창 참조
 	const [feedbackVisibility, setFeedbackVisibility] = useState({});
+	const chatContentRef = useRef(null); // 채팅창 참조
 	const { chatroomList, setChatroomList } = useChatroomStore();
 	const { openedChatroomList, currentChatroom, setOpenedChatroomList, findChatroomById, setCurrentChatroom } =
 		useChatroomDataStore();
@@ -81,7 +81,7 @@ const IStudy = () => {
 			};
 			console.log('Request Body:', requestBody); // 요청 데이터 확인
 			const response = await post(`/chat/${userId}/chat`, requestBody);
-			 
+
 			// 새 채팅방 목록에 추가
 			setChatroomList(response.data);
 
@@ -135,6 +135,65 @@ const IStudy = () => {
 	const findChatroom = (chatId) => {
 		const response = findChatroomById(chatId);
 		console.log(response);
+	};
+
+	// 이하 녹음 관련 기능(추후 정리 예정)
+	const [isRecording, setIsRecording] = useState(false); // 녹음 상태 관리
+	const [audioURL, setAudioURL] = useState(null); // 녹음된 오디오 URL
+	const mediaRecorderRef = useRef(null); // MediaRecorder 인스턴스
+	const audioChunksRef = useRef([]); // 오디오 데이터 청크
+
+	const startRecording = async () => {
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			const mediaRecorder = new MediaRecorder(stream);
+
+			audioChunksRef.current = []; // 청크 초기화
+			mediaRecorderRef.current = mediaRecorder;
+
+			mediaRecorder.ondataavailable = (event) => {
+				audioChunksRef.current.push(event.data); // 청크 저장
+			};
+
+			mediaRecorder.onstop = async () => {
+				// 녹음 중지지
+				const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+				const audioUrl = URL.createObjectURL(audioBlob);
+				setAudioURL(audioUrl); // 오디오 URL 설정
+				stream.getTracks().forEach((track) => track.stop()); // 스트림 정리
+				// 녹음된 오디오를 서버에 전송
+				await postNewChat(audioUrl);
+			};
+
+			mediaRecorder.start();
+			setIsRecording(true);
+		} catch (error) {
+			console.error('녹음 시작 중 오류:', error);
+			alert('마이크 권한을 확인해주세요.');
+		}
+	};
+
+	const stopRecording = () => {
+		if (mediaRecorderRef.current) {
+			mediaRecorderRef.current.stop(); // 녹음 중단
+			setIsRecording(false);
+		}
+	};
+
+	const postNewChat = async (audioData) => {
+		try {
+			const formData = new FormData();
+			formData.append('file', audioData);
+
+			console.log('FormData:', formData.get('file')); // 추가 로그
+			// 서버 요청
+			const response = await post(`/chat/${userId}/${currentChatroom.chat_id}`, formData, true);
+			console.log('서버 응답:', response);
+			alert('오디오 파일 업로드가 완료되었습니다.');
+		} catch (error) {
+			console.error('파일 업로드 중 오류 발생:', error);
+			alert('파일 업로드에 실패했습니다.');
+		}
 	};
 
 	return (
@@ -203,7 +262,13 @@ const IStudy = () => {
 						))}
 					</ChatContent>
 					<RecordSection>
-						<RecordButton where='istudy' />
+						<RecordButton where='istudy' onClick={isRecording ? stopRecording : startRecording} />
+						{audioURL && (
+							<audio controls>
+								<source src={audioURL} type='audio/webm' />
+								Your browser does not support the audio element.
+							</audio>
+						)}
 					</RecordSection>
 				</ChatSection>
 			</MainContainer>
