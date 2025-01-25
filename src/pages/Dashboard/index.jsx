@@ -2,7 +2,7 @@
 import styled from 'styled-components';
 import Layout from '@/components/Layout';
 import { pretendard_bold } from '@/GlobalStyle';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import useAuthStore from '@/store/authStore';
 import { get } from '@/api';
 import { useNavigate } from 'react-router-dom';
@@ -13,42 +13,29 @@ const DashboardPage = () => {
 	const { isLoggedIn, profile, setAuth } = useAuthStore();
 	const [userData, setUserData] = useState({ nickname: '', email: '', user_image: '' });
 	const navigate = useNavigate();
-	const [contributions, setContributions] = useState({});
-	const storedUserId = sessionStorage.getItem('userId');
+	const userID = sessionStorage.getItem('userId');
 
 	useEffect(() => {
-		const fetchData = async () => {
+		const getLoginData = async () => {
 			try {
-				if (!storedUserId) {
+				if (!userID) {
 					navigate('/signin');
 					return; // 로그인되지 않은 상태
 				}
 				// 사용자 프로필 요청
-				const profileResult = await get(`/user/${storedUserId}`);
+				const profileResult = await get(`/user/${userID}`);
 				if (profileResult.data) {
 					const { nickname, email, user_image } = profileResult.data;
 					setUserData({ nickname, email, user_image });
 				} else {
 					console.error('사용자 정보를 가져오는 데 실패했습니다:', profileResult.message);
 				}
-
-				const contributionsResult = await get(`/user/attendance/${storedUserId}`);
-				const attendanceStatus = contributionsResult?.attendance_status || [];
-				const today = new Date();
-
-				const contributionData = attendanceStatus.reduce((acc, status, index) => {
-					const date = new Date(today);
-					date.setDate(today.getDate() - index);
-					const dateString = date.toISOString().split('T')[0];
-					acc[dateString] = status;
-					return acc;
-				}, {});
-				setContributions(contributionData);
 			} catch (error) {
-				console.error('Error fetching data:', error);
+				console.error('Error fetching login data:', error);
 			}
 		};
-		fetchData();
+
+		getLoginData();
 	}, [isLoggedIn, navigate]);
 
 	return (
@@ -66,7 +53,7 @@ const DashboardPage = () => {
 						<CardTitle>My Attendance</CardTitle>
 
 						{/** Attendance 컴포넌트로 출석 달력 표시 */}
-						<Attendance contributions={contributions} />
+						<Attendance />
 					</HistoryCard>
 					<FeedbackCard>
 						<CardTitle>My Histories</CardTitle>
