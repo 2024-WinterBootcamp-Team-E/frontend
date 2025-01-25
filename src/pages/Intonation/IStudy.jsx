@@ -81,10 +81,9 @@ const IStudy = () => {
 			};
 			console.log('Request Body:', requestBody); // 요청 데이터 확인
 			const response = await post(`/chat/${userId}/chat`, requestBody);
+			 
 			// 새 채팅방 목록에 추가
-			// const newChatroom = response.data.data; 
-			// setChatroomList((prevList) => [newChatroom, ...prevList]);
-			// console.log(response.data);
+			setChatroomList(response.data);
 
 			alert('채팅방이 성공적으로 생성되었습니다!');
 			setIsModalOpen(false); // 모달 닫기
