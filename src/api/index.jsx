@@ -193,7 +193,7 @@ export const postWithReadableStream = async (endpoint, data, isFormData, onChunk
 
 			// 스트림 데이터 처리 (디코딩하여 사용)
 			const chunk = decoder.decode(value, { stream: true });
-			console.log('수신된 데이터:', chunk);
+			console.log(chunk);
 			if (onChunk) {
 				onChunk(chunk);
 			}
