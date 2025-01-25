@@ -137,7 +137,7 @@ const Header = () => {
 		if (!isLoggedIn) {
 			navigate('/signin');
 		} else {
-			navigate('/intonation');
+			navigate('/intonation/istudy');
 		}
 	};
 
