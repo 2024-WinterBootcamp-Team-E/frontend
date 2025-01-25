@@ -41,17 +41,20 @@ export const useChatroomDataStore = create((set, get) => ({
       "created_at": "2024-12-19T07:56:39",
       "updated_at": "2024-12-20T07:56:39"
     }, // 현재 선택된 채팅방
+    
   // 내가 그동안 열어본 채팅방 리스트 갱신
   setOpenedChatroomList: (newOpenedData) =>
     set((state) => ({
       openedChatroomList: [...state.openedChatroomList, newOpenedData],
     })),
+
   // 특정 chat_id를 가진 요소 찾기
   findChatroomById: (chatId) => {
 		const state = get(); // get()으로 현재 store 상태 가져오기
 		// 찾으면 채팅방 data, 못찾으면 undefined 반환
     return state.openedChatroomList.find((chatroom) => chatroom.chat_id === chatId); 
 	},
+
 	// 현재 선택된 채팅방 갱신
   setCurrentChatroom: (data) => {
     const state = get();

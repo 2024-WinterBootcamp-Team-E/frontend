@@ -17,7 +17,10 @@ const IStudy = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false); // Modal 상태
 	const [selectedImage, setSelectedImage] = useState(null); // 선택된 이미지
 	const [inputValue, setInputValue] = useState(''); // 입력 값
+<<<<<<< Updated upstream
 	// const messages = chatData.messages;
+=======
+>>>>>>> Stashed changes
 	const [messages, setMessages] = useState([]);
 	const chatContentRef = useRef(null); // 채팅창 참조
 	const [feedbackVisibility, setFeedbackVisibility] = useState({});
@@ -48,13 +51,19 @@ const IStudy = () => {
 				create_at: response.data.chat_info.created_at,
 				updated_at: response.data.chat_info.updated_at,
 			});
+<<<<<<< Updated upstream
 			setCurrentChatroom(response.data.chat_info);
 			setMessages(response.data.chat_history); // 메시지 히스토리 업데이트
+=======
+			console.log(chatData);
+			setMessages(response.data.messages); // 메시지 히스토리 업데이트
+>>>>>>> Stashed changes
 		} catch (error) {
 			console.error(`${chatId}번 채팅방 조회 실패:`, error.message);
 			alert('채팅방 정보를 가져오는 데 실패했습니다.');
 		}
 	};
+
 	// 전체 채팅방 목록 조회
 	const handleGetChatRoom = async () => {
 		try {
