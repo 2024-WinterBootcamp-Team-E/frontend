@@ -19,28 +19,10 @@ const IStudy = () => {
 	const [inputValue, setInputValue] = useState(''); // 입력 값
 	const messages = chatData.messages;
 	const chatContentRef = useRef(null); // 채팅창 참조
-	const [feedbackVisibility, setFeedbackVisibility] = useState({});
+	const [ feedbackVisibility, setFeedbackVisibility ] = useState({});
 	const { chatroomList, setChatroomList } = useChatroomStore();
-	const {openedChatroomList, setOpenedChatroomList, findChatroomById} = useChatroomDataStore()
+	const { openedChatroomList,currentChatroom, setOpenedChatroomList, findChatroomById,setCurrentChatroom} = useChatroomDataStore()
 	const userId = sessionStorage.getItem('userId'); // 유저id 가져오는 함수
-
-	const chat_history = [
-		{
-		  subject: '호텔직원과 대화하는상황',
-		  create_at: '2025.01.11',
-		  updated_at: '2025.01.18',
-		},
-		{
-		  subject: '길을 물어보는 상황',
-		  create_at: '2025.01.12',
-		  updated_at: '2025.01.18',
-		},
-		{
-		  subject: '음식을 주문하는 상황',
-		  create_at: '2025.01.18',
-		  updated_at: '2025.01.18',
-		},
-	];
 
 	const toggleSidebar = () => {
 		setIsSidebarExpanded(!isSidebarExpanded);
@@ -53,21 +35,18 @@ const IStudy = () => {
 		}));
 	};
 
-	// 특정 채팅방 상세 정보 및 메시지 가져오기
-	const handleGetChatDetails = async (chatId) => {
+	// 특정 채팅방 상세 정보 및 메시지 가져오기 <-수정 필요!
+	const handleGetCurrentChatroom = async (chatId) => {
 		try {
 			const response = await get(`/chat/${userId}/${chatId}`);
-			setSelectedChat({
-				subject: response.data.chat_info.subject,
-				create_at: response.data.chat_info.created_at,
-				updated_at: response.data.chat_info.updated_at,
-			});
-			setMessages(response.data.chat_history); // 메시지 히스토리 업데이트
+			console.log(response.code, response.message);
+			setCurrentChatroom(response.data.chat_info)
 		} catch (error) {
 		  console.error(`${chatId}번 채팅방 조회 실패:`, error.message);
 		  alert('채팅방 정보를 가져오는 데 실패했습니다.');
 		}
 	};
+
 	// 전체 채팅방 목록 조회
 	const handleGetChatRoom = async () => {
 		try {
@@ -80,7 +59,7 @@ const IStudy = () => {
 		}
 	}
 	
-	  // 채팅방 생성
+	  // 채팅방 생성 <- 새로운 api로 만들기!
 	const handlePostChatroom = async () => {
 		if (!inputValue || !selectedImage) {
 		  alert('채팅방 제목과 캐릭터를 선택하세요!');
@@ -109,13 +88,13 @@ const IStudy = () => {
 		}
 	};
 
-	const formatDate = (isoString) => {
+	const formatDate = (isoString) => { // 2024-12-20T07:56:39 -> 24/12/20
 		const date = new Date(isoString);
 		const year = String(date.getFullYear()).slice(-2); // 연도 마지막 두 자리
 		const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
 		const day = String(date.getDate()).padStart(2, '0');
 
-		return `${year}/${month}/${day}`;
+		return `${year}/${month}/${day}`; 
 	};
 
 	useEffect(() => {
@@ -136,10 +115,6 @@ const IStudy = () => {
 		});
 	}, [messages, selectedChat, chat_history]);
 
-	const findChatroom = (chatId) => {
-		const response = findChatroomById(chatId);
-		console.log(response)
-	};
 
 	return (
 		<Layout>
@@ -164,7 +139,7 @@ const IStudy = () => {
 										key={index}
 										onClick={() => {
 											setSelectedChat(chatroom); // 클릭한 채팅방 상태 업데이트
-											handleGetChatDetails(chatroom.chat_id); // 선택된 채팅방 조회
+											handleGetCurrentChatroom(chatroom.chat_id); // 선택된 채팅방 조회
 										}}
 									>
 										<span role='img' aria-label='flag'>
