@@ -17,11 +17,12 @@ const PStudy = () => {
 	const category = searchParams.get('category'); // 쿼리 파라미터에서 category 추출
 	const [evaluation, setEvaluation] = useState('info'); // info, success, warning, danger
 	const [sentenceData, setSentenceData] = useState(null); // 데이터 상태 추가
-	const [score, setScore] = useState(0);
+	const [pronscore, setPronScore] = useState(0);
 	const [feedbackText, setFeedbackText] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [isPlaying, setIsPlaying] = useState(false);
 	const audioRef = useRef(null); // audio 엘리먼트를 위한 ref
+	const userId = sessionStorage.getItem('userId'); // 유저id 가져오는 함수
 	// 사이드바 관련 상태 및 함수
 	const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
 	const [selectedSentence, setSelectedSentence] = useState(null);
@@ -137,7 +138,7 @@ const PStudy = () => {
 	};
 
 	const handleScoreUpdate = (scoreValue) => {
-		setScore(scoreValue);
+		setPronScore(scoreValue);
 		if (scoreValue <= 30) setEvaluation('danger');
 		else if (scoreValue <= 60) setEvaluation('warning');
 		else setEvaluation('success');
@@ -172,7 +173,7 @@ const PStudy = () => {
 		Promise.resolve().then(() => {
 			resetRecordedAudio();
 			setEvaluation('info');
-			setScore(0);
+			setPronScore(0);
 		});
 
 		// cleanup 함수에서도 초기화
@@ -255,7 +256,7 @@ const PStudy = () => {
 							)}
 						</ContentSection>
 						<FeedbackSection $evaluation={evaluation}>
-							<ProgressCircle $evaluation={evaluation}>{score}%</ProgressCircle>
+							<ProgressCircle $evaluation={evaluation}>{pronscore}%</ProgressCircle>
 							<FeedbackText $evaluation={evaluation}>
 								<p>{feedbackText}</p>
 							</FeedbackText>
