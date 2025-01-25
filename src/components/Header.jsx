@@ -173,7 +173,7 @@ const Header = () => {
 					<h3>Sentences</h3>
 				</Button>
 				<Button onClick={handelDashboardClick}>
-					<h3>My Activity</h3>
+					<h3>My Page</h3>
 				</Button>
 			</Center>
 

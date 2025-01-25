@@ -14,7 +14,7 @@ import {
 import { Line, Pie } from 'react-chartjs-2';
 import { get } from '@/api';
 import styled from 'styled-components';
-import { weakPointsSample } from '@/mock/weakPoints';
+import { BlackTie } from 'styled-icons/fa-brands';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Filler, Tooltip, Legend);
 
@@ -22,7 +22,7 @@ const DashboardGraphs = () => {
 	const [averageScores, setAverageScores] = useState([]); // 평균 점수 초기 상태 빈 배열
 	const [weakPoints, setWeakPoints] = useState([]); // 약점 초기 상태 빈 배열
 	// const userId = sessionStorage.getItem('userId');
-	const userId = 1;
+	const userId = 19;
 
 	useEffect(() => {
 		// 평균 점수 Get
@@ -79,15 +79,16 @@ const DashboardGraphs = () => {
 	const pronScores = averageScores.map((item) => item.average_pron_score);
 	// 평균 점수 그래프 옵션
 	const averageOptions = {
-		responsive: true,
+		maintainAspectRatio: false,
 		plugins: {
 			legend: {
 				position: 'top',
 				fullSize: true,
 			},
 			title: {
-				display: false,
-				text: 'Average Scores Over Time',
+				display: true,
+				text: 'Average Scores',
+				color: '#0a0a0a',
 			},
 		},
 		scales: {
@@ -99,9 +100,16 @@ const DashboardGraphs = () => {
 			},
 			y: {
 				title: {
-					display: true,
+					display: false,
 					text: 'Score',
 				},
+				yAxes: [
+					{
+						ticks: {
+							beginAtZero: true,
+						},
+					},
+				],
 				min: 0,
 				max: 100,
 			},
@@ -117,8 +125,8 @@ const DashboardGraphs = () => {
 			{
 				label: 'Accuracy',
 				data: accuracyScores,
-				borderColor: 'rgb(255, 99, 132)',
-				backgroundColor: 'rgba(255, 99, 132, 0.3)',
+				borderColor: 'rgb(253, 175, 189)',
+				backgroundColor: 'rgba(253, 175, 189, 0.3)',
 				tension: 0.4,
 				fill: true,
 				tension: 0.1,
@@ -126,8 +134,8 @@ const DashboardGraphs = () => {
 			{
 				label: 'Fluency',
 				data: fluencyScores,
-				borderColor: 'rgb(54, 162, 235)',
-				backgroundColor: 'rgba(54, 162, 235, 0.3)',
+				borderColor: 'rgb(152, 207, 240)',
+				backgroundColor: 'rgba(152, 207, 240, 0.3)',
 				tension: 0.4,
 				fill: true,
 				tension: 0.1,
@@ -135,8 +143,8 @@ const DashboardGraphs = () => {
 			{
 				label: 'Completeness',
 				data: completenessScores,
-				borderColor: 'rgb(255, 206, 86)',
-				backgroundColor: 'rgba(255, 206, 86, 0.3)',
+				borderColor: 'rgb(253, 229, 166)',
+				backgroundColor: 'rgba(253, 229, 166, 0.3)',
 				tension: 0.4,
 				fill: true,
 				tension: 0.1,
@@ -144,8 +152,8 @@ const DashboardGraphs = () => {
 			{
 				label: 'Pronunciation',
 				data: pronScores,
-				borderColor: 'rgb(75, 192, 192)',
-				backgroundColor: 'rgba(75, 192, 192, 0.3)',
+				borderColor: 'rgb(163, 222, 179)',
+				backgroundColor: 'rgba(163, 222, 179, 0.3)',
 				tension: 0.4,
 				fill: true,
 				tension: 0.1,
@@ -154,31 +162,41 @@ const DashboardGraphs = () => {
 	};
 
 	const weakOptions = {
-		layout: {
-			padding: 20,
+		maintainAspectRatio: false,
+		plugins: {
+			title: {
+				display: true,
+				text: 'Weak Point',
+				color: '#0a0a0a',
+			},
+			legend: {
+				position: 'right', // 범례를 왼쪽에 배치
+				// fullSize: true,
+			},
 		},
 	};
 
 	// 약점 데이터
 	const weakData = {
-		labels: weakPointsSample.map((item) => item.syllable),
+		labels: weakPoints.map((item) => `${item.syllable} : ${item.words}`),
 		datasets: [
 			{
 				label: 'count ',
-				data: weakPointsSample.map((item) => item.count),
+				data: weakPoints.map((item) => item.count),
 				backgroundColor: [
-					'rgba(255, 99, 132, 0.2)',
-					'rgba(54, 162, 235, 0.2)',
-					'rgba(255, 206, 86, 0.2)',
-					'rgba(75, 192, 192, 0.2)',
-					'rgba(153, 102, 255, 0.2)',
+					// 251 252 246
+					'rgba(253, 175, 189, 0.5)',
+					'rgba(152, 207, 240, 0.5)',
+					'rgba(253, 229, 166, 0.5)',
+					'rgba(163, 222, 179, 0.5)',
+					'rgba(202, 177, 250, 0.5)',
 				],
 				borderColor: [
-					'rgba(255, 99, 132, 1)',
-					'rgba(54, 162, 235, 1)',
-					'rgba(255, 206, 86, 1)',
-					'rgba(75, 192, 192, 1)',
-					'rgba(153, 102, 255, 1)',
+					'rgba(253, 175, 189, 1)',
+					'rgba(152, 207, 240, 1)',
+					'rgba(253, 229, 166, 1)',
+					'rgba(163, 222, 179, 1)',
+					'rgba(202, 177, 250, 1)',
 				],
 				borderWidth: 1,
 				hoverOffset: 4,
@@ -188,8 +206,12 @@ const DashboardGraphs = () => {
 
 	return (
 		<GraphWrapper>
-			<Line options={averageOptions} data={averageData} />
-			<Pie options={weakOptions} data={weakData} />
+			<GraphDiv>
+				<Line options={averageOptions} data={averageData} />
+			</GraphDiv>
+			<GraphDiv>
+				<Pie options={weakOptions} data={weakData} />
+			</GraphDiv>
 		</GraphWrapper>
 	);
 };
@@ -202,4 +224,15 @@ const GraphWrapper = styled.div`
 	gap: 1rem;
 	width: 100%;
 	height: 14.5rem;
+	canvas {
+		height: 100%;
+	}
+`;
+
+const GraphDiv = styled.div`
+	display: flex;
+	height: 100%;
+	width: 100%;
+	align-items: center;
+	justify-content: center;
 `;
