@@ -14,8 +14,7 @@ const DashboardPage = () => {
 	const [userData, setUserData] = useState({ nickname: '', email: '', user_image: '' });
 	const navigate = useNavigate();
 	const [contributions, setContributions] = useState({});
-	// const storedUserId = sessionStorage.getItem('userId');
-	const storedUserId = 19;
+	const storedUserId = sessionStorage.getItem('userId');
 
 	useEffect(() => {
 		const fetchData = async () => {
