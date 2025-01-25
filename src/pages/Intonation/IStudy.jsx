@@ -1,140 +1,140 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import Modal from 'react-modal';
-import { AngleLeft } from '@styled-icons/fa-solid';
-import { ToggleOff, ToggleOn } from '@styled-icons/fa-solid';
 import ChatBubble from '@/components/ChatBubble';
 import Layout from '@/components/Layout';
 import RecordButton from '@/components/RecordButton';
+import { AngleLeft } from '@styled-icons/fa-solid';
+import { ToggleOff, ToggleOn } from '@styled-icons/fa-solid';
 import Button from '@/components/Button';
-import chatData from '@/mock/chatData';
-import { get, post } from '@/api/index';
-import { useChatroomStore, useChatroomDataStore } from '@/store'
+import Modal from 'react-modal';
+import { get, post } from '@/api'; // API 헬퍼 임포트
 
 const IStudy = () => {
-	const [isSidebarExpanded, setIsSidebarExpanded] = useState(true); // 사이드바 상태
-	const [selectedChat, setSelectedChat] = useState(null); // 초기 상태 추가
-	const [isModalOpen, setIsModalOpen] = useState(false); // Modal 상태
-	const [selectedImage, setSelectedImage] = useState(null); // 선택된 이미지
-	const [inputValue, setInputValue] = useState(''); // 입력 값
-	// const messages = chatData.messages;
-	const [messages, setMessages] = useState([]);
-	const chatContentRef = useRef(null); // 채팅창 참조
+	// 상태 관리
+	const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+	const [selectedChat, setSelectedChat] = useState(null);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [selectedImage, setSelectedImage] = useState(null);
+	const [inputValue, setInputValue] = useState('');
+	const chatContentRef = useRef(null);
 	const [feedbackVisibility, setFeedbackVisibility] = useState({});
-	const { chatroomList, setChatroomList } = useChatroomStore();
-	const { openedChatroomList, currentChatroom, setOpenedChatroomList, findChatroomById, setCurrentChatroom } =
-		useChatroomDataStore();
-	const userId = sessionStorage.getItem('userId'); // 유저id 가져오는 함수
 
+	const [chatHistory, setChatHistory] = useState([]);
+	const [loadingChats, setLoadingChats] = useState(false);
+	const [errorChats, setErrorChats] = useState(null);
+
+	const [messages, setMessages] = useState([]);
+	const [loadingMessages, setLoadingMessages] = useState(false);
+	const [errorMessages, setErrorMessages] = useState(null);
+
+	const user_id = sessionStorage.getItem('userId'); // 실제 사용자 ID로 변경하세요.
+
+	// 사이드바 토글 함수
 	const toggleSidebar = () => {
 		setIsSidebarExpanded(!isSidebarExpanded);
 	};
 
+	// 피드백 토글 함수
 	const toggleFeedback = (index) => {
 		setFeedbackVisibility((prevState) => ({
 			...prevState,
-			[index]: !prevState[index], // 특정 메시지의 피드백 토글
+			[index]: !prevState[index],
 		}));
 	};
 
-	// 특정 채팅방 상세 정보 및 메시지 가져오기
-	const handleGetChatDetails = async (chatId) => {
-		try {
-			const response = await get(`/chat/${userId}/${chatId}`);
-			console.log(response);
-			setSelectedChat({
-				chatroomId: response.data.chat_info.chat_id,
-				title: response.data.chat_info.title,
-				create_at: response.data.chat_info.created_at,
-				updated_at: response.data.chat_info.updated_at,
-			});
-			setCurrentChatroom(response.data.chat_info);
-			setMessages(response.data.chat_history); // 메시지 히스토리 업데이트
-		} catch (error) {
-			console.error(`${chatId}번 채팅방 조회 실패:`, error.message);
-			alert('채팅방 정보를 가져오는 데 실패했습니다.');
-		}
-	};
-
-	// 전체 채팅방 목록 조회
-	const handleGetChatRoom = async () => {
-		try {
-			const response = await get(`/chat/${userId}`);
-			console.log(response.code, response.message);
-			setChatroomList(response.data);
-		} catch (error) {
-			console.error('전체 채팅방 조회 실패', error.message);
-			alert('전체 채팅방 조회 실패');
-		}
-	};
-
-	// 채팅방 생성
-	const handlePostChatroom = async () => {
-		if (!inputValue || !selectedImage) {
-			alert('채팅방 제목과 캐릭터를 선택하세요!');
-			return;
-		}
-		try {
-			const requestBody = {
-				character_name: selectedImage,
-				title: inputValue,
-			};
-			console.log('Request Body:', requestBody); // 요청 데이터 확인
-			const response = await post(`/chat/${userId}/chat`, requestBody);
-			 
-			// 새 채팅방 목록에 추가
-			setChatroomList(response.data);
-
-			alert('채팅방이 성공적으로 생성되었습니다!');
-			setIsModalOpen(false); // 모달 닫기
-		} catch (error) {
-			if (error.response) {
-				console.error('Server Error Message:', error.response.data); // 서버 에러 메시지 출력
-				alert(`오류: ${error.response.data.detail || '알 수 없는 오류가 발생했습니다.'}`);
-			} else {
-				console.error('Unexpected Error:', error);
-				alert('채팅방 생성 중 알 수 없는 오류가 발생했습니다.');
-			}
-		}
-	};
-
-	const formatDate = (isoString) => {
-		const date = new Date(isoString);
-		const year = String(date.getFullYear()).slice(-2); // 연도 마지막 두 자리
-		const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
-		const day = String(date.getDate()).padStart(2, '0');
-
-		return `${year}/${month}/${day}`;
-	};
-
-	// 첫 렌더링 시 전체 채팅방 목록 조회 및 설정
+	// 채팅방 목록 불러오기
 	useEffect(() => {
-		const onFirstEnter = () => {
-			if (!selectedChat && chatroomList.length > 0) {
-				setCurrentChatroom(chatroomList[0]);
-				console.log(chatroomList[0]);
+		const fetchChatHistory = async () => {
+			setLoadingChats(true);
+			setErrorChats(null);
+			try {
+				const response = await get(`/chat/${user_id}`);
+				if (response.code === 200) {
+					// 응답 데이터 정렬: updated_at 내림차순
+					const sortedData = response.data.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+					setChatHistory(sortedData);
+					if (sortedData.length > 0 && !selectedChat) {
+						setSelectedChat(sortedData[0]);
+					}
+				} else {
+					setErrorChats(response.message || '채팅방을 불러오는 데 실패했습니다.');
+				}
+			} catch (err) {
+				setErrorChats('채팅방을 불러오는 도중 오류가 발생했습니다.');
+				console.error('채팅방 불러오기 오류:', err);
+			} finally {
+				setLoadingChats(false);
 			}
 		};
-		const fetchChatRooms = async () => {
-			await handleGetChatRoom(); // 채팅방 목록을 먼저 가져옴
-			onFirstEnter(); // 이후에 첫 번째 채팅방 선택
+
+		if (user_id) {
+			fetchChatHistory();
+		}
+	}, [user_id, selectedChat]);
+
+	// 선택된 채팅방의 메시지 불러오기
+	useEffect(() => {
+		const fetchMessages = async () => {
+			if (selectedChat) {
+				setLoadingMessages(true);
+				setErrorMessages(null);
+				try {
+					const response = await get(`/chat/${user_id}/${selectedChat.chat_id}`);
+					if (response.code === 200) {
+						setMessages(response.data.chat_history);
+					} else {
+						setErrorMessages(response.message || '메시지를 불러오는 데 실패했습니다.');
+					}
+				} catch (err) {
+					setErrorMessages('메시지를 불러오는 도중 오류가 발생했습니다.');
+					console.error('메시지 불러오기 오류:', err);
+				} finally {
+					setLoadingMessages(false);
+				}
+			}
 		};
 
-		fetchChatRooms();
-	}, [userId]);
+		fetchMessages();
+	}, [user_id, selectedChat]);
 
-	// 현재 채팅방 메세지 자동 스크롤 기능
+	// 새로운 메시지가 추가될 때 스크롤을 아래로 이동
 	useEffect(() => {
-		// 새로운 메시지가 추가될 때마다 스크롤이 아래로 이동
 		chatContentRef.current?.scrollTo({
 			top: chatContentRef.current.scrollHeight,
 			behavior: 'smooth',
 		});
-	}, [messages, selectedChat]);
+	}, [messages, selectedChat, chatHistory]);
 
-	const findChatroom = (chatId) => {
-		const response = findChatroomById(chatId);
-		console.log(response);
+	// 새 채팅 생성 핸들러
+	const handleCreateChat = async () => {
+		if (!inputValue || !selectedImage) {
+			alert('제목과 캐릭터를 선택해주세요.');
+			return;
+		}
+
+		// character_name이 "미국" 또는 "영국"인지 확인
+		if (!['미국', '영국'].includes(selectedImage)) {
+			alert('유효하지 않은 캐릭터 이름입니다.');
+			return;
+		}
+
+		try {
+			const response = await post(`/chat/${user_id}/chat`, {
+				title: inputValue,
+				character_name: selectedImage,
+			});
+
+			if (response.code === 200) {
+				setChatHistory((prev) => [response.data, ...prev]);
+				setSelectedChat(response.data);
+				setIsModalOpen(false);
+			} else {
+				alert(response.message || '채팅 생성에 실패했습니다.');
+			}
+		} catch (error) {
+			console.error('새 채팅 생성 실패:', error);
+			alert('채팅 생성 중 오류가 발생했습니다.');
+		}
 	};
 
 	return (
@@ -154,22 +154,23 @@ const IStudy = () => {
 							<Button varient='plus' rounded='sm' padding='none' size='wide' onClick={() => setIsModalOpen(true)}>
 								+
 							</Button>
-							<SubjectList>
-								{chatroomList.map((chatroom, index) => (
-									<SubjectItem
-										key={index}
-										onClick={() => {
-											handleGetChatDetails(chatroom.chat_id); // 선택된 채팅방 조회
-										}}
-									>
-										<span role='img' aria-label='flag'>
-											{chatroom.character_name == '영국' ? 'UK' : 'USA'}
-										</span>
-										<TitleText>{chatroom.title}</TitleText>
-										<DateDisplay>{formatDate(chatroom.updated_at)}</DateDisplay>
-									</SubjectItem>
-								))}
-							</SubjectList>
+							{loadingChats ? (
+								<p>Loading...</p>
+							) : errorChats ? (
+								<p style={{ color: 'red' }}>{errorChats}</p>
+							) : (
+								<SubjectList>
+									{chatHistory.map((history) => (
+										<SubjectItem key={history.chat_id} onClick={() => setSelectedChat(history)}>
+											<span role='img' aria-label='flag'>
+												{history.character_name === '미국' ? '🇺🇸' : '🇬🇧'}
+											</span>
+											<SubjectText>{history.title}</SubjectText>
+											<DateDisplay>{new Date(history.updated_at).toLocaleDateString()}</DateDisplay>
+										</SubjectItem>
+									))}
+								</SubjectList>
+							)}
 						</>
 					) : (
 						<ToggleWrapper onClick={toggleSidebar}>
@@ -183,24 +184,30 @@ const IStudy = () => {
 					<ChatHeader>
 						<AngleLeftIcon />
 						<ChatTitle>
-							<TitleLarge>{currentChatroom?.title || 'Subject1'}</TitleLarge>
+							<TitleLarge>{selectedChat?.title || 'Subject1'}</TitleLarge>
 							<TitleSmall>
-								{currentChatroom
-									? `${formatDate(currentChatroom.created_at)} ~ ${formatDate(currentChatroom.updated_at)}`
-									: 'yyyy.mm.dd ~ yyyy.mm.dd'}
+								{selectedChat ? `${new Date(selectedChat.updated_at).toLocaleDateString()}` : 'yyyy.mm.dd'}
 							</TitleSmall>
 						</ChatTitle>
 					</ChatHeader>
 					<StyledHr />
 					<ChatContent ref={chatContentRef}>
-						{messages.map((message, index) => (
-							<ChatBubble
-								key={index}
-								message={message}
-								isFeedbackVisible={feedbackVisibility[index] || false}
-								toggleFeedback={() => toggleFeedback(index)}
-							/>
-						))}
+						{loadingMessages ? (
+							<p>Loading messages...</p>
+						) : errorMessages ? (
+							<p style={{ color: 'red' }}>{errorMessages}</p>
+						) : messages.length > 0 ? (
+							messages.map((message, index) => (
+								<ChatBubble
+									key={index}
+									message={message}
+									isFeedbackVisible={feedbackVisibility[index] || false}
+									toggleFeedback={() => toggleFeedback(index)}
+								/>
+							))
+						) : (
+							<p>Start the conversation!</p>
+						)}
 					</ChatContent>
 					<RecordSection>
 						<RecordButton where='istudy' />
@@ -216,20 +223,15 @@ const IStudy = () => {
 					<h2>Create New Chat</h2>
 					<ImageSelector>
 						<Button padding='none' rounded='full' onClick={() => setSelectedImage('미국')}>
-							<img src='/public/usa.png' alt='USA' className={selectedImage === '미국' ? 'selected' : ''} />
+							<img src='/public/usa.png' alt='미국' className={selectedImage === '미국' ? 'selected' : ''} />
 						</Button>
 						<Button padding='none' rounded='full' onClick={() => setSelectedImage('영국')}>
-							<img src='/public/uk.png' alt='UK' className={selectedImage === '영국' ? 'selected' : ''} />
+							<img src='/public/uk.png' alt='영국' className={selectedImage === '영국' ? 'selected' : ''} />
 						</Button>
 					</ImageSelector>
 					<InputBox placeholder='Enter your topic' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
 					<ButtonWrapper>
-						<Button
-							varient='white'
-							rounded='sm'
-							border='black'
-							onClick={handlePostChatroom} // 채팅방 생성 함수 호출
-						>
+						<Button varient='white' rounded='sm' border='black' onClick={handleCreateChat}>
 							Create
 						</Button>
 						<Button varient='black' border='black' rounded='sm' onClick={() => setIsModalOpen(false)}>
@@ -260,11 +262,19 @@ const Sidebar = styled.aside`
 	flex-direction: column;
 	overflow: auto;
 	height: 100%;
-	max-height: 82vh;
 	transition:
 		width 0.3s ease,
 		padding 0.3s ease;
 	position: relative;
+	overflow-y: scroll;
+	max-height: 70vh;
+	border-bottom: 6px solid #d4d5c8;
+	-ms-overflow-style: none; /* IE 및 Edge용 */
+	scrollbar-width: none; /* Firefox용 */
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
 `;
 
 const SidebarHeader = styled.div`
@@ -318,12 +328,6 @@ const SubjectList = styled.ul`
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
-	height: 100%;
-	overflow-y:auto;
-	-ms-overflow-style: none;
-	&::-webkit-scrollbar {
-		display:none;
-	}
 `;
 
 const SubjectItem = styled.li`
@@ -334,28 +338,21 @@ const SubjectItem = styled.li`
 	background-color: var(--neutral-10);
 	border-radius: 0.5rem;
 	cursor: pointer;
-	gap: 1rem;
-
-	span {
-		width: 1.5rem;
-		text-align:start;
-	}
 `;
 
-const TitleText = styled.p`
+const SubjectText = styled.span`
 	flex-grow: 1;
+	margin: 0 0.5rem; /* 텍스트의 좌우 간격 */
 	font-size: 1rem;
 	color: #333; /* 기본 텍스트 색상 */
 	overflow: hidden; /* 내용이 길어질 경우 숨김 처리 */
 	text-overflow: ellipsis; /* 생략 기호 추가 */
 	white-space: nowrap; /* 한 줄로 표시 */
-	text-align:start;
 `;
 
-const DateDisplay = styled.p`
+const DateDisplay = styled.span`
 	font-size: 0.875rem;
 	color: #6c757d;
-	text-align:end;
 `;
 
 const ChatSection = styled.section`
