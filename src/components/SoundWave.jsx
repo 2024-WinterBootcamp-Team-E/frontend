@@ -137,7 +137,7 @@ const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) 
 						const scoreValue = Number(scoreStr);
 						if (onScoreUpdate) onScoreUpdate(scoreValue);
 					} else if (part.startsWith('data:')) {
-						const dataStr = part.replace('data:', '').trim();
+						const dataStr = part.replace('data: ', '');
 						if (onSSEUpdate) onSSEUpdate(dataStr);
 					}
 				});

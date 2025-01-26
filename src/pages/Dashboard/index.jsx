@@ -2,57 +2,26 @@
 import styled from 'styled-components';
 import Layout from '@/components/Layout';
 import { pretendard_bold } from '@/GlobalStyle';
-import React, { useState, useEffect } from 'react';
 import useAuthStore from '@/store/authStore';
-import { get } from '@/api';
-import { useNavigate } from 'react-router-dom';
 import Attendance from '@/components/Attendance';
 import DashboardGraphs from '@/components/DashboardGraphs';
 
 const DashboardPage = () => {
-	const { isLoggedIn, profile, setAuth } = useAuthStore();
-	const [userData, setUserData] = useState({ nickname: '', email: '', user_image: '' });
-	const navigate = useNavigate();
-	const userID = sessionStorage.getItem('userId');
-
-	useEffect(() => {
-		const getLoginData = async () => {
-			try {
-				if (!userID) {
-					navigate('/signin');
-					return; // 로그인되지 않은 상태
-				}
-				// 사용자 프로필 요청
-				const profileResult = await get(`/user/${userID}`);
-				if (profileResult.data) {
-					const { nickname, email, user_image } = profileResult.data;
-					setUserData({ nickname, email, user_image });
-				} else {
-					console.error('사용자 정보를 가져오는 데 실패했습니다:', profileResult.message);
-				}
-			} catch (error) {
-				console.error('Error fetching login data:', error);
-			}
-		};
-
-		getLoginData();
-	}, [isLoggedIn, navigate]);
+	const { profile } = useAuthStore();
 
 	return (
 		<Layout>
 			<PageContainer>
 				<CardGrid>
 					<Card>
-						<ProfileImage src={userData.user_image || '/UserImage.png'} alt='Profile' />
+						<ProfileImage src={profile.image || '/UserImage.png'} alt='Profile' />
 						<div>
-							<Nickname>{userData.nickname || 'Guest'}</Nickname>
-							<p>{userData.email || 'guest@example.com'}</p>
+							<Nickname>{profile.name}</Nickname>
+							<p>{profile.email || 'guest@example.com'}</p>
 						</div>
 					</Card>
 					<HistoryCard>
 						<CardTitle>My Attendance</CardTitle>
-
-						{/** Attendance 컴포넌트로 출석 달력 표시 */}
 						<Attendance />
 					</HistoryCard>
 					<FeedbackCard>
@@ -126,31 +95,31 @@ const FeedbackCard = styled(Card)`
 `;
 
 const CardTitle = styled.h2`
-  font-size: 1.5rem;
-  font-weight: bold;
-  text-align: left;
-  width: 100%;
-  text-align: start;
+	font-size: 1.5rem;
+	font-weight: bold;
+	text-align: left;
+	width: 100%;
+	text-align: start;
 `;
 
 const ContentBox = styled.div`
-  width: 100%;
-  height: calc(100% - 4rem);
-  background-color: ${(props) => props.bgColor || '#ffffff'};
-  border-radius: 0.5rem;
+	width: 100%;
+	height: calc(100% - 4rem);
+	background-color: ${(props) => props.bgColor || '#ffffff'};
+	border-radius: 0.5rem;
 `;
 
 const ProfileImage = styled.img`
-  width: 13rem;
-  height: 13rem;
-  border-radius: 50%;
-  object-fit: cover;
-  background-color: var(--neutral-20);
-  box-shadow: 0rem 0rem 1rem var(--neutral-20);
+	width: 13rem;
+	height: 13rem;
+	border-radius: 50%;
+	object-fit: cover;
+	background-color: var(--neutral-20);
+	box-shadow: 0rem 0rem 1rem var(--neutral-20);
 `;
 
 const Nickname = styled.h3`
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 0;
+	font-size: 1.5rem;
+	font-weight: bold;
+	margin: 0;
 `;

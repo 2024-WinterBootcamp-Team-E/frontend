@@ -1,6 +1,5 @@
 // /src/api/index.jsx
 const BASE_URL = 'http://localhost:8000/api/v1';
-// const BASE_URL = 'http://api.myenglishstudy.com:8080/api/v1';
 const defaultHeaders = {
 	'Content-Type': 'application/json',
 	Accept: 'application/json',
@@ -193,7 +192,7 @@ export const postWithReadableStream = async (endpoint, data, isFormData, onChunk
 
 			// 스트림 데이터 처리 (디코딩하여 사용)
 			const chunk = decoder.decode(value, { stream: true });
-			console.log('수신된 데이터:', chunk);
+			console.log(chunk);
 			if (onChunk) {
 				onChunk(chunk);
 			}

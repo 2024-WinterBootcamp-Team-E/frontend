@@ -17,11 +17,12 @@ const PStudy = () => {
 	const category = searchParams.get('category'); // 쿼리 파라미터에서 category 추출
 	const [evaluation, setEvaluation] = useState('info'); // info, success, warning, danger
 	const [sentenceData, setSentenceData] = useState(null); // 데이터 상태 추가
-	const [score, setScore] = useState(0);
+	const [pronscore, setPronScore] = useState(0);
 	const [feedbackText, setFeedbackText] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [isPlaying, setIsPlaying] = useState(false);
 	const audioRef = useRef(null); // audio 엘리먼트를 위한 ref
+	const userId = sessionStorage.getItem('userId'); // 유저id 가져오는 함수
 	// 사이드바 관련 상태 및 함수
 	const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
 	const [selectedSentence, setSelectedSentence] = useState(null);
@@ -137,7 +138,8 @@ const PStudy = () => {
 	};
 
 	const handleScoreUpdate = (scoreValue) => {
-		setScore(scoreValue);
+		setPronScore(scoreValue);
+		console.log(scoreValue);
 		if (scoreValue <= 30) setEvaluation('danger');
 		else if (scoreValue <= 60) setEvaluation('warning');
 		else setEvaluation('success');
@@ -172,7 +174,7 @@ const PStudy = () => {
 		Promise.resolve().then(() => {
 			resetRecordedAudio();
 			setEvaluation('info');
-			setScore(0);
+			setPronScore(0);
 		});
 
 		// cleanup 함수에서도 초기화
@@ -255,8 +257,8 @@ const PStudy = () => {
 							)}
 						</ContentSection>
 						<FeedbackSection $evaluation={evaluation}>
-							<ProgressCircle $evaluation={evaluation}>{score}%</ProgressCircle>
-							<FeedbackText $evaluation={evaluation}>
+							<ProgressCircle evaluation={evaluation}>{pronscore}%</ProgressCircle>
+							<FeedbackText evaluation={evaluation}>
 								<p>{feedbackText}</p>
 							</FeedbackText>
 							<Button varient='white' rounded='xl' aria-label='Continue to Next' onClick={handleContinue}>
@@ -274,11 +276,11 @@ export default PStudy;
 // Styled Components
 const MainContainer = styled.div`
 	display: grid;
-	grid-template-columns: ${(props) => (props.expanded ? '20% 80%' : '5% 100%')};
+	grid-template-columns: ${(props) => (props.expanded ? '20% 80%' : '5% 95%')};
 	grid-gap: 1rem;
 	background-color: traansparents;
 	transition: grid-template-columns 0.3s ease;
-	height: 70vh;
+	height: 85vh;
 	padding: 1rem 2rem 2rem 2rem;
 `;
 
@@ -295,7 +297,7 @@ const Sidebar = styled.aside`
 		padding 0.3s ease;
 	position: relative;
 	overflow-y: scroll;
-	max-height: 70vh;
+	/* max-height: 70vh; */
 	border-bottom: 6px solid #d4d5c8;
 
 	-ms-overflow-style: none; /* IE 및 Edge용 */
@@ -465,6 +467,8 @@ const FeedbackSection = styled.div`
 	gap: 0.75rem;
 	padding: 1rem 2rem;
 	width: 100%;
+	height: fit-content;
+	max-height: 20vh;
 `;
 
 const ProgressCircle = styled.div`
@@ -490,6 +494,7 @@ const ProgressCircle = styled.div`
 	height: 4.5rem;
 	justify-content: center;
 	width: 4.5rem;
+	min-width: 4.5rem;
 `;
 
 const FeedbackText = styled.div`
@@ -508,12 +513,11 @@ const FeedbackText = styled.div`
 				case 'danger':
 					return 'var(--danger-pressed)';
 				case 'info':
+					return 'var(--info-pressed)';
 				default:
 					return 'var(--info-pressed)';
 			}
 		}};
-		${pretendard_bold}
-		${TextSizeL}
 	}
 	span {
 		color: ${(props) => {

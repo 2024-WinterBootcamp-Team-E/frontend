@@ -5,61 +5,367 @@ import Layout from '@/components/Layout';
 import RecordButton from '@/components/RecordButton';
 import { AngleLeft } from '@styled-icons/fa-solid';
 import { ToggleOff, ToggleOn } from '@styled-icons/fa-solid';
-import chatData from '@/mock/chatData';
 import Button from '@/components/Button';
 import Modal from 'react-modal';
+import { get, post, postWithReadableStream } from '@/api'; // API 헬퍼 임포트
 
 const IStudy = () => {
-	const [isSidebarExpanded, setIsSidebarExpanded] = useState(true); // 사이드바 상태
-	const [selectedChat, setSelectedChat] = useState(null); // 초기 상태 추가
-	const [isModalOpen, setIsModalOpen] = useState(false); // Modal 상태
-	const [selectedImage, setSelectedImage] = useState(null); // 선택된 이미지
-	const [inputValue, setInputValue] = useState(''); // 입력 값
-	const messages = chatData.messages;
-	const chatContentRef = useRef(null); // 채팅창 참조
+	// 상태 관리
+	const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+	const [selectedChat, setSelectedChat] = useState(null);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [selectedImage, setSelectedImage] = useState(null);
+	const [inputValue, setInputValue] = useState('');
+	const chatContentRef = useRef(null);
 	const [feedbackVisibility, setFeedbackVisibility] = useState({});
 
-	const chat_history = [
-		{
-			subject: '호텔직원과 대화하는상황',
-			create_at: '2025.01.11',
-			updated_at: '2025.01.18',
-		},
-		{
-			subject: '길을 물어보는 상황',
-			create_at: '2025.01.12',
-			updated_at: '2025.01.18',
-		},
-		{
-			subject: '음식을 주문하는 상황',
-			create_at: '2025.01.18',
-			updated_at: '2025.01.18',
-		},
-	];
+	const [chatHistory, setChatHistory] = useState([]);
+	const [loadingChats, setLoadingChats] = useState(false);
+	const [errorChats, setErrorChats] = useState(null);
+
+	const [messages, setMessages] = useState([]);
+	const [loadingMessages, setLoadingMessages] = useState(false);
+	const [errorMessages, setErrorMessages] = useState(null);
+
+	const user_id = sessionStorage.getItem('userId');
+
+	// ========== 녹음 관련 상태 & ref ==========
+	const [isRecording, setIsRecording] = useState(false);
+	const mediaRecorderRef = useRef(null);
+	const audioChunksRef = useRef([]);
+	// ===== (1) Web Audio API 사용 위한 ref =====
+	const audioContextRef = useRef(null);
+	const scriptNodeRef = useRef(null);
+	const sseRef = useRef(null);
+
+	// PCM 버퍼를 쌓을 큐
+	const pcmDataQueueRef = useRef([]);
+	// 현재 chunk에서 얼마나 소비됐는지
+	const [currentChunkPos, setCurrentChunkPos] = useState(0);
+
+	// ===== (2) 컴포넌트 마운트 시점에 AudioContext 초기화 =====
+	useEffect(() => {
+		initAudioContext();
+		return () => {
+			// 언마운트 시점에 정리
+			closeAudioContext();
+			if (sseRef.current) {
+				sseRef.current.close();
+				sseRef.current = null;
+			}
+		};
+	}, []);
+
+	// ===== AudioContext 초기화 =====
+	const initAudioContext = () => {
+		if (!window.AudioContext) {
+			console.warn('이 브라우저는 Web Audio API를 지원하지 않습니다.');
+			return;
+		}
+		const audioCtx = new AudioContext({ sampleRate: 24000 }); // 서버 PCM 샘플레이트에 맞춰줍니다
+		audioContextRef.current = audioCtx;
+
+		// ScriptProcessorNode
+		const scriptNode = audioCtx.createScriptProcessor(2048, 1, 1);
+		scriptNode.onaudioprocess = handleAudioProcess;
+		scriptNode.connect(audioCtx.destination);
+
+		scriptNodeRef.current = scriptNode;
+	};
+
+	// ===== AudioContext 종료 =====
+	const closeAudioContext = () => {
+		if (scriptNodeRef.current) {
+			scriptNodeRef.current.disconnect();
+			scriptNodeRef.current.onaudioprocess = null;
+			scriptNodeRef.current = null;
+		}
+		if (audioContextRef.current) {
+			audioContextRef.current.close();
+			audioContextRef.current = null;
+		}
+	};
+
+	// ===== ScriptProcessorNode 처리 =====
+	const handleAudioProcess = (audioProcessingEvent) => {
+		const output = audioProcessingEvent.outputBuffer.getChannelData(0);
+		const bufferSize = output.length;
+
+		let offset = 0;
+		let currentPos = currentChunkPos; // 임시 변수로
+
+		while (offset < bufferSize && pcmDataQueueRef.current.length > 0) {
+			const currentChunk = pcmDataQueueRef.current[0];
+			const remainInChunk = currentChunk.length - currentPos;
+			const needed = bufferSize - offset;
+			const toCopy = Math.min(remainInChunk, needed);
+
+			output.set(currentChunk.subarray(currentPos, currentPos + toCopy), offset);
+
+			offset += toCopy;
+			currentPos += toCopy;
+
+			if (currentPos >= currentChunk.length) {
+				pcmDataQueueRef.current.shift();
+				currentPos = 0;
+			}
+		}
+
+		while (offset < bufferSize) {
+			output[offset++] = 0; // 무음
+		}
+
+		setCurrentChunkPos(currentPos);
+	};
+
+	// ===== SSE 메시지 처리 =====
+	const processSseMessage = (parsed) => {
+		const { step, content } = parsed;
+
+		if (step === 'transcription') {
+			setMessages((prev) => [...prev, { role: 'user', content, grammarFeedback: '' }]);
+		} else if (step === 'gpt_response') {
+			setMessages((prev) => {
+				if (prev.length > 0 && prev[prev.length - 1].role === 'assistant') {
+					const updated = {
+						...prev[prev.length - 1],
+						content: prev[prev.length - 1].content + content,
+					};
+					return [...prev.slice(0, -1), updated];
+				} else {
+					return [...prev, { role: 'assistant', content }];
+				}
+			});
+		} else if (step === 'grammar_feedback') {
+			setMessages((prev) => {
+				const newMsgs = [...prev];
+				for (let i = newMsgs.length - 1; i >= 0; i--) {
+					if (newMsgs[i].role === 'user') {
+						newMsgs[i].grammarFeedback = content;
+						break;
+					}
+				}
+				return newMsgs;
+			});
+		}
+		// ===== (2-A) tts_audio → PCM 실시간 재생을 위해 큐에 push =====
+		else if (step === 'tts_audio') {
+			const pcmUint8 = base64ToUint8Array(content);
+			const float32Arr = convert16BitPcmToFloat32(pcmUint8);
+			pcmDataQueueRef.current.push(float32Arr);
+		}
+		// ===== (2-B) tts_complete =====
+		else if (step === 'tts_complete') {
+			console.log('TTS 스트리밍 완료');
+			// 필요 시 sseRef.current?.close();
+		} else if (step === 'error') {
+			console.error('SSE error:', parsed.message);
+		}
+	};
+
+	// ===== base64 → Uint8Array =====
+	const base64ToUint8Array = (base64) => {
+		const binary = atob(base64);
+		const length = binary.length;
+		const bytes = new Uint8Array(length);
+		for (let i = 0; i < length; i++) {
+			bytes[i] = binary.charCodeAt(i);
+		}
+		return bytes;
+	};
+
+	// ===== 16bit PCM → float32 =====
+	const convert16BitPcmToFloat32 = (uint8Arr) => {
+		const length = uint8Arr.length / 2;
+		const float32Arr = new Float32Array(length);
+		for (let i = 0; i < length; i++) {
+			const sample = uint8Arr[2 * i] | (uint8Arr[2 * i + 1] << 8);
+			float32Arr[i] = sample / 32768; // -1.0 ~ +1.0
+		}
+		return float32Arr;
+	};
 
 	const toggleSidebar = () => {
 		setIsSidebarExpanded(!isSidebarExpanded);
 	};
 
+	// 피드백 토글 함수
 	const toggleFeedback = (index) => {
 		setFeedbackVisibility((prevState) => ({
 			...prevState,
-			[index]: !prevState[index], // 특정 메시지의 피드백 토글
+			[index]: !prevState[index],
 		}));
 	};
 
+	// 채팅방 목록 불러오기
 	useEffect(() => {
-		// 초기 상태 설정: 첫 번째 항목을 기본 선택
-		if (!selectedChat && chat_history.length > 0) {
-			setSelectedChat(chat_history[0]);
-		}
+		const fetchChatHistory = async () => {
+			setLoadingChats(true);
+			setErrorChats(null);
+			try {
+				const response = await get(`/chat/${user_id}`);
+				if (response.code === 200) {
+					// 응답 데이터 정렬: updated_at 내림차순
+					const sortedData = response.data.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+					setChatHistory(sortedData);
+					if (sortedData.length > 0 && !selectedChat) {
+						setSelectedChat(sortedData[0]);
+					}
+				} else {
+					setErrorChats(response.message || '채팅방을 불러오는 데 실패했습니다.');
+				}
+			} catch (err) {
+				setErrorChats('채팅방을 불러오는 도중 오류가 발생했습니다.');
+				console.error('채팅방 불러오기 오류:', err);
+			} finally {
+				setLoadingChats(false);
+			}
+		};
 
-		// 새로운 메시지가 추가될 때마다 스크롤이 아래로 이동
+		if (user_id) {
+			fetchChatHistory();
+		}
+	}, [user_id, selectedChat]);
+
+	// 선택된 채팅방의 메시지 불러오기
+	useEffect(() => {
+		const fetchMessages = async () => {
+			if (selectedChat) {
+				setLoadingMessages(true);
+				setErrorMessages(null);
+				try {
+					const response = await get(`/chat/${user_id}/${selectedChat.chat_id}`);
+					if (response.code === 200) {
+						setMessages(response.data.chat_history);
+					} else {
+						setErrorMessages(response.message || '메시지를 불러오는 데 실패했습니다.');
+					}
+				} catch (err) {
+					setErrorMessages('메시지를 불러오는 도중 오류가 발생했습니다.');
+					console.error('메시지 불러오기 오류:', err);
+				} finally {
+					setLoadingMessages(false);
+				}
+			}
+		};
+
+		fetchMessages();
+	}, [user_id, selectedChat]);
+
+	// 새로운 메시지가 추가될 때 스크롤을 아래로 이동
+	useEffect(() => {
 		chatContentRef.current?.scrollTo({
 			top: chatContentRef.current.scrollHeight,
 			behavior: 'smooth',
 		});
-	}, [messages, selectedChat, chat_history]);
+	}, [messages, selectedChat, chatHistory]);
+
+	// 새 채팅 생성 핸들러
+	const handleCreateChat = async () => {
+		if (!inputValue || !selectedImage) {
+			alert('제목과 캐릭터를 선택해주세요.');
+			return;
+		}
+
+		// character_name이 "미국" 또는 "영국"인지 확인
+		if (!['미국', '영국'].includes(selectedImage)) {
+			alert('유효하지 않은 캐릭터 이름입니다.');
+			return;
+		}
+
+		try {
+			const response = await post(`/chat/${user_id}/chat`, {
+				title: inputValue,
+				character_name: selectedImage,
+			});
+
+			if (response.code === 200) {
+				setChatHistory((prev) => [response.data, ...prev]);
+				setSelectedChat(response.data);
+				setIsModalOpen(false);
+			} else {
+				alert(response.message || '채팅 생성에 실패했습니다.');
+			}
+		} catch (error) {
+			console.error('새 채팅 생성 실패:', error);
+			alert('채팅 생성 중 오류가 발생했습니다.');
+		}
+	};
+	// ========== 녹음 시작 / 중지 메서드 ==========
+	const startRecording = async () => {
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			mediaRecorderRef.current = new MediaRecorder(stream);
+			audioChunksRef.current = [];
+
+			// MediaRecorder에서 데이터가 들어올 때마다 audioChunksRef에 push
+			mediaRecorderRef.current.ondataavailable = (event) => {
+				if (event.data.size > 0) {
+					audioChunksRef.current.push(event.data);
+				}
+			};
+
+			mediaRecorderRef.current.start();
+			console.log('녹음 시작!');
+		} catch (error) {
+			console.error('마이크 접근 오류:', error);
+		}
+	};
+
+	const stopRecording = async () => {
+		console.log('녹음 중지!');
+		if (!mediaRecorderRef.current) return;
+
+		// MediaRecorder 정지
+		mediaRecorderRef.current.stop();
+
+		// 녹음이 실제로 정지되고 onstop 콜백이 불리기 전까지는 잠깐의 지연이 있을 수 있음
+		mediaRecorderRef.current.onstop = async () => {
+			const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+			audioChunksRef.current = []; // 다음 녹음을 위해 초기화
+
+			// 녹음된 Blob을 서버에 전송
+			await handleSendRecordedAudio(audioBlob);
+		};
+	};
+
+	// 서버 전송 + SSE 스트리밍 수신
+	const handleSendRecordedAudio = async (audioBlob) => {
+		try {
+			if (!selectedChat) {
+				alert('채팅방 선택');
+				return;
+			}
+			const formData = new FormData();
+			formData.append('file', audioBlob, 'recorded.wav');
+
+			await postWithReadableStream(`/chat/${user_id}/${selectedChat.chat_id}`, formData, true, (chunk) => {
+				chunk.split('\n\n').forEach((part) => {
+					if (!part.trim()) return;
+					if (part.startsWith('data: ')) {
+						try {
+							const jsonStr = part.replace('data: ', '').trim();
+							const parsed = JSON.parse(jsonStr);
+							processSseMessage(parsed);
+						} catch (e) {
+							console.error('SSE JSON 파싱 오류:', e);
+						}
+					}
+				});
+			});
+		} catch (err) {
+			console.error('오디오 전송/스트리밍 오류:', err);
+		}
+	};
+
+	const handleRecordButtonClick = () => {
+		setIsRecording((prev) => {
+			const next = !prev;
+			if (!prev) startRecording();
+			else stopRecording();
+			return next;
+		});
+	};
 
 	return (
 		<Layout>
@@ -78,20 +384,27 @@ const IStudy = () => {
 							<Button varient='plus' rounded='sm' padding='none' size='wide' onClick={() => setIsModalOpen(true)}>
 								+
 							</Button>
-							<SubjectList>
-								{chat_history.map((history, index) => (
-									<SubjectItem
-										key={index}
-										onClick={() => setSelectedChat(history)} // 클릭 시 선택된 채팅 데이터 업데이트
-									>
-										<span role='img' aria-label='flag'>
-											🇺🇸
-										</span>
-										<SubjectText>{history.subject}</SubjectText>
-										<DateDisplay>{history.updated_at}</DateDisplay>
-									</SubjectItem>
-								))}
-							</SubjectList>
+							{loadingChats ? (
+								<p>Loading...</p>
+							) : errorChats ? (
+								<p style={{ color: 'red' }}>{errorChats}</p>
+							) : (
+								<SubjectList>
+									{chatHistory.map((history) => (
+										<SubjectItem key={history.chat_id} onClick={() => setSelectedChat(history)}>
+											<img
+												src={history.character_name === '미국' ? '/us_icon.png' : '/uk_icon.png'}
+												alt={history.character_name === '미국' ? 'us' : 'uk'}
+												style={{ width: '20px', height: '24px', marginRight: '0.3rem' }}
+											/>
+											<SubjectText>{history.title}</SubjectText>
+											<DateDisplay>
+												{new Date(history.updated_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
+											</DateDisplay>
+										</SubjectItem>
+									))}
+								</SubjectList>
+							)}
 						</>
 					) : (
 						<ToggleWrapper onClick={toggleSidebar}>
@@ -105,25 +418,31 @@ const IStudy = () => {
 					<ChatHeader>
 						<AngleLeftIcon />
 						<ChatTitle>
-							<TitleLarge>{selectedChat?.subject || 'Subject1'}</TitleLarge>
-							<TitleSmall>
-								{selectedChat ? `${selectedChat.create_at} ~ ${selectedChat.updated_at}` : 'yyyy.mm.dd ~ yyyy.mm.dd'}
-							</TitleSmall>
+							<TitleLarge>{selectedChat?.title || 'Start the conversation!'}</TitleLarge>
+							<TitleSmall>{selectedChat ? `${new Date(selectedChat.updated_at).toLocaleDateString()}` : ''}</TitleSmall>
 						</ChatTitle>
 					</ChatHeader>
 					<StyledHr />
 					<ChatContent ref={chatContentRef}>
-						{messages.map((message, index) => (
-							<ChatBubble
-								key={index}
-								message={message}
-								isFeedbackVisible={feedbackVisibility[index] || false}
-								toggleFeedback={() => toggleFeedback(index)}
-							/>
-						))}
+						{loadingMessages ? (
+							<p>Loading messages...</p>
+						) : errorMessages ? (
+							<p style={{ color: 'red' }}>{errorMessages}</p>
+						) : messages.length > 0 ? (
+							messages.map((message, index) => (
+								<ChatBubble
+									key={index}
+									message={message}
+									isFeedbackVisible={feedbackVisibility[index] || false}
+									toggleFeedback={() => toggleFeedback(index)}
+								/>
+							))
+						) : (
+							<p>Start the conversation!</p>
+						)}
 					</ChatContent>
 					<RecordSection>
-						<RecordButton where='istudy' />
+						<RecordButton where='istudy' isRecording={isRecording} onClick={handleRecordButtonClick} />
 					</RecordSection>
 				</ChatSection>
 			</MainContainer>
@@ -135,24 +454,16 @@ const IStudy = () => {
 
 					<h2>Create New Chat</h2>
 					<ImageSelector>
-						<Button padding='none' rounded='full' onClick={() => setSelectedImage('USA')}>
-							<img src='/public/usa.png' alt='USA' className={selectedImage === 'USA' ? 'selected' : ''} />
+						<Button padding='none' rounded='full' onClick={() => setSelectedImage('미국')}>
+							<img src='/usa.png' alt='미국' className={selectedImage === '미국' ? 'selected' : ''} />
 						</Button>
-						<Button padding='none' rounded='full' onClick={() => setSelectedImage('UK')}>
-							<img src='/public/uk.png' alt='UK' className={selectedImage === 'UK' ? 'selected' : ''} />
+						<Button padding='none' rounded='full' onClick={() => setSelectedImage('영국')}>
+							<img src='/uk.png' alt='영국' className={selectedImage === '영국' ? 'selected' : ''} />
 						</Button>
 					</ImageSelector>
 					<InputBox placeholder='Enter your topic' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
 					<ButtonWrapper>
-						<Button
-							varient='white'
-							rounded='sm'
-							border='black'
-							onClick={() => {
-								console.log('Chat created:', selectedImage, inputValue);
-								setIsModalOpen(false);
-							}}
-						>
+						<Button varient='white' rounded='sm' border='black' onClick={handleCreateChat}>
 							Create
 						</Button>
 						<Button varient='black' border='black' rounded='sm' onClick={() => setIsModalOpen(false)}>
@@ -172,7 +483,7 @@ const MainContainer = styled.div`
 	grid-gap: 1rem;
 	background-color: var(--neutral-10);
 	transition: grid-template-columns 0.3s ease;
-	height: 100%;
+	height: 70vh;
 `;
 
 const Sidebar = styled.aside`
@@ -187,6 +498,14 @@ const Sidebar = styled.aside`
 		width 0.3s ease,
 		padding 0.3s ease;
 	position: relative;
+	overflow-y: scroll;
+	border-bottom: 6px solid #d4d5c8;
+	-ms-overflow-style: none; /* IE 및 Edge용 */
+	scrollbar-width: none; /* Firefox용 */
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
 `;
 
 const SidebarHeader = styled.div`
@@ -254,7 +573,7 @@ const SubjectItem = styled.li`
 
 const SubjectText = styled.span`
 	flex-grow: 1;
-	margin: 0 0.5rem; /* 텍스트의 좌우 간격 */
+	margin: 0 0.1rem; /* 텍스트의 좌우 간격 */
 	font-size: 1rem;
 	color: #333; /* 기본 텍스트 색상 */
 	overflow: hidden; /* 내용이 길어질 경우 숨김 처리 */
@@ -263,8 +582,9 @@ const SubjectText = styled.span`
 `;
 
 const DateDisplay = styled.span`
-	font-size: 0.875rem;
+	font-size: 0.7rem;
 	color: #6c757d;
+	white-space: nowrap; /* 한 줄로 표시 */
 `;
 
 const ChatSection = styled.section`

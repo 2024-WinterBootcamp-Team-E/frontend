@@ -21,8 +21,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcEleme
 const DashboardGraphs = () => {
 	const [averageScores, setAverageScores] = useState([]); // 평균 점수 초기 상태 빈 배열
 	const [weakPoints, setWeakPoints] = useState([]); // 약점 초기 상태 빈 배열
-	// const userId = sessionStorage.getItem('userId');
-	const userId = 19;
+	const userId = sessionStorage.getItem('userId');
 
 	useEffect(() => {
 		// 평균 점수 Get
