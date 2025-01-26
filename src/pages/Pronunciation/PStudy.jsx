@@ -139,6 +139,7 @@ const PStudy = () => {
 
 	const handleScoreUpdate = (scoreValue) => {
 		setPronScore(scoreValue);
+		console.log(scoreValue);
 		if (scoreValue <= 30) setEvaluation('danger');
 		else if (scoreValue <= 60) setEvaluation('warning');
 		else setEvaluation('success');
@@ -256,8 +257,8 @@ const PStudy = () => {
 							)}
 						</ContentSection>
 						<FeedbackSection $evaluation={evaluation}>
-							<ProgressCircle $evaluation={evaluation}>{pronscore}%</ProgressCircle>
-							<FeedbackText $evaluation={evaluation}>
+							<ProgressCircle evaluation={evaluation}>{pronscore}%</ProgressCircle>
+							<FeedbackText evaluation={evaluation}>
 								<p>{feedbackText}</p>
 							</FeedbackText>
 							<Button varient='white' rounded='xl' aria-label='Continue to Next' onClick={handleContinue}>
@@ -275,11 +276,11 @@ export default PStudy;
 // Styled Components
 const MainContainer = styled.div`
 	display: grid;
-	grid-template-columns: ${(props) => (props.expanded ? '20% 80%' : '5% 100%')};
+	grid-template-columns: ${(props) => (props.expanded ? '20% 80%' : '5% 95%')};
 	grid-gap: 1rem;
 	background-color: traansparents;
 	transition: grid-template-columns 0.3s ease;
-	height: 70vh;
+	height: 85vh;
 	padding: 1rem 2rem 2rem 2rem;
 `;
 
@@ -296,7 +297,7 @@ const Sidebar = styled.aside`
 		padding 0.3s ease;
 	position: relative;
 	overflow-y: scroll;
-	max-height: 70vh;
+	/* max-height: 70vh; */
 	border-bottom: 6px solid #d4d5c8;
 
 	-ms-overflow-style: none; /* IE 및 Edge용 */
@@ -466,6 +467,8 @@ const FeedbackSection = styled.div`
 	gap: 0.75rem;
 	padding: 1rem 2rem;
 	width: 100%;
+	height: fit-content;
+	max-height: 20vh;
 `;
 
 const ProgressCircle = styled.div`
@@ -491,6 +494,7 @@ const ProgressCircle = styled.div`
 	height: 4.5rem;
 	justify-content: center;
 	width: 4.5rem;
+	min-width: 4.5rem;
 `;
 
 const FeedbackText = styled.div`
@@ -509,12 +513,11 @@ const FeedbackText = styled.div`
 				case 'danger':
 					return 'var(--danger-pressed)';
 				case 'info':
+					return 'var(--info-pressed)';
 				default:
 					return 'var(--info-pressed)';
 			}
 		}};
-		${pretendard_bold}
-		${TextSizeL}
 	}
 	span {
 		color: ${(props) => {
