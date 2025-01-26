@@ -141,6 +141,7 @@ const IStudy = () => {
 				const newMsgs = [...prev];
 				for (let i = newMsgs.length - 1; i >= 0; i--) {
 					if (newMsgs[i].role === 'user') {
+						// grammarFeedback만 넣기
 						newMsgs[i].grammarFeedback = content;
 						break;
 					}
