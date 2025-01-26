@@ -1,23 +1,61 @@
 // DashboardPage.jsx
 import styled from 'styled-components';
+import { Edit } from '@styled-icons/boxicons-solid';
 import Layout from '@/components/Layout';
 import { pretendard_bold } from '@/GlobalStyle';
 import useAuthStore from '@/store/authStore';
 import Attendance from '@/components/Attendance';
 import DashboardGraphs from '@/components/DashboardGraphs';
+import Button from '@/components/Button';
+import { post } from '@/api';
 
 const DashboardPage = () => {
-	const { profile } = useAuthStore();
+	const { profile, setAuth } = useAuthStore();
+	const userId = sessionStorage.getItem('userId');
+
+	const postUserImage = async () => {
+		try {
+			const fileInput = document.createElement('input');
+			fileInput.type = 'file';
+			fileInput.accept = 'image/*';
+			fileInput.onchange = async (event) => {
+				const file = event.target.files[0];
+				if (!file) return;
+
+				const formData = new FormData();
+				formData.append('file', file);
+				try {
+					const response = await post(`/user/${userId}/image`, formData, true);
+					console.log('서버 응답:', response);
+					setAuth(true, {
+						image: response.data,
+						name: profile.name,
+						email: profile.email,
+					});
+				} catch (error) {
+					console.error('이미지 업로드 오류:', error);
+				}
+			};
+			fileInput.click();
+		} catch (error) {
+			console.error('postUserImage Error:', error);
+		}
+	};
 
 	return (
 		<Layout>
 			<PageContainer>
 				<CardGrid>
 					<Card>
-						<ProfileImage src={profile.image || '/UserImage.png'} alt='Profile' />
+						<Button padding='none' rounded='full' onClick={postUserImage}>
+							<ProfileImageWrapper>
+								<ProfileImage src={profile?.image || '/EAStudy.png'} alt='Profile' />
+								<EditIcon />
+							</ProfileImageWrapper>
+						</Button>
 						<div>
-							<Nickname>{profile.name}</Nickname>
-							<p>{profile.email || 'guest@example.com'}</p>
+							<Nickname>{profile?.name}</Nickname>
+							<p>{profile?.email || 'guest@example.com'}</p>
 						</div>
 					</Card>
 					<HistoryCard>
@@ -38,14 +76,14 @@ export default DashboardPage;
 
 // 이하 스타일 정의
 const PageContainer = styled.div`
+	${pretendard_bold};
+	align-items: center;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	width: 100%;
 	height: calc(100vh - 5rem);
-	padding: 1rem;
 	margin: 0;
-	${pretendard_bold}
+	padding: 1rem;
+	width: 100%;
 `;
 
 const CardGrid = styled.div`
@@ -67,20 +105,20 @@ const CardGrid = styled.div`
 `;
 
 const Card = styled.div`
-	position: relative;
-	overflow: hidden;
-	border-radius: 1rem;
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-	background-color: var(--neutral-10);
-	padding: 1rem;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: 1rem;
 	&:nth-child(1) {
 		grid-area: card1;
 	}
+	align-items: center;
+	background-color: var(--neutral-10);
+	border-radius: 1rem;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	justify-content: center;
+	overflow: hidden;
+	padding: 1rem;
+	position: relative;
 `;
 
 const HistoryCard = styled(Card)`
@@ -98,24 +136,55 @@ const CardTitle = styled.h2`
 	font-size: 1.5rem;
 	font-weight: bold;
 	text-align: left;
-	width: 100%;
 	text-align: start;
-`;
-
-const ContentBox = styled.div`
 	width: 100%;
-	height: calc(100% - 4rem);
-	background-color: ${(props) => props.bgColor || '#ffffff'};
-	border-radius: 0.5rem;
 `;
 
 const ProfileImage = styled.img`
-	width: 13rem;
-	height: 13rem;
+	width: 100%;
+	height: 100%;
 	border-radius: 50%;
 	object-fit: cover;
+	object-position: center;
 	background-color: var(--neutral-20);
-	box-shadow: 0rem 0rem 1rem var(--neutral-20);
+	box-shadow: 0 0 1rem var(--neutral-20);
+	transition: filter 0.3s ease; /* 어두워지는 전환 효과 */
+`;
+
+const EditIcon = styled(Edit)`
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 3rem;
+	height: 3rem;
+	color: var(--neutral-10, #ffffff);
+	background-color: transparent;
+	border-radius: 50%;
+	padding: 0.5rem;
+	opacity: 0;
+	visibility: hidden;
+	transition:
+		opacity 0.3s ease,
+		visibility 0.3s ease; /* 아이콘 전환 효과 */
+	cursor: pointer;
+`;
+
+const ProfileImageWrapper = styled.div`
+	position: relative;
+	width: 13rem;
+	height: 13rem;
+
+	&:hover {
+		${ProfileImage} {
+			filter: brightness(0.8); /* 이미지 어둡게 */
+		}
+
+		${EditIcon} {
+			opacity: 1; /* 아이콘 표시 */
+			visibility: visible;
+		}
+	}
 `;
 
 const Nickname = styled.h3`
