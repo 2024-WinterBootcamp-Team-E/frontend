@@ -30,7 +30,6 @@ const SignInPage = () => {
 			// 세션 스토리지에 사용자 ID 저장
 			sessionStorage.setItem('userId', data.data);
 
-			alert('로그인 성공! 유저 ID: ' + data.data);
 			navigate('/'); // 메인 페이지로 이동
 		} catch (error) {
 			console.error('로그인 실패:', error);

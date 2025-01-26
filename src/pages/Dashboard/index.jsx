@@ -5,19 +5,53 @@ import { pretendard_bold } from '@/GlobalStyle';
 import useAuthStore from '@/store/authStore';
 import Attendance from '@/components/Attendance';
 import DashboardGraphs from '@/components/DashboardGraphs';
+import Button from '@/components/Button';
+import { post } from '@/api';
 
 const DashboardPage = () => {
-	const { profile } = useAuthStore();
+	const { profile, setAuth } = useAuthStore();
+	const userId = sessionStorage.getItem('userId');
+
+	const postUserImage = async () => {
+		try {
+			const fileInput = document.createElement('input');
+			fileInput.type = 'file';
+			fileInput.accept = 'image/*';
+			fileInput.onchange = async (event) => {
+				const file = event.target.files[0];
+				if (!file) return;
+
+				const formData = new FormData();
+				formData.append('file', file);
+				try {
+					const response = await post(`/user/${userId}/image`, formData, true);
+					console.log('서버 응답:', response);
+					setAuth(true, {
+						image: response.data,
+						name: profile.name,
+						email: profile.email,
+					});
+				} catch (error) {
+					console.error('이미지 업로드 오류:', error);
+				}
+			};
+			fileInput.click();
+		} catch (error) {
+			console.error('postUserImage Error:', error);
+		}
+	};
 
 	return (
 		<Layout>
 			<PageContainer>
 				<CardGrid>
 					<Card>
-						<ProfileImage src={profile.image || '/UserImage.png'} alt='Profile' />
+						<Button padding='none' rounded='full' onClick={postUserImage}>
+							<ProfileImage src={profile?.image || '/EAStudy.png'} alt='Profile' />
+						</Button>
 						<div>
-							<Nickname>{profile.name}</Nickname>
-							<p>{profile.email || 'guest@example.com'}</p>
+							<Nickname>{profile?.name}</Nickname>
+							<p>{profile?.email || 'guest@example.com'}</p>
 						</div>
 					</Card>
 					<HistoryCard>
@@ -114,6 +148,7 @@ const ProfileImage = styled.img`
 	height: 13rem;
 	border-radius: 50%;
 	object-fit: cover;
+	object-position: center;
 	background-color: var(--neutral-20);
 	box-shadow: 0rem 0rem 1rem var(--neutral-20);
 `;
