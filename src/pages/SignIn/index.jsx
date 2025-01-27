@@ -85,6 +85,7 @@ const SignInContainer = styled.div`
 	height: 100%;
 	background-color: var(--secondary-main);
 	${pretendard_bold}
+	margin-top:10vh;
 `;
 
 const SignInForm = styled.div`

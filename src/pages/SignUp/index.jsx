@@ -135,6 +135,7 @@ const SignUpContainer = styled.div`
 	height: 100%;
 	background-color: var(--secondary-main);
 	${pretendard_bold}
+	margin-top:5vh;
 `;
 
 const SignUpForm = styled.form`
