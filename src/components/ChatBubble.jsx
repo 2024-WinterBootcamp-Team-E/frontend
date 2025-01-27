@@ -1,15 +1,18 @@
 import styled from 'styled-components';
 import { AngleUp, AngleDown } from '@styled-icons/fa-solid';
+import useAuthStore from '@/store/authStore';
 
 const ChatBubble = ({ message, isFeedbackVisible, toggleFeedback }) => {
 	const { role, content, grammar_feedback, grammarFeedback } = message;
 	const gf = grammarFeedback || grammar_feedback;
+	const userId = sessionStorage.getItem('userId');
+	const { profile } = useAuthStore();
 	return (
 		<ChatBubbleWrapper role={role}>
 			{/* 닉네임과 프로필 이미지 */}
-			<ProfileImage src={role === 'user' ? '/UserImage.png' : '/AIImage.jpg'} alt={`${role} Profile`} />
+			<ProfileImage src={role === 'user' ? profile.image : '/AIImage.jpg'} alt={`${role} Profile`} />
 			<BubbleWrapper role={role}>
-				<ChatterName role={role}>{role === 'user' ? 'Nickname' : 'AIName'}</ChatterName>
+				<ChatterName role={role}>{role === 'user' ? profile.name : 'AI'}</ChatterName>
 
 				{/* 말풍선과 피드백 */}
 				<BubbleContainer isUser={role === 'user'}>
