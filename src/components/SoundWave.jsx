@@ -140,6 +140,17 @@ const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) 
 						const dataStr = part.replace('data: ', '');
 						if (onSSEUpdate) onSSEUpdate(dataStr);
 					}
+					// 핵심: result: 가 들어온 경우 (거대한 JSON 파싱)
+					else if (part.startsWith('result:')) {
+						const jsonString = part.replace('result:', '').trim();
+						try {
+							const parsedData = JSON.parse(jsonString);
+							// PStudy로 JSON 결과 전달 (props 활용)
+							onSSEUpdate && onSSEUpdate(parsedData, 'result');
+						} catch (parseError) {
+							console.error('JSON 파싱 실패:', parseError);
+						}
+					}
 				});
 			});
 			console.log('스트림 처리 완료');

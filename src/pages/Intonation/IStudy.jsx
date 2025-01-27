@@ -33,94 +33,59 @@ const IStudy = () => {
 	const [isRecording, setIsRecording] = useState(false);
 	const mediaRecorderRef = useRef(null);
 	const audioChunksRef = useRef([]);
-	// ===== (1) Web Audio API 사용 위한 ref =====
+	// ========== MP3 재생 관련 ==========
 	const audioContextRef = useRef(null);
-	const scriptNodeRef = useRef(null);
-	const sseRef = useRef(null);
-
-	// PCM 버퍼를 쌓을 큐
-	const pcmDataQueueRef = useRef([]);
-	// 현재 chunk에서 얼마나 소비됐는지
-	const [currentChunkPos, setCurrentChunkPos] = useState(0);
-
+	const isPlayingRef = useRef(false);
+	const audioQueueRef = useRef([]);
 	// ===== (2) 컴포넌트 마운트 시점에 AudioContext 초기화 =====
 	useEffect(() => {
 		initAudioContext();
 		return () => {
-			// 언마운트 시점에 정리
-			closeAudioContext();
-			if (sseRef.current) {
-				sseRef.current.close();
-				sseRef.current = null;
+			if (audioContextRef.current) {
+				audioContextRef.current.close();
+				audioContextRef.current = null;
 			}
 		};
 	}, []);
 
-	// ===== AudioContext 초기화 =====
 	const initAudioContext = () => {
 		if (!window.AudioContext) {
 			console.warn('이 브라우저는 Web Audio API를 지원하지 않습니다.');
 			return;
 		}
-		const audioCtx = new AudioContext({ sampleRate: 24000 }); // 서버 PCM 샘플레이트에 맞춰줍니다
-		audioContextRef.current = audioCtx;
-
-		// ScriptProcessorNode
-		const scriptNode = audioCtx.createScriptProcessor(2048, 1, 1);
-		scriptNode.onaudioprocess = handleAudioProcess;
-		scriptNode.connect(audioCtx.destination);
-
-		scriptNodeRef.current = scriptNode;
+		audioContextRef.current = new AudioContext();
 	};
-
-	// ===== AudioContext 종료 =====
-	const closeAudioContext = () => {
-		if (scriptNodeRef.current) {
-			scriptNodeRef.current.disconnect();
-			scriptNodeRef.current.onaudioprocess = null;
-			scriptNodeRef.current = null;
+	// ===== TTS 오디오 재생을 위한 함수 추가 =====
+	const playAudioFromBytes = (bytes) => {
+		if (isPlayingRef.current) {
+			// 이미 재생 중이라면 큐에 추가
+			audioQueueRef.current.push(bytes);
+			return;
 		}
-		if (audioContextRef.current) {
-			audioContextRef.current.close();
-			audioContextRef.current = null;
-		}
-	};
 
-	// ===== ScriptProcessorNode 처리 =====
-	const handleAudioProcess = (audioProcessingEvent) => {
-		const output = audioProcessingEvent.outputBuffer.getChannelData(0);
-		const bufferSize = output.length;
-
-		let offset = 0;
-		let currentPos = currentChunkPos; // 임시 변수로
-
-		while (offset < bufferSize && pcmDataQueueRef.current.length > 0) {
-			const currentChunk = pcmDataQueueRef.current[0];
-			const remainInChunk = currentChunk.length - currentPos;
-			const needed = bufferSize - offset;
-			const toCopy = Math.min(remainInChunk, needed);
-
-			output.set(currentChunk.subarray(currentPos, currentPos + toCopy), offset);
-
-			offset += toCopy;
-			currentPos += toCopy;
-
-			if (currentPos >= currentChunk.length) {
-				pcmDataQueueRef.current.shift();
-				currentPos = 0;
+		const blob = new Blob([bytes], { type: 'audio/mpeg' }); // MP3 형식으로 가정
+		const url = URL.createObjectURL(blob);
+		const audio = new Audio(url);
+		isPlayingRef.current = true;
+		audio.play().catch((err) => {
+			console.error('오디오 재생 오류:', err);
+			URL.revokeObjectURL(url);
+			isPlayingRef.current = false;
+			// 필요 시 사용자에게 알림 표시
+			alert('오디오 재생 중 오류가 발생했습니다.');
+		});
+		audio.onended = () => {
+			URL.revokeObjectURL(url); // 메모리 해제
+			isPlayingRef.current = false;
+			if (audioQueueRef.current.length > 0) {
+				const nextBytes = audioQueueRef.current.shift();
+				playAudioFromBytes(nextBytes);
 			}
-		}
-
-		while (offset < bufferSize) {
-			output[offset++] = 0; // 무음
-		}
-
-		setCurrentChunkPos(currentPos);
+		};
 	};
-
 	// ===== SSE 메시지 처리 =====
 	const processSseMessage = (parsed) => {
-		const { step, content } = parsed;
+		const { step, content, sentence_id } = parsed;
 
 		if (step === 'transcription') {
 			setMessages((prev) => [...prev, { role: 'user', content, grammarFeedback: '' }]);
@@ -148,44 +113,62 @@ const IStudy = () => {
 				}
 				return newMsgs;
 			});
-		}
-		// ===== (2-A) tts_audio → PCM 실시간 재생을 위해 큐에 push =====
-		else if (step === 'tts_audio') {
-			const pcmUint8 = base64ToUint8Array(content);
-			const float32Arr = convert16BitPcmToFloat32(pcmUint8);
-			pcmDataQueueRef.current.push(float32Arr);
-		}
-		// ===== (2-B) tts_complete =====
-		else if (step === 'tts_complete') {
-			console.log('TTS 스트리밍 완료');
-			// 필요 시 sseRef.current?.close();
+		} else if (step === 'tts_audio') {
+			if (!sentence_id) {
+				console.warn('tts_audio 메시지에 sentence_id가 없습니다.');
+				return;
+			}
+			const mp3Bytes = base64ToUint8Array(content);
+			playAudioFromBytes(mp3Bytes);
 		} else if (step === 'error') {
 			console.error('SSE error:', parsed.message);
 		}
 	};
 
-	// ===== base64 → Uint8Array =====
+	// base64 → Uint8Array
 	const base64ToUint8Array = (base64) => {
-		const binary = atob(base64);
-		const length = binary.length;
-		const bytes = new Uint8Array(length);
-		for (let i = 0; i < length; i++) {
-			bytes[i] = binary.charCodeAt(i);
+		try {
+			const binary = atob(base64);
+			const length = binary.length;
+			const bytes = new Uint8Array(length);
+			for (let i = 0; i < length; i++) {
+				bytes[i] = binary.charCodeAt(i);
+			}
+			return bytes;
+		} catch (error) {
+			console.error('Base64 디코딩 오류:', error);
+			// 사용자에게 오류 알림 표시 (예시)
+			alert('오디오 데이터를 디코딩하는 중 오류가 발생했습니다.');
+			return new Uint8Array();
 		}
-		return bytes;
 	};
 
-	// ===== 16bit PCM → float32 =====
-	const convert16BitPcmToFloat32 = (uint8Arr) => {
-		const length = uint8Arr.length / 2;
-		const float32Arr = new Float32Array(length);
-		for (let i = 0; i < length; i++) {
-			const sample = uint8Arr[2 * i] | (uint8Arr[2 * i + 1] << 8);
-			float32Arr[i] = sample / 32768; // -1.0 ~ +1.0
-		}
-		return float32Arr;
-	};
+	const playTtsQueue = () => {
+		if (isPlayingRef.current) return; // 이미 재생 중이면 대기
+		if (ttsPlaybackQueueRef.current.length === 0) return; // 큐가 비어있으면 대기
 
+		const audioBuffer = ttsPlaybackQueueRef.current.shift();
+		if (audioBuffer && audioContextRef.current) {
+			isPlayingRef.current = true;
+			audioContextRef.current
+				.decodeAudioData(audioBuffer)
+				.then((decodedData) => {
+					const source = audioContextRef.current.createBufferSource();
+					source.buffer = decodedData;
+					source.connect(audioContextRef.current.destination);
+					source.start(0);
+					source.onended = () => {
+						isPlayingRef.current = false;
+						playTtsQueue(); // 다음 오디오 재생
+					};
+				})
+				.catch((err) => {
+					console.error('MP3 디코딩 오류:', err);
+					isPlayingRef.current = false;
+					playTtsQueue(); // 에러 발생 시 다음 오디오 재생 시도
+				});
+		}
+	};
 	const toggleSidebar = () => {
 		setIsSidebarExpanded(!isSidebarExpanded);
 	};
