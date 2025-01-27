@@ -11,32 +11,80 @@ import { get } from '@/api';
 import { ToggleOff, ToggleOn } from '@styled-icons/fa-solid';
 import { useRecordStore } from '@/store'; // Zustand 스토어 import
 
+// (1) Word 색상 처리 함수들
+function getWordColor(wordObj) {
+	const accuracy = wordObj?.PronunciationAssessment?.AccuracyScore ?? 0;
+	const errorType = wordObj?.PronunciationAssessment?.ErrorType ?? 'None';
+
+	if (errorType === 'Mispronunciation' || accuracy < 50) {
+		return 'red';
+	} else if (accuracy < 80) {
+		return 'orange';
+	} else {
+		return 'black';
+	}
+}
+
+function getBreakHighlight(wordObj) {
+	const breakInfo = wordObj?.PronunciationAssessment?.Feedback?.Prosody?.Break;
+	if (!breakInfo) return null;
+
+	if (breakInfo.UnexpectedBreak?.Confidence > 0.5) {
+		return <span style={{ color: 'red' }}> | </span>;
+	}
+	return null;
+}
+
+// (2) 원본 문장에 색상 입히는 함수
+function highlightSentence(originalSentence, bestResult) {
+	if (!bestResult) return originalSentence;
+	const words = bestResult.Words || [];
+	const tokens = originalSentence.split(' ');
+
+	return tokens.map((token, i) => {
+		const wordObj = words[i];
+		if (!wordObj) {
+			return <span key={i}>{token} </span>;
+		}
+		const color = getWordColor(wordObj);
+		const breakEl = getBreakHighlight(wordObj);
+
+		return (
+			<React.Fragment key={i}>
+				<span style={{ color }}>{token}</span>
+				{breakEl}{' '}
+			</React.Fragment>
+		);
+	});
+}
+
 const PStudy = () => {
 	const location = useLocation();
 	const searchParams = new URLSearchParams(location.search);
-	const category = searchParams.get('category'); // 쿼리 파라미터에서 category 추출
-	const [evaluation, setEvaluation] = useState('info'); // info, success, warning, danger
-	const [sentenceData, setSentenceData] = useState(null); // 데이터 상태 추가
+	const category = searchParams.get('category');
+
+	const [evaluation, setEvaluation] = useState('info');
+	const [sentenceData, setSentenceData] = useState(null);
 	const [pronscore, setPronScore] = useState(0);
 	const [feedbackText, setFeedbackText] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [isPlaying, setIsPlaying] = useState(false);
-	const audioRef = useRef(null); // audio 엘리먼트를 위한 ref
-	const userId = sessionStorage.getItem('userId'); // 유저id 가져오는 함수
-	// 사이드바 관련 상태 및 함수
+	const audioRef = useRef(null);
+	const [pronResult, setPronResult] = useState(null);
+
 	const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
 	const [selectedSentence, setSelectedSentence] = useState(null);
-	const [sentences, setSentences] = useState([]); // API로부터 받아온 문장 데이터 저장
+	const [sentences, setSentences] = useState([]);
 
-	const { recordedAudio, resetRecordedAudio } = useRecordStore(); // reset 메서드 가져오기
+	const { recordedAudio, resetRecordedAudio } = useRecordStore();
 	useEffect(() => {
 		console.log('recordedAudio changed', recordedAudio);
 	}, [recordedAudio]);
+
 	const toggleSidebar = () => {
 		setIsSidebarExpanded(!isSidebarExpanded);
 	};
 
-	// 상황 타입별 매핑
 	const categoryMapping = {
 		Travel: '여행',
 		Business: '비즈니스',
@@ -44,7 +92,7 @@ const PStudy = () => {
 		Movie: '영화',
 	};
 
-	// category 변화 시 상황에 맞는 문장 데이터 가져오기
+	// 문장 목록 가져오기
 	useEffect(() => {
 		const fetchSentences = async () => {
 			const situation = categoryMapping[category] || '';
@@ -58,7 +106,7 @@ const PStudy = () => {
 		if (category) fetchSentences();
 	}, [category]);
 
-	// sentences 변화 시 초기 선택된 문장 설정
+	// 문장 목록이 바뀌면 첫 문장 선택
 	useEffect(() => {
 		if (!selectedSentence && sentences.length > 0) {
 			setSelectedSentence(sentences[0]);
@@ -69,31 +117,31 @@ const PStudy = () => {
 		? sentences.findIndex((sentence) => sentence.sentence_id === selectedSentence.sentence_id)
 		: -1;
 
-	// selectedSentence 변화 시 해당 문장 데이터 가져오기
+	// 선택된 문장 데이터 가져오기
 	useEffect(() => {
 		const fetchSentenceData = async () => {
 			if (!selectedSentence) return;
 			setIsLoading(true);
 			try {
 				const response = await get(`/speech/${selectedSentence.sentence_id}`);
-				setSentenceData(response.data); // 데이터 상태 저장
+				setSentenceData(response.data);
 				console.log('Fetched Sentence Data:', response);
 			} catch (error) {
 				console.error('Error fetching sentence data:', error);
 			} finally {
-				setIsLoading(false); // 로딩 상태 업데이트
+				setIsLoading(false);
 			}
 		};
 		fetchSentenceData();
 	}, [selectedSentence]);
 
-	// 선택된 문장 변경 시 recordedAudio 및 feedbackText 초기화
+	// 문장 바뀔 때마다 녹음 및 피드백 리셋
 	useEffect(() => {
 		resetRecordedAudio();
 		setFeedbackText('');
 	}, [selectedSentence, resetRecordedAudio]);
 
-	// 컴포넌트 언마운트 시 recordedAudio 초기화
+	// unmount 시에도 초기화
 	useEffect(() => {
 		return () => {
 			resetRecordedAudio();
@@ -103,15 +151,10 @@ const PStudy = () => {
 	useEffect(() => {
 		if (audioRef.current) {
 			const audioElement = audioRef.current;
-
-			// 오디오 재생이 끝났을 때 isPlaying을 false로 설정
 			const handleAudioEnded = () => {
 				setIsPlaying(false);
 			};
-
 			audioElement.addEventListener('ended', handleAudioEnded);
-
-			// cleanup: 이벤트 리스너 제거
 			return () => {
 				audioElement.removeEventListener('ended', handleAudioEnded);
 			};
@@ -121,12 +164,12 @@ const PStudy = () => {
 	const handlePlayAudio = () => {
 		if (audioRef.current) {
 			if (isPlaying) {
-				audioRef.current.pause(); // 일시정지
-				setIsPlaying(false); // 재생 상태를 false로 설정
+				audioRef.current.pause();
+				setIsPlaying(false);
 			} else {
 				if (sentenceData && sentenceData.voice_url) {
-					audioRef.current.src = sentenceData.voice_url; // 오디오 URL 설정
-					audioRef.current.play(); // 재생
+					audioRef.current.src = sentenceData.voice_url;
+					audioRef.current.play();
 					setIsPlaying(true);
 				}
 			}
@@ -145,20 +188,19 @@ const PStudy = () => {
 		else setEvaluation('success');
 	};
 
-	const handleSSEUpdate = (textChunk) => {
-		setFeedbackText((prev) => prev + textChunk);
+	const handleSSEUpdate = (data, type) => {
+		if (type === 'result') {
+			setPronResult(data);
+		} else {
+			setFeedbackText((prev) => prev + data);
+		}
 	};
 
 	const handleContinue = () => {
-		// 현재 선택된 문장의 인덱스를 찾음
 		const currentIndex = selectedSentence
 			? sentences.findIndex((sentence) => sentence.sentence_id === selectedSentence.sentence_id)
 			: -1;
-
-		// 다음 인덱스 계산
 		const nextIndex = currentIndex + 1;
-
-		// 다음 문장이 존재하면 선택된 문장을 업데이트
 		if (nextIndex < sentences.length) {
 			resetRecordedAudio();
 			setSelectedSentence(sentences[nextIndex]);
@@ -167,27 +209,27 @@ const PStudy = () => {
 		}
 	};
 
-	// sentenceId를 selectedSentence에서 동적으로 가져옴
 	const dynamicSentenceId = selectedSentence ? selectedSentence.sentence_id : null;
+
 	useEffect(() => {
-		// 상태 초기화를 Promise.resolve()를 사용하여 마이크로태스크 큐에 넣기
 		Promise.resolve().then(() => {
 			resetRecordedAudio();
 			setEvaluation('info');
 			setPronScore(0);
 		});
-
-		// cleanup 함수에서도 초기화
 		return () => {
 			resetRecordedAudio();
 		};
 	}, [selectedSentence?.sentence_id]);
+
 	const handleSelectSentence = (sentenceItem) => {
-		// 1) 오디오 먼저 reset
 		resetRecordedAudio();
-		// 2) 그리고 나서 문장 변경
 		setSelectedSentence(sentenceItem);
 	};
+
+	// pronResult에서 NBest[0] 얻기
+	const bestResult = pronResult?.NBest?.[0];
+
 	return (
 		<Layout>
 			<MainContainer expanded={isSidebarExpanded}>
@@ -203,9 +245,9 @@ const PStudy = () => {
 							</SidebarHeader>
 							<StyledHr />
 							<SubjectList>
-								{sentences.map((sentenceItem, index) => (
+								{sentences.map((sentenceItem) => (
 									<SubjectItem
-										key={sentenceItem.sentence_id} // key를 고유한 ID로 변경
+										key={sentenceItem.sentence_id}
 										active={dynamicSentenceId === sentenceItem.sentence_id}
 										onClick={() => handleSelectSentence(sentenceItem)}
 									>
@@ -220,6 +262,8 @@ const PStudy = () => {
 						</ToggleWrapper>
 					)}
 				</Sidebar>
+
+				{/* 메인 콘텐츠 영역 */}
 				<MainContent>
 					<StudyContainer>
 						<ProgressSection>
@@ -228,13 +272,21 @@ const PStudy = () => {
 							</p>
 							<a href='/pronunciation'>Quit</a>
 						</ProgressSection>
+
 						<ContentSection>
 							{sentenceData ? (
 								<>
 									<QuestionContainer>
 										<PlayButton aria-label='Play Question' isPlaying={isPlaying} onClick={handlePlayAudio} />
-										<h3>{sentenceData.content}</h3>
+										{/* 문장에 색상 입히기 */}
+										<h3>
+											{highlightSentence(
+												sentenceData.content,
+												bestResult, // pronResult의 NBest[0] 전달
+											)}
+										</h3>
 									</QuestionContainer>
+
 									<AnswerContainer>
 										<SoundWave
 											key={dynamicSentenceId}
@@ -256,6 +308,7 @@ const PStudy = () => {
 								/>
 							)}
 						</ContentSection>
+
 						<FeedbackSection $evaluation={evaluation}>
 							<ProgressCircle evaluation={evaluation}>{pronscore}%</ProgressCircle>
 							<FeedbackText evaluation={evaluation}>
@@ -273,6 +326,7 @@ const PStudy = () => {
 };
 
 export default PStudy;
+
 // Styled Components
 const MainContainer = styled.div`
 	display: grid;
