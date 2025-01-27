@@ -8,6 +8,15 @@ import { pretendard_bold, pretendard_light, TextSizeXL, TextSizeL } from '@/Glob
 const HomePage = () => {
 	const navigate = useNavigate(); // navigate 함수 초기화
 
+  const startedMove = () => {
+		const userId = sessionStorage.getItem('userId');
+		if (userId) {
+			navigate('/intonation/istudy');
+		} else {
+			navigate('/signin');
+		}
+	};
+
 	return (
 		<Layout isLanding='landing'>
 			<Container>
@@ -15,7 +24,7 @@ const HomePage = () => {
 				<Subtitle>
 					It is a free speaking practice platform where you can start your practicing via AI trainer anywhere anytime.
 				</Subtitle>
-				<Button varient='black' rounded='full' padding='getstarted' onClick={() => navigate('/signin')}>
+				<Button varient='black' rounded='full' padding='getstarted' onClick={startedMove}>
 					<BoldLgText>
 						<span>Get Started</span>
 					</BoldLgText>
