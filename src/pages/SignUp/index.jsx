@@ -44,6 +44,9 @@ const SignUpPage = () => {
 			alert('네트워크 오류로 회원가입에 실패했습니다.');
 		}
 	};
+  const handleSignIn = () => {
+		navigate('/signin');
+	};
 	return (
 		<Layout>
 			<SignUpContainer>
@@ -111,6 +114,11 @@ const SignUpPage = () => {
 							<span>Sign Up</span>
 						</BoldLgText>
 					</Button>
+					<Divider />
+					<Text>Do you have an account?</Text>
+					<SignInButton varient='white' border='black' rounded='sm' size='full' padding='lg' onClick={handleSignIn}>
+						<BoldLgText>Sign In</BoldLgText>
+					</SignInButton>
 				</SignUpForm>
 			</SignUpContainer>
 		</Layout>
