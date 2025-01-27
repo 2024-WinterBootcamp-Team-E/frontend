@@ -91,13 +91,14 @@ const StyledInputWrapper = styled.div`
 `;
 
 const StyledLabel = styled.label`
-	${TextSizeS}
+	color: var(--neutral-100);
+	${TextSizeS};
 `;
 
 const StyledInput = styled.input`
 	${(props) => props.stateStyle}
-	${TextSizeM}
-
+	${TextSizeM} 
+  background-color: var(--neutral-10);
 	border-radius: var(--rounded-sm, 0.5rem);
 	height: 100%;
 	margin: 0;
