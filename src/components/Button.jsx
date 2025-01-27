@@ -67,19 +67,19 @@ const VARIENTS = {
 		}
 	`,
 	plus: css`
-		background-color: #0a0a0a80;
+		background-color: #29893f80;
 		color: var(--netural-10, #ffffff);
 
 		&:active {
-			background-color: #0a0a0a50;
+			background-color: #12752950;
 		}
 
 		&:focus {
-			background-color: #0a0a0a80;
+			background-color: #29893f80;
 		}
 
 		&:hover {
-			background-color: #0a0a0a50;
+			background-color: #12752950;
 		}
 	`,
 };
@@ -172,7 +172,7 @@ const SIZES = {
 		width: 100%;
 	`,
 	wide: css`
-		height: 1.7rem;
+		height: fit-content;
 		width: 100%;
 	`,
 };
