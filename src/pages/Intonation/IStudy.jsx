@@ -365,8 +365,8 @@ const IStudy = () => {
 								</ToggleWrapper>
 							</SidebarHeader>
 							<StyledHr />
-							<Button varient='plus' rounded='sm' padding='none' size='wide' onClick={() => setIsModalOpen(true)}>
-								+
+							<Button varient='plus' rounded='sm' padding='sm' size='wide' onClick={() => setIsModalOpen(true)}>
+								<PlusText>+</PlusText>
 							</Button>
 							{loadingChats ? (
 								<p>Loading...</p>
@@ -379,7 +379,11 @@ const IStudy = () => {
 											<img
 												src={history.character_name === '미국' ? '/us_icon.png' : '/uk_icon.png'}
 												alt={history.character_name === '미국' ? 'us' : 'uk'}
-												style={{ width: '20px', height: '24px', marginRight: '0.3rem' }}
+												style={{
+													width: '1.25rem',
+													height: '1.5rem',
+													marginRight: '0.3rem',
+												}}
 											/>
 											<SubjectText>{history.title}</SubjectText>
 											<DateDisplay>
@@ -467,7 +471,7 @@ const MainContainer = styled.div`
 	grid-gap: 1rem;
 	background-color: var(--neutral-10);
 	transition: grid-template-columns 0.3s ease;
-	height: 70vh;
+	height: 85vh;
 `;
 
 const Sidebar = styled.aside`
@@ -557,12 +561,13 @@ const SubjectItem = styled.li`
 
 const SubjectText = styled.span`
 	flex-grow: 1;
-	margin: 0 0.1rem; /* 텍스트의 좌우 간격 */
+	margin: 0 0.2rem; /* 텍스트의 좌우 간격 */
 	font-size: 1rem;
 	color: #333; /* 기본 텍스트 색상 */
 	overflow: hidden; /* 내용이 길어질 경우 숨김 처리 */
 	text-overflow: ellipsis; /* 생략 기호 추가 */
 	white-space: nowrap; /* 한 줄로 표시 */
+	text-align: start;
 `;
 
 const DateDisplay = styled.span`
@@ -709,6 +714,12 @@ const CloseButton = styled.button`
 	&:hover {
 		color: #000;
 	}
+`;
+
+const PlusText = styled.p`
+	font-size: 1.5rem;
+	color: var(--neutral-100);
+	text-align: center;
 `;
 
 export default IStudy;
