@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import WaveSurfer from 'wavesurfer.js';
+import MicrophonePlugin from 'wavesurfer.js/dist/plugin/wavesurfer.microphone.js'; // v6 경로
 import styled from 'styled-components';
 import PlayButton from '@/components/PlayButton';
 import RecordButton from '@/components/RecordButton';
@@ -13,6 +14,7 @@ const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) 
 	const audioChunksRef = useRef([]);
 	const containerRef = useRef(null); // WaveSurfer가 렌더링될 DOM 참조
 	const waveSurferRef = useRef(null); // WaveSurfer 인스턴스를 저장
+	const microphoneRef = useRef(null); // 마이크로폰 플러그인 인스턴스
 	const userId = sessionStorage.getItem('userId'); // 유저id 가져오는 함수
 
 	// 스토어에서 오디오 파일 상태와 메서드 가져오기
@@ -23,6 +25,7 @@ const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) 
 			waveSurferRef.current.destroy();
 		}
 
+		// WaveSurfer 초기화
 		waveSurferRef.current = WaveSurfer.create({
 			container: containerRef.current,
 			waveColor: '#11317d',
@@ -33,7 +36,13 @@ const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) 
 			barWidth: 4,
 			barGap: 2,
 			barRadius: 4,
+			plugins: [
+				MicrophonePlugin.create(), // 마이크로폰 플러그인 추가
+			],
 		});
+
+		// 마이크로폰 플러그인 인스턴스 가져오기
+		microphoneRef.current = waveSurferRef.current.microphone;
 
 		// 재생이 끝났을 때 isPlaying을 false로 설정
 		waveSurferRef.current.on('finish', () => {
@@ -48,11 +57,12 @@ const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) 
 
 	useEffect(() => {
 		let audioURL;
-		if (recordedAudio && waveSurferRef.current) {
+		if (recordedAudio && !isRecording) {
+			// 녹음이 완료되고 녹음 중이 아닐 때만 로드
 			audioURL = URL.createObjectURL(recordedAudio);
 			waveSurferRef.current.load(audioURL);
 		} else {
-			// 녹음된 오디오가 없을 경우 WaveSurfer 초기화
+			// 녹음 중일 때는 빈 파형으로 유지
 			if (waveSurferRef.current) {
 				waveSurferRef.current.empty();
 			}
@@ -64,7 +74,7 @@ const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) 
 				URL.revokeObjectURL(audioURL);
 			}
 		};
-	}, [recordedAudio]);
+	}, [recordedAudio, isRecording]);
 
 	const handlePlay = () => {
 		if (waveSurferRef.current) {
@@ -77,6 +87,9 @@ const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) 
 		try {
 			// 새로운 녹음에 앞서 부모 컴포넌트에서 피드백 텍스트 초기화
 			if (onResetFeedback) onResetFeedback();
+
+			// 마이크로폰 플러그인 시작
+			microphoneRef.current.start();
 
 			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 			const mediaRecorder = new MediaRecorder(stream);
@@ -96,7 +109,16 @@ const SoundWave = ({ sentenceId, onScoreUpdate, onSSEUpdate, onResetFeedback }) 
 				setRecordedAudio(audioBlob);
 				console.log('녹음이 완료되었습니다.');
 
-				// setTimeout을 제거하고 즉시 handlePostFeedback 호출
+				// 마이크로폰 플러그인 정지
+				microphoneRef.current.stop();
+
+				// 녹음된 오디오로 WaveSurfer 로드
+				if (waveSurferRef.current) {
+					const audioURL = URL.createObjectURL(audioBlob);
+					waveSurferRef.current.load(audioURL);
+				}
+
+				// handlePostFeedback 호출
 				handlePostFeedback(audioBlob);
 			};
 

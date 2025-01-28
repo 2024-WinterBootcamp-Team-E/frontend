@@ -16,10 +16,8 @@ function getWordColor(wordObj) {
 	const accuracy = wordObj?.PronunciationAssessment?.AccuracyScore ?? 0;
 	const errorType = wordObj?.PronunciationAssessment?.ErrorType ?? 'None';
 
-	if (errorType === 'Mispronunciation' || accuracy < 50) {
-		return 'red';
-	} else if (accuracy < 80) {
-		return 'orange';
+	if (errorType === 'Mispronunciation' || accuracy < 75) {
+		return '#cc111180';
 	} else {
 		return 'black';
 	}
@@ -30,7 +28,7 @@ function getBreakHighlight(wordObj) {
 	if (!breakInfo) return null;
 
 	if (breakInfo.UnexpectedBreak?.Confidence > 0.5) {
-		return <span style={{ color: 'red' }}> | </span>;
+		return <span style={{ color: '#15151565' }}> - </span>;
 	}
 	return null;
 }
@@ -139,6 +137,7 @@ const PStudy = () => {
 	useEffect(() => {
 		resetRecordedAudio();
 		setFeedbackText('');
+		setPronResult(null);
 	}, [selectedSentence, resetRecordedAudio]);
 
 	// unmount 시에도 초기화
