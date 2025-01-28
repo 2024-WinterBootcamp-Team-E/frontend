@@ -325,8 +325,18 @@ const IStudy = () => {
 			const formData = new FormData();
 			formData.append('file', audioBlob, 'recorded.wav');
 
+			let buffer = ''; // 버퍼 문자열 초기화
+
 			await postWithReadableStream(`/chat/${user_id}/${selectedChat.chat_id}`, formData, true, (chunk) => {
-				chunk.split('\n\n').forEach((part) => {
+				buffer += chunk; // 청크를 버퍼에 추가
+
+				// 버퍼에서 '\n\n'으로 분리된 이벤트 단위로 처리
+				let parts = buffer.split('\n\n');
+
+				// 마지막 청크는 완전하지 않을 수 있으므로 제외하고 처리
+				buffer = parts.pop();
+
+				parts.forEach((part) => {
 					if (!part.trim()) return;
 					if (part.startsWith('data: ')) {
 						try {
@@ -339,6 +349,20 @@ const IStudy = () => {
 					}
 				});
 			});
+
+			// 스트림이 끝난 후 남은 버퍼 처리
+			if (buffer.trim()) {
+				const part = buffer.trim();
+				if (part.startsWith('data: ')) {
+					try {
+						const jsonStr = part.replace('data: ', '').trim();
+						const parsed = JSON.parse(jsonStr);
+						processSseMessage(parsed);
+					} catch (e) {
+						console.error('SSE JSON 파싱 오류:', e);
+					}
+				}
+			}
 		} catch (err) {
 			console.error('오디오 전송/스트리밍 오류:', err);
 		}
