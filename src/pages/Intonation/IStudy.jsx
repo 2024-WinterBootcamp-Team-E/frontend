@@ -474,6 +474,7 @@ const IStudy = () => {
 							messages.map((message, index) => (
 								<ChatBubble
 									key={index}
+									charactor={selectedChat.character_name}
 									message={message}
 									isFeedbackVisible={feedbackVisibility[index] || false}
 									toggleFeedback={() => toggleFeedback(index)}
