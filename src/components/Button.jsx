@@ -43,7 +43,7 @@ const VARIENTS = {
 		}
 
 		&:focus {
-			background: var(--neutral-30, #e4e9ec);
+			background: var(--neutral-10, #e4e9ec);
 		}
 
 		&:hover {
