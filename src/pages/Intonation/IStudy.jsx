@@ -3,11 +3,11 @@ import styled from 'styled-components';
 import ChatBubble from '@/components/ChatBubble';
 import Layout from '@/components/Layout';
 import RecordButton from '@/components/RecordButton';
-import { AngleLeft } from '@styled-icons/fa-solid';
-import { ToggleOff, ToggleOn } from '@styled-icons/fa-solid';
+import { AngleLeft, ToggleOff, ToggleOn, TrashCan } from '@styled-icons/fa-solid';
 import Button from '@/components/Button';
 import Modal from 'react-modal';
-import { get, post, postWithReadableStream } from '@/api'; // API 헬퍼 임포트
+import { TextSizeS } from '@/GlobalStyle';
+import { get, post, remove, postWithReadableStream } from '@/api'; // API 헬퍼 임포트
 
 const IStudy = () => {
 	// 상태 관리
@@ -273,6 +273,8 @@ const IStudy = () => {
 		} catch (error) {
 			console.error('새 채팅 생성 실패:', error);
 			alert('채팅 생성 중 오류가 발생했습니다.');
+		} finally {
+			setInputValue('');
 		}
 	};
 	// ========== 녹음 시작 / 중지 메서드 ==========
@@ -351,6 +353,30 @@ const IStudy = () => {
 		});
 	};
 
+	// 채팅방 제거 함수
+	const removeChatroom = async (chatId) => {
+		try {
+			const userConfirmed = window.confirm('정말로 이 채팅방을 삭제하시겠습니까?');
+
+			if (!userConfirmed) {
+				console.log('채팅방 삭제가 취소되었습니다.');
+				return;
+			}
+
+			const response = await remove(`/chat/${user_id}/${chatId}`);
+			console.log('removeChatroom:', response);
+
+			// 삭제 성공 시 chatHistory에서 해당 채팅방 제거
+			setChatHistory((prevChatHistory) => prevChatHistory.filter((chat) => chat.chat_id !== chatId));
+			setSelectedChat(chatHistory[0]);
+
+			alert('채팅방이 삭제되었습니다.');
+		} catch (error) {
+			console.error('removeChatroom:', error);
+			alert('채팅방 삭제 중 오류가 발생했습니다.');
+		}
+	};
+
 	return (
 		<Layout>
 			<MainContainer expanded={isSidebarExpanded}>
@@ -408,6 +434,10 @@ const IStudy = () => {
 						<ChatTitle>
 							<TitleLarge>{selectedChat?.title || 'Start the conversation!'}</TitleLarge>
 							<TitleSmall>{selectedChat ? `${new Date(selectedChat.updated_at).toLocaleDateString()}` : ''}</TitleSmall>
+							<span />
+							<Button rounded='sm' padding='sm' varient='white' onClick={() => removeChatroom(selectedChat?.chat_id)}>
+								<DeleteText>-</DeleteText>
+							</Button>
 						</ChatTitle>
 					</ChatHeader>
 					<StyledHr />
@@ -449,7 +479,12 @@ const IStudy = () => {
 							<img src='/uk.png' alt='영국' className={selectedImage === '영국' ? 'selected' : ''} />
 						</Button>
 					</ImageSelector>
-					<InputBox placeholder='Enter your topic' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
+					<InputBox
+						placeholder='Enter your topic'
+						value={inputValue}
+						onChange={(e) => setInputValue(e.target.value)}
+						defaultValue={''}
+					/>
 					<ButtonWrapper>
 						<Button varient='white' rounded='sm' border='black' onClick={handleCreateChat}>
 							Create
@@ -577,6 +612,7 @@ const DateDisplay = styled.span`
 `;
 
 const ChatSection = styled.section`
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	background-color: #e0e0d5;
@@ -596,42 +632,57 @@ const ChatHeader = styled.header`
 	height: 4rem;
 `;
 
-const DateRange = styled.span`
-	font-size: 0.875rem;
-	color: var(--neutral-70);
-`;
-
 const AngleLeftIcon = styled(AngleLeft)`
 	color: var(--neutral-100);
 	width: 1.25rem;
 	height: 1.25rem;
 `;
 
-const ChatTitle = styled.h4`
+const ChatTitle = styled.div`
+	display: flex;
+	flex-direction: row;
 	margin: 0;
 	font-size: 1.25rem; /* 적절한 크기로 설정 */
 	color: var(--neutral-100); /* 텍스트 색상 */
-	display: flex;
 	white-space: nowrap; /* 텍스트가 한 줄로 유지되도록 설정 */
 	overflow: hidden; /* 텍스트가 길면 숨김 처리 */
 	gap: 0.5rem;
+	align-items: center;
+	width: 100%;
+	span {
+		flex-grow: 1;
+	}
 `;
 
-const TitleLarge = styled.span`
+const TitleLarge = styled.p`
 	font-size: 1.5rem;
 	font-weight: bold;
 	color: var(--neutral-100);
+	width: fit-content;
 `;
 
-const TitleSmall = styled.span`
-	font-size: 0.875rem;
+const TitleSmall = styled.p`
+	${TextSizeS}
 	color: var(--neutral-70);
+	text-align: center;
+	width: fit-content;
 `;
 
 const ChatContent = styled.div`
 	flex: 1;
 	overflow-y: auto;
 	margin-top: 1rem;
+
+	&::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+		border-radius: 6px;
+		background: rgba(255, 255, 255, 0.4);
+	}
+	&::-webkit-scrollbar-thumb {
+		background: rgba(0, 0, 0, 0.3);
+		border-radius: 6px;
+	}
 `;
 
 const RecordSection = styled.div`
@@ -639,6 +690,10 @@ const RecordSection = styled.div`
 	justify-content: center;
 	align-items: center;
 	margin-top: 1rem;
+	position: absolute;
+	bottom: 2rem;
+	left: 50%;
+	transform: translateX(-50%);
 `;
 
 // Modal 스타일 설정
@@ -720,6 +775,12 @@ const PlusText = styled.p`
 	font-size: 1.5rem;
 	color: var(--neutral-100);
 	text-align: center;
+`;
+
+const DeleteText = styled(TrashCan)`
+	color: var(--danger-main);
+	width: 1rem;
+	height: 1rem;
 `;
 
 export default IStudy;
