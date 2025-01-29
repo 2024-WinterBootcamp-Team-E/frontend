@@ -18,7 +18,7 @@ const IStudy = () => {
 	const [inputValue, setInputValue] = useState('');
 	const chatContentRef = useRef(null);
 	const [feedbackVisibility, setFeedbackVisibility] = useState({});
-  const [isRecordDisabled, setIsRecordDisabled] = useState(false);
+
 	const [chatHistory, setChatHistory] = useState([]);
 	const [loadingChats, setLoadingChats] = useState(false);
 	const [errorChats, setErrorChats] = useState(null);
@@ -57,8 +57,6 @@ const IStudy = () => {
 	};
 	// ===== TTS 오디오 재생을 위한 함수 추가 =====
 	const playAudioFromBytes = (bytes) => {
-		// 여기에 RecordButton 비활성화 코드
-		setIsRecordDisabled(true);
 		if (isPlayingRef.current) {
 			// 이미 재생 중이라면 큐에 추가
 			audioQueueRef.current.push(bytes);
@@ -83,8 +81,6 @@ const IStudy = () => {
 				const nextBytes = audioQueueRef.current.shift();
 				playAudioFromBytes(nextBytes);
 			}
-			// 여기에 RecordButton 활성화 코드
-			setIsRecordDisabled(false);
 		};
 	};
 	// ===== SSE 메시지 처리 =====
@@ -198,6 +194,14 @@ const IStudy = () => {
 					setChatHistory(sortedData);
 					if (sortedData.length > 0 && !selectedChat) {
 						setSelectedChat(sortedData[0]);
+					} else if (sortedData.length > 0 && selectedChat) {
+						// 선택된 채팅방이 삭제되지 않았는지 확인
+						const exists = sortedData.find((chat) => chat.chat_id === selectedChat.chat_id);
+						if (!exists) {
+							setSelectedChat(sortedData[0]);
+						}
+					} else {
+						setSelectedChat(null);
 					}
 				} else {
 					setErrorChats(response.message || '채팅방을 불러오는 데 실패했습니다.');
@@ -213,7 +217,7 @@ const IStudy = () => {
 		if (user_id) {
 			fetchChatHistory();
 		}
-	}, [user_id]);
+	}, [user_id]); // selectedChat을 의존성 배열에서 제거
 
 	// 선택된 채팅방의 메시지 불러오기
 	useEffect(() => {
@@ -234,6 +238,8 @@ const IStudy = () => {
 				} finally {
 					setLoadingMessages(false);
 				}
+			} else {
+				setMessages([]); // selectedChat이 null일 경우 메시지 초기화
 			}
 		};
 
@@ -323,7 +329,7 @@ const IStudy = () => {
 	const handleSendRecordedAudio = async (audioBlob) => {
 		try {
 			if (!selectedChat) {
-				alert('채팅방을 만들어 대화를 진행하세요!');
+				alert('채팅방을 선택해주세요.');
 				return;
 			}
 			const formData = new FormData();
@@ -392,7 +398,7 @@ const IStudy = () => {
 			}
 
 			const response = await remove(`/chat/${user_id}/${chatId}`);
-			// console.log('removeChatroom:', response);
+			console.log('removeChatroom:', response);
 
 			if (response.code === 200) {
 				// 현재 chatHistory 상태를 기준으로 새로운 목록 생성
@@ -437,7 +443,7 @@ const IStudy = () => {
 								<p>Loading...</p>
 							) : errorChats ? (
 								<p style={{ color: 'red' }}>{errorChats}</p>
-							) : (
+							) : chatHistory.length > 0 ? (
 								<SubjectList>
 									{chatHistory.map((history) => (
 										<SubjectItem key={history.chat_id} onClick={() => setSelectedChat(history)}>
@@ -457,6 +463,8 @@ const IStudy = () => {
 										</SubjectItem>
 									))}
 								</SubjectList>
+							) : (
+								<p>Start the conversation!</p>
 							)}
 						</>
 					) : (
@@ -487,27 +495,26 @@ const IStudy = () => {
 							<p>Loading messages...</p>
 						) : errorMessages ? (
 							<p style={{ color: 'red' }}>{errorMessages}</p>
-						) : messages.length > 0 ? (
-							messages.map((message, index) => (
-								<ChatBubble
-									key={index}
-									character={selectedChat.character_name}
-									message={message}
-									isFeedbackVisible={feedbackVisibility[index] || false}
-									toggleFeedback={() => toggleFeedback(index)}
-								/>
-							))
+						) : selectedChat ? (
+							messages.length > 0 ? (
+								messages.map((message, index) => (
+									<ChatBubble
+										key={index}
+										character={selectedChat.character_name}
+										message={message}
+										isFeedbackVisible={feedbackVisibility[index] || false}
+										toggleFeedback={() => toggleFeedback(index)}
+									/>
+								))
+							) : (
+								<p>Start the conversation!</p>
+							)
 						) : (
 							<p>Start the conversation!</p>
 						)}
 					</ChatContent>
 					<RecordSection>
-						<RecordButton
-							where='istudy'
-							isRecording={isRecording}
-							onClick={handleRecordButtonClick}
-							disabled={isRecordDisabled}
-						/>
+						<RecordButton where='istudy' isRecording={isRecording} onClick={handleRecordButtonClick} />
 					</RecordSection>
 				</ChatSection>
 			</MainContainer>
@@ -545,7 +552,6 @@ const IStudy = () => {
 		</Layout>
 	);
 };
-
 // Styled Components
 const MainContainer = styled.div`
 	display: grid;
