@@ -158,7 +158,7 @@ const PStudy = () => {
 				audioElement.removeEventListener('ended', handleAudioEnded);
 			};
 		}
-	}, []);
+	}, [audioRef]);
 
 	const handlePlayAudio = () => {
 		if (audioRef.current) {
@@ -166,8 +166,10 @@ const PStudy = () => {
 				audioRef.current.pause();
 				setIsPlaying(false);
 			} else {
-				if (sentenceData && sentenceData.voice_url) {
-					audioRef.current.src = sentenceData.voice_url;
+				if (sentenceData?.voice_url) {
+					if (audioRef.current.src !== sentenceData.voice_url) {
+						audioRef.current.src = sentenceData.voice_url;
+					}
 					audioRef.current.play();
 					setIsPlaying(true);
 				}
