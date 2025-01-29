@@ -8,7 +8,7 @@ const varients = {
 	1: '#7B7D63', // You can add more colors as needed
 };
 
-const RecordButton = ({ onClick, where = 0 }) => {
+const RecordButton = ({ onClick, where = 0, disabled }) => {
 	const [isRecording, setIsRecording] = useState(false);
 
 	const handleClick = () => {
@@ -19,7 +19,7 @@ const RecordButton = ({ onClick, where = 0 }) => {
 	};
 
 	return (
-		<StyledButton $isRecording={isRecording} $where={where} onClick={handleClick}>
+		<StyledButton $isRecording={isRecording} $where={where} onClick={handleClick} disabled={disabled}>
 			{isRecording ? <StopIcon $where={where} /> : <MicrophoneIcon $where={where} />}
 		</StyledButton>
 	);
@@ -49,6 +49,9 @@ const StyledButton = styled.button`
 
 	&:active {
 		transform: scale(0.95);
+	}
+	&:disabled {
+		background: #7b7d6380;
 	}
 `;
 

@@ -18,7 +18,7 @@ const IStudy = () => {
 	const [inputValue, setInputValue] = useState('');
 	const chatContentRef = useRef(null);
 	const [feedbackVisibility, setFeedbackVisibility] = useState({});
-
+  const [isRecordDisabled, setIsRecordDisabled] = useState(false);
 	const [chatHistory, setChatHistory] = useState([]);
 	const [loadingChats, setLoadingChats] = useState(false);
 	const [errorChats, setErrorChats] = useState(null);
@@ -57,6 +57,8 @@ const IStudy = () => {
 	};
 	// ===== TTS 오디오 재생을 위한 함수 추가 =====
 	const playAudioFromBytes = (bytes) => {
+		// 여기에 RecordButton 비활성화 코드
+		setIsRecordDisabled(true);
 		if (isPlayingRef.current) {
 			// 이미 재생 중이라면 큐에 추가
 			audioQueueRef.current.push(bytes);
@@ -81,6 +83,8 @@ const IStudy = () => {
 				const nextBytes = audioQueueRef.current.shift();
 				playAudioFromBytes(nextBytes);
 			}
+			// 여기에 RecordButton 활성화 코드
+			setIsRecordDisabled(false);
 		};
 	};
 	// ===== SSE 메시지 처리 =====
@@ -498,7 +502,12 @@ const IStudy = () => {
 						)}
 					</ChatContent>
 					<RecordSection>
-						<RecordButton where='istudy' isRecording={isRecording} onClick={handleRecordButtonClick} />
+						<RecordButton
+							where='istudy'
+							isRecording={isRecording}
+							onClick={handleRecordButtonClick}
+							disabled={isRecordDisabled}
+						/>
 					</RecordSection>
 				</ChatSection>
 			</MainContainer>
