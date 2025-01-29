@@ -147,21 +147,12 @@ const PStudy = () => {
 		};
 	}, [resetRecordedAudio]);
 
-	useEffect(() => {
-		if (audioRef.current) {
-			const audioElement = audioRef.current;
-			const handleAudioEnded = () => {
-				setIsPlaying(false);
-			};
-			audioElement.addEventListener('ended', handleAudioEnded);
-			return () => {
-				audioElement.removeEventListener('ended', handleAudioEnded);
-			};
-		}
-	}, [audioRef]);
-
 	const handlePlayAudio = () => {
 		if (audioRef.current) {
+			// 이벤트 리스너 추가
+			audioRef.current.removeEventListener('ended', handleAudioEnded); // 중복 방지를 위해 제거
+			audioRef.current.addEventListener('ended', handleAudioEnded);
+
 			if (isPlaying) {
 				audioRef.current.pause();
 				setIsPlaying(false);
@@ -175,6 +166,10 @@ const PStudy = () => {
 				}
 			}
 		}
+	};
+
+	const handleAudioEnded = () => {
+		setIsPlaying(false);
 	};
 
 	const handleResetFeedback = () => {
