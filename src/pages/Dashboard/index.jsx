@@ -49,7 +49,7 @@ const DashboardPage = () => {
 					<Card>
 						<Button padding='none' rounded='full' onClick={postUserImage}>
 							<ProfileImageWrapper>
-								<ProfileImage src={profile?.image || '/EAStudy.png'} alt='Profile' />
+								<ProfileImage src={profile?.image || '/default.jpg'} alt='Profile' />
 								<EditIcon />
 							</ProfileImageWrapper>
 						</Button>

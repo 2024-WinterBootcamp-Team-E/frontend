@@ -180,7 +180,7 @@ const Header = () => {
 			<RightSide>
 				{isLoggedIn && profile ? (
 					<ProfileContainer>
-						<ProfileImage src={profile.image || '/UserImage.png'} alt={profile.name} />
+						<ProfileImage src={profile.image || '/default.jpg'} alt={profile.name} />
 						<ProfileName>{profile.name}</ProfileName>
 						<DropdownButton onClick={() => setIsDropDownOpen((prev) => !prev)}>
 							<ChevronIcon />

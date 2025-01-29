@@ -7,7 +7,7 @@ import { AngleLeft, ToggleOff, ToggleOn, TrashCan } from '@styled-icons/fa-solid
 import Button from '@/components/Button';
 import Modal from 'react-modal';
 import { TextSizeS } from '@/GlobalStyle';
-import { get, post, remove, postWithReadableStream } from '@/api'; // API 헬퍼 임포트
+import { get, post, remove, postWithReadableStream_acc } from '@/api'; // API 헬퍼 임포트
 
 const IStudy = () => {
 	// 상태 관리
@@ -209,7 +209,7 @@ const IStudy = () => {
 		if (user_id) {
 			fetchChatHistory();
 		}
-	}, [user_id, selectedChat]);
+	}, [user_id]);
 
 	// 선택된 채팅방의 메시지 불러오기
 	useEffect(() => {
@@ -319,7 +319,7 @@ const IStudy = () => {
 	const handleSendRecordedAudio = async (audioBlob) => {
 		try {
 			if (!selectedChat) {
-				alert('채팅방 선택');
+				alert('채팅방을 만들어 대화를 진행하세요!');
 				return;
 			}
 			const formData = new FormData();
@@ -327,7 +327,7 @@ const IStudy = () => {
 
 			let buffer = ''; // 버퍼 문자열 초기화
 
-			await postWithReadableStream(`/chat/${user_id}/${selectedChat.chat_id}`, formData, true, (chunk) => {
+			await postWithReadableStream_acc(`/chat/${user_id}/${selectedChat.chat_id}`, formData, true, (chunk) => {
 				buffer += chunk; // 청크를 버퍼에 추가
 
 				// 버퍼에서 '\n\n'으로 분리된 이벤트 단위로 처리
@@ -388,13 +388,24 @@ const IStudy = () => {
 			}
 
 			const response = await remove(`/chat/${user_id}/${chatId}`);
-			console.log('removeChatroom:', response);
+			// console.log('removeChatroom:', response);
 
-			// 삭제 성공 시 chatHistory에서 해당 채팅방 제거
-			setChatHistory((prevChatHistory) => prevChatHistory.filter((chat) => chat.chat_id !== chatId));
-			setSelectedChat(chatHistory[0]);
+			if (response.code === 200) {
+				// 현재 chatHistory 상태를 기준으로 새로운 목록 생성
+				const updatedChatHistory = chatHistory.filter((chat) => chat.chat_id !== chatId);
+				setChatHistory(updatedChatHistory);
 
-			alert('채팅방이 삭제되었습니다.');
+				// 새로운 채팅방이 남아있으면 첫 번째 채팅방을 선택, 없으면 null로 설정
+				if (updatedChatHistory.length > 0) {
+					setSelectedChat(updatedChatHistory[0]);
+				} else {
+					setSelectedChat(null);
+				}
+
+				alert('채팅방이 삭제되었습니다.');
+			} else {
+				alert(response.message || '채팅방 삭제에 실패했습니다.');
+			}
 		} catch (error) {
 			console.error('removeChatroom:', error);
 			alert('채팅방 삭제 중 오류가 발생했습니다.');
@@ -459,9 +470,11 @@ const IStudy = () => {
 							<TitleLarge>{selectedChat?.title || 'Start the conversation!'}</TitleLarge>
 							<TitleSmall>{selectedChat ? `${new Date(selectedChat.updated_at).toLocaleDateString()}` : ''}</TitleSmall>
 							<span />
-							<Button rounded='sm' padding='sm' varient='white' onClick={() => removeChatroom(selectedChat?.chat_id)}>
-								<DeleteText>-</DeleteText>
-							</Button>
+							{selectedChat && (
+								<Button rounded='sm' padding='sm' varient='white' onClick={() => removeChatroom(selectedChat.chat_id)}>
+									<DeleteText>-</DeleteText>
+								</Button>
+							)}
 						</ChatTitle>
 					</ChatHeader>
 					<StyledHr />
@@ -474,7 +487,7 @@ const IStudy = () => {
 							messages.map((message, index) => (
 								<ChatBubble
 									key={index}
-									charactor={selectedChat.character_name}
+									character={selectedChat.character_name}
 									message={message}
 									isFeedbackVisible={feedbackVisibility[index] || false}
 									toggleFeedback={() => toggleFeedback(index)}

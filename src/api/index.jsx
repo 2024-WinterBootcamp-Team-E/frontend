@@ -64,11 +64,17 @@ export const post = async (endpoint, data, isFormData = false) => {
 			body: isFormData ? data : JSON.stringify(data),
 		});
 
+		const responseData = await response.json();
+
 		if (!response.ok) {
-			throw new Error(`POST 요청 실패: ${response.status}`);
+			// 에러 객체에 응답 데이터를 포함시킴
+			const error = new Error(`POST 요청 실패: ${response.status}`);
+			error.status = response.status;
+			error.data = responseData;
+			throw error;
 		}
 
-		return await response.json();
+		return responseData;
 	} catch (error) {
 		console.error('POST 요청 오류:', error);
 		throw error;
@@ -160,7 +166,7 @@ export const remove = async (endpoint) => {
 	}
 };
 
-export const postWithReadableStream = async (endpoint, data, isFormData, onChunk) => {
+export const postWithReadableStream_acc = async (endpoint, data, isFormData, onChunk) => {
 	try {
 		// 1. FormData를 POST 요청으로 서버에 전송
 		const headers = isFormData ? {} : { 'Content-Type': 'application/json' };
@@ -173,7 +179,50 @@ export const postWithReadableStream = async (endpoint, data, isFormData, onChunk
 			body,
 		});
 
-		console.log('발음분석 리스폰스 : ', response); // 결과가 궁금함
+		if (!response.ok) {
+			throw new Error(`POST 요청 실패: ${response.status}`);
+		}
+
+		// 2. 서버로부터 스트림 데이터를 읽기 시작
+		const reader = response.body.getReader();
+		const decoder = new TextDecoder('utf-8');
+
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) {
+				console.log('스트림 읽기 완료');
+				break;
+			}
+
+			// 스트림 데이터 처리 (디코딩하여 사용)
+			const chunk = decoder.decode(value, { stream: true });
+			console.log(chunk);
+			if (onChunk) {
+				onChunk(chunk);
+			}
+			// 필요 시 추가적인 처리 로직
+			// e.g., 데이터를 누적하거나 UI 업데이트
+		}
+
+		return '스트림 읽기 완료';
+	} catch (error) {
+		console.error('POST 요청 또는 스트림 처리 오류:', error);
+		throw error;
+	}
+};
+
+export const postWithReadableStream = async (endpoint, data, isFormData, onChunk) => {
+	try {
+		// 1. FormData를 POST 요청으로 서버에 전송
+		const headers = isFormData ? {} : { 'Content-Type': 'application/json' };
+		const body = isFormData ? data : JSON.stringify(data);
+
+		const response = await fetch(`${BASE_URL}${endpoint}`, {
+			method: 'POST',
+			headers,
+			credentials: 'include', // 필요 시 쿠키 전송
+			body,
+		});
 
 		if (!response.ok) {
 			throw new Error(`POST 요청 실패: ${response.status}`);

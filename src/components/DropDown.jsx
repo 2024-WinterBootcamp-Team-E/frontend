@@ -68,7 +68,7 @@ const DropDown = ({ isDropDownOpen }) => {
 	return (
 		<StyledDropDownMenu isEditOpen={isEditOpen} isDropDownOpen={isDropDownOpen}>
 			<StyledProfileItem>
-				<StyledProfileImage src={profile?.image || '/UserImage.png'} alt='Profile' />
+				<StyledProfileImage src={profile?.image || '/default.jpg'} alt='Profile' />
 				<StyledProfileInfo>
 					<StyledNameWrapper>
 						<StyledName>{profile?.name || '닉네임'}</StyledName>

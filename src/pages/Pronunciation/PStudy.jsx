@@ -24,19 +24,18 @@ function getWordColor(wordObj) {
 }
 
 function getBreakHighlight(wordObj) {
-	const breakInfo = wordObj?.PronunciationAssessment?.Feedback?.Prosody?.Break;
+	const breakInfo = wordObj?.PronunciationAssessment?.Break;
 	if (!breakInfo) return null;
-
-	if (breakInfo.UnexpectedBreak?.Confidence > 0.5) {
+	// "UnexpectedBreak"가 BreakErrorTypes에 포함되어 있는지 확인
+	if (breakInfo.UnexpectedBreak?.Confidence > 0.55) {
 		return <span style={{ color: '#15151565' }}> - </span>;
 	}
 	return null;
 }
 
-// (2) 원본 문장에 색상 입히는 함수
-function highlightSentence(originalSentence, bestResult) {
-	if (!bestResult) return originalSentence;
-	const words = bestResult.Words || [];
+function highlightSentence(originalSentence, processedWords) {
+	if (!processedWords) return originalSentence;
+	const words = processedWords;
 	const tokens = originalSentence.split(' ');
 
 	return tokens.map((token, i) => {
@@ -49,8 +48,8 @@ function highlightSentence(originalSentence, bestResult) {
 
 		return (
 			<React.Fragment key={i}>
-				<span style={{ color }}>{token}</span>
-				{breakEl}{' '}
+				{breakEl && breakEl}
+				<span style={{ color }}>{token}</span>{' '}
 			</React.Fragment>
 		);
 	});
@@ -73,7 +72,7 @@ const PStudy = () => {
 	const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
 	const [selectedSentence, setSelectedSentence] = useState(null);
 	const [sentences, setSentences] = useState([]);
-
+	const [isMonotone, setIsMonotone] = useState(false);
 	const { recordedAudio, resetRecordedAudio } = useRecordStore();
 	useEffect(() => {
 		console.log('recordedAudio changed', recordedAudio);
@@ -138,6 +137,7 @@ const PStudy = () => {
 		resetRecordedAudio();
 		setFeedbackText('');
 		setPronResult(null);
+		setIsMonotone(false); // isMonotone 초기화
 	}, [selectedSentence, resetRecordedAudio]);
 
 	// unmount 시에도 초기화
@@ -189,7 +189,8 @@ const PStudy = () => {
 
 	const handleSSEUpdate = (data, type) => {
 		if (type === 'result') {
-			setPronResult(data);
+			setPronResult(data.processed);
+			setIsMonotone(data.isMonotone); // 'isMonotone' 값을 설정
 		} else {
 			setFeedbackText((prev) => prev + data);
 		}
@@ -203,6 +204,7 @@ const PStudy = () => {
 		if (nextIndex < sentences.length) {
 			resetRecordedAudio();
 			setSelectedSentence(sentences[nextIndex]);
+			setIsMonotone(false);
 		} else {
 			alert('마지막 문장입니다!');
 		}
@@ -225,9 +227,6 @@ const PStudy = () => {
 		resetRecordedAudio();
 		setSelectedSentence(sentenceItem);
 	};
-
-	// pronResult에서 NBest[0] 얻기
-	const bestResult = pronResult?.NBest?.[0];
 
 	return (
 		<Layout>
@@ -278,12 +277,7 @@ const PStudy = () => {
 									<QuestionContainer>
 										<PlayButton aria-label='Play Question' isPlaying={isPlaying} onClick={handlePlayAudio} />
 										{/* 문장에 색상 입히기 */}
-										<h3>
-											{highlightSentence(
-												sentenceData.content,
-												bestResult, // pronResult의 NBest[0] 전달
-											)}
-										</h3>
+										<h3>{highlightSentence(sentenceData.content, pronResult)}</h3>
 									</QuestionContainer>
 
 									<AnswerContainer>
@@ -307,12 +301,17 @@ const PStudy = () => {
 								/>
 							)}
 						</ContentSection>
-
+						{isMonotone && (
+							<p style={{ color: '#cc111180', marginBottom: '0px' }}>
+								발음이 단조롭게 들립니다. 더 생동감 있는 표현을 위해 억양과 높낮이를 다양하게 사용해 보세요!
+							</p>
+						)}
 						<FeedbackSection $evaluation={evaluation}>
 							<ProgressCircle evaluation={evaluation}>{pronscore}%</ProgressCircle>
 							<FeedbackText evaluation={evaluation}>
 								<p>{feedbackText}</p>
 							</FeedbackText>
+
 							<Button varient='white' rounded='xl' aria-label='Continue to Next' onClick={handleContinue}>
 								Continue
 							</Button>

@@ -32,8 +32,13 @@ const SignInPage = () => {
 
 			navigate('/'); // 메인 페이지로 이동
 		} catch (error) {
-			console.error('로그인 실패:', error);
-			setErrorMessage(error.message || '로그인 중 오류가 발생했습니다.');
+			if (error.data && error.data.detail) {
+				setErrorMessage(error.data.detail);
+			} else if (error.message) {
+				setErrorMessage(error.message);
+			} else {
+				setErrorMessage('로그인 중 오류가 발생했습니다.');
+			}
 		}
 	};
 
